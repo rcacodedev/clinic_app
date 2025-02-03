@@ -3,7 +3,7 @@ import CustomModal from "../Modal";
 import Boton from "../Boton";
 import { getToken, decodeJWT } from "../../utils/auth";
 import { fetchWorkers } from "../../services/workerService";
-import  "../../styles/actividades/CrearActividadModal.css"
+import  "../../styles/actividades/crearActividadModal.css"
 
 const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
     const [activityData, setActivityData] = useState({
