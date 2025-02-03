@@ -1,0 +1,103 @@
+.worker-profile-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.worker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.worker-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.worker-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.worker-field {
+  font-size: 16px;
+  color: #444;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc; /* Borde visible */
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+.worker-field strong {
+  color: #222;
+  margin-right: 10px;
+}
+
+.worker-field span {
+  flex: 1;
+  background: none;
+  border: none;
+  font-size: inherit;
+  color: inherit;
+  outline: none;
+  cursor: not-allowed;
+}
+
+.worker-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+.worker-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.worker-actions .btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.worker-actions .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.worker-actions .btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.worker-actions .btn-danger:hover {
+  background-color: #b02a37;
+}
+
+.worker-agenda {
+  margin-top: 40px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.worker-agenda h1 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 20px;
+}

@@ -1,0 +1,73 @@
+/* Estilo base de la barra de navegación */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--container-color);
+  color: var(--container-color);
+  font-family: var(--font-family-header);
+  height: 100vh;
+  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Contenedor de los botones */
+.navbar-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Permite que los elementos ocupen toda la altura */
+  width: 100%;
+}
+
+/* Botones principales */
+.navbar-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+/* Botón de logout */
+.navbar-logout {
+  margin-top: auto; /* Empuja el botón hacia abajo */
+  margin-bottom: 30px;
+}
+
+/* Botón general */
+.navbar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Contenedor del icono y texto */
+.navbar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icono */
+.navbar-icon {
+  width: 48px;
+  height: 48px;
+  fill: white;
+  transition: transform 0.3s ease-in-out;
+  margin-bottom: 5px;
+}
+
+/* Texto */
+.navbar-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--link-color);
+}

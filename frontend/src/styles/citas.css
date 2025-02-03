@@ -1,0 +1,75 @@
+/* citas.css */
+
+/* Contenedor principal */
+.citas-container {
+  font-family: Arial, sans-serif;
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado */
+.citas-boton-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.citas-boton-container h1 {
+  color: #333;
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Botón de añadir cita */
+.citas-boton-container button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.citas-boton-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Contenedor de agenda y lista de citas */
+.container-agenda,
+.container-listCitas {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Agenda */
+.container-agenda {
+  margin-bottom: 20px;
+}
+
+/* Lista de citas */
+.container-listCitas {
+  overflow-x: auto;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .citas-container {
+    width: 95%;
+  }
+
+  .citas-boton-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

@@ -1,0 +1,69 @@
+/* Estilo base para el botón */
+.boton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    opacity: 1;
+  }
+
+  .boton:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* Variantes de color */
+  .boton-primario {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  .boton-primario:hover {
+    background-color: #0056b3;
+  }
+
+  .boton-peligro {
+    background-color: #ff4136;
+    color: #fff;
+  }
+
+  .boton-peligro:hover {
+    background-color: #c0392b;
+  }
+
+  .boton-guardar {
+    background-color: #05bd15;
+    color: #fff;
+  }
+
+  .boton-guardar:hover {
+    background-color: #028a0f;
+  }
+
+  .boton-eliminar {
+    background-color: #f5730f;
+    color: #fff;
+  }
+
+  .boton-eliminar:hover {
+    background-color: #e04e00;
+  }
+
+  /* Estilo por defecto */
+  .boton-default {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  .boton-default:hover {
+    background-color: #5a6268;
+  }
+
+  .boton-disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #d6d6d6 !important; /* Aseguramos un fondo neutro para cualquier tipo */
+    color: #a1a1a1 !important; /* Color de texto para deshabilitado */
+  }

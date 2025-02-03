@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --background-color: #F9F7F7;
+  --link-color: #DBE2EF;
+  --link-color-hover: #89abe9;
+  --link-color-visited: #157741;
+  --header-color: #3F72AF;
+  --container-color: #112D4E;
+  --font-family-base: "Roboto", serif;
+  --font-family-header: "Oswald", serif;
+  --input-text-color: #0f4b91;
+}
+
+
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-header);
+  color: var(--header-color) !important;
+  margin: 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+

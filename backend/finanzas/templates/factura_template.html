@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura - {{ factura.id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin: 20px;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .header p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        .details {
+            margin-bottom: 30px;
+        }
+        .details th, .details td {
+            padding: 10px;
+            text-align: left;
+        }
+        .details th {
+            background-color: #f2f2f2;
+        }
+        .total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado de la factura -->
+        <div class="header">
+            <h1>Factura #{{ factura.id }}</h1>
+            <p>Generada el: {{ factura.created_at|date:"d/m/Y" }}</p>
+        </div>
+
+        <!-- Detalles de la transacción -->
+        <div class="details">
+            <table width="100%">
+                <tr>
+                    <th>Paciente</th>
+                    <td>{{ factura.paciente.nombre }} {{ factura.paciente.primer_apellido }} {{ factura.paciente.segundo_apellido }}</td>
+                </tr>
+                <tr>
+                    <th>Trabajador</th>
+                    <td>{{ factura.trabajador.user.first_name }} {{ factura.trabajador.user.last_name }}</td>
+                </tr>
+                <tr>
+                    <th>Descripción de la transacción</th>
+                    <td>{{ factura.transaccion.descripcion }}</td>
+                </tr>
+                <tr>
+                    <th>Monto</th>
+                    <td>${{ factura.transaccion.monto }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Total de la factura -->
+        <div class="total">
+            <p>Total: ${{ factura.transaccion.monto }}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Gracias por tu confianza.</p>
+            <p>Si tienes alguna pregunta, contáctanos al 123-456-789.</p>
+        </div>
+    </div>
+</body>
+</html>

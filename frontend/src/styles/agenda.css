@@ -1,0 +1,72 @@
+.agenda-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.agenda-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.agenda-controls button {
+  padding: 10px;
+  border: none;
+  background: #007bff;
+  color: white;
+  font-size: 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.agenda-controls button:hover {
+  background: #0056b3;
+}
+
+.agenda-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f9f9f9;
+}
+
+.agenda-table thead th {
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+.agenda-hour-cell {
+  font-weight: bold;
+  background: #e6e6e6;
+  padding: 10px;
+  border-right: 1px solid #dcdcdc;
+}
+
+.agenda-slot {
+  padding: 15px;
+  border: 1px solid #ddd;
+  transition: background 0.3s;
+}
+
+.agenda-slot:hover {
+  background: #e6f7ff;
+}
+
+.agenda-cita {
+  padding: 10px;
+  margin: 5px 0;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.agenda-cita:hover {
+  background: #0056b3;
+}

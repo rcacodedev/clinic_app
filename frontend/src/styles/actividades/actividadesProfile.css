@@ -1,0 +1,200 @@
+/* actividadesProfile.css */
+
+/* Contenedor principal */
+.actividad-profile {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
+}
+
+/* Títulos */
+.actividad-profile h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Sección de información de la actividad */
+.actividad-info {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos de los campos editables */
+.actividad-info .editable-field {
+    margin-bottom: 20px;
+}
+
+.editable-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.editable-field input,
+.editable-field select,
+.editable-field textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+}
+
+.editable-field input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+.editable-field input:focus,
+.editable-field select:focus,
+.editable-field textarea:focus {
+    border-color: #4CAF50;
+}
+
+.editable-field button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.editable-field button:hover {
+    background-color: #45a049;
+}
+
+/* Sección de asignación de pacientes */
+.pacientes-section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.pacientes-section h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Caja de búsqueda */
+.pacientes-section .search-box {
+    margin-bottom: 15px;
+}
+
+.pacientes-section .search-box input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+}
+
+.pacientes-section .search-box input:focus {
+    border-color: #4CAF50;
+}
+
+/* Diseño de columnas para pacientes disponibles y asignados */
+.pacientes-section .columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+/* Columna de pacientes */
+.pacientes-section .left-column,
+.pacientes-section .right-column {
+    flex: 1;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pacientes-section .left-column ul,
+.pacientes-section .right-column ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pacientes-section .left-column li,
+.pacientes-section .right-column li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+.pacientes-section .left-column button,
+.pacientes-section .right-column button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.pacientes-section .left-column button:hover,
+.pacientes-section .right-column button:hover {
+    background-color: #45a049;
+}
+
+.pacientes-section .left-column li:hover,
+.pacientes-section .right-column li:hover {
+    background-color: #f1f1f1;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .actividad-info {
+        padding: 15px;
+    }
+
+    .pacientes-section .columns {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pacientes-section .left-column,
+    .pacientes-section .right-column {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .actividad-profile {
+        padding: 15px;
+    }
+
+    .actividad-profile h2 {
+        font-size: 1.5rem;
+    }
+
+    .editable-field button {
+        width: 100%;
+        font-size: 1rem;
+    }
+}

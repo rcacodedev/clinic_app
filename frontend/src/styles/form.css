@@ -1,0 +1,77 @@
+/* Estilo para el contenedor del formulario */
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 80%;  /* Ajusta el contenedor para que ocupe un 80% del ancho de la pantalla */
+    max-width: 400px; /* Ajusta el tamaño máximo */
+    height: auto;  /* El contenedor se ajustará automáticamente a su contenido */
+    margin: 50px auto;  /* Centra el formulario vertical y horizontalmente */
+    padding: 30px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor del logo */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo para el logo (ajustado para evitar corte) */
+.form-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;  /* Evita que el logo se recorte o estire */
+}
+
+/* Contenedor de los campos del formulario */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo del título */
+.form-fields h1 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* Estilo para los inputs */
+.form-fields input[type="text"],
+.form-fields input[type="password"] {
+    width: 90%;
+    padding: 10px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+}
+
+/* Foco en los inputs */
+.form-fields input[type="text"]:focus,
+.form-fields input[type="password"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+
+/* Estilo del indicador de carga */
+.form-fields .loading-indicator {
+    margin: 0 auto;
+    color: #007bff;
+    font-size: 14px;
+    font-style: italic;
+}
