@@ -14,7 +14,7 @@ class CitasListCreateAPIView(ListCreateAPIView):
         queryset = Citas.objects.select_related('patient', 'worker', 'user')
         if user.is_staff:
             return queryset.filter(worker__user=user)
-        return queryset.filter(user=user)
+        return queryset.filter(worker__user=user) | queryset.filter(user=user)
 
     def perform_create(self, serializer):
         """Guardar citas asociadas al usuario actual."""
