@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.contrib.auth.models import Group
 
 class Patient(models.Model):
     nombre = models.CharField(max_length=100)
@@ -10,7 +10,6 @@ class Patient(models.Model):
         max_length=15,
         blank=True,
         null=True,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Número de teléfono inválido. Debe incluir el código de país.')]
     )
     fecha_nacimiento = models.DateField()
     dni = models.CharField(max_length=10)
@@ -19,6 +18,14 @@ class Patient(models.Model):
     code_postal = models.CharField(max_length=6)
     country = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    alergias = models.BooleanField(default=False)
+    patologias = models.JSONField(default=list)
+    notas = models.TextField(blank=True, null=True)
+    pdf_firmado_general = models.FileField(upload_to='media/pdf_PD_firmados/', blank=True, null=True)
+    pdf_firmado_menor = models.FileField(upload_to='media/pdf_CM_firmados/', blank=True, null=True)
+    pdf_firmado_inyecciones = models.FileField(upload_to='media/pdf_MI_firmados/', blank=True, null=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='patients', null=True)
+
 
     class Meta:
         ordering = ['-created_at']  # Últimos pacientes primero

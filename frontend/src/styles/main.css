@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
   --background-color: #F9F7F7;
   --link-color: #DBE2EF;
   --link-color-hover: #89abe9;
   --link-color-visited: #157741;
-  --header-color: #3F72AF;
-  --container-color: #112D4E;
+  --header-color: #9840bb;
+  --container-color: #4a356d;
   --font-family-base: "Roboto", serif;
-  --font-family-header: "Oswald", serif;
-  --input-text-color: #0f4b91;
+  --font-family-header: "Montserrat", serif;
+  --input-text-color: #8a1a52;
 }
 
 

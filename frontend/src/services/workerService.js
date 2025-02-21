@@ -2,6 +2,7 @@ import api from "./api";
 import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
+
 const API_URL= '/api/workers/';
 
 // Obtener la lista de trabajadores
@@ -17,12 +18,19 @@ export const fetchWorkers = async () => {
 // Crear un nuevo trabajador
 export const createWorker = async (workerData) => {
   try {
-    const response = await api.post(`${API_URL}`, workerData, getAuthHeaders());
+    // Hacer la solicitud POST con JSON
+    const response = await api.post(`${API_URL}`, workerData, {
+      headers: {
+        "Content-Type": "application/json",  // Asegura que el contenido sea JSON
+      },
+    });
+
     return response.data;
   } catch (error) {
-    handleApiError(error, 'Crear un trabajador');
+    handleApiError(error, "Crear un trabajador");
   }
-};
+}
+
 
 // Obtener detalles de un trabajador
 export const fetchWorkerDetails = async (workerId) => {
@@ -96,3 +104,38 @@ export const deleteWorkerAppointment = async (workerId, appointmentId) => {
   }
 };
 
+// Subir registro de jornada worker
+export const uploadPDF = async (workerId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await api.post(`${API_URL}${workerId}/upload-pdf/`, formData, {
+      headers: { "Content-Type": "multipart/form-data"},
+    });
+    return response;
+  } catch (error) {
+    handleApiError(error, "Subir registro de jornada");
+  }
+}
+
+// Obtener registros de jornada del Worker
+export const getPDF = async (workerId, page = 1) => {
+  try {
+    const response = await api.get(`${API_URL}${workerId}/get-pdfs/?page=${page}`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, "Obtener todos los registros de jornada")
+  }
+}
+
+
+// Obtener workerId del userID
+export const getWorkerIdByUserId = async (userId) => {
+  try {
+    const response = await api.get(`${API_URL}get-worker-id/${userId}`);
+    return response.data.worker_id;
+  } catch (error) {
+    handleApiError(error, "Error al obtener el workerID")
+  }
+}

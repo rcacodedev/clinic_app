@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 .ajustes-container {
     max-width: 600px;
     margin: 0 auto;
@@ -8,67 +12,140 @@
     font-family: Arial, sans-serif;
   }
 
-  h1 {
-    text-align: center;
-    color: #333;
-  }
+h1 {
+  text-align: center;
+  color: #333;
+}
+h2 {
+  text-align: center;
+  color: #555;
+  margin-bottom: 20px;
+}
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+input {
+  padding: 10px;
+  border: 1px solid #970c0c;
+  border-radius: 5px;
+  font-size: 16px;
+}
+input:focus {
+  border-color: #007bff;
+  outline: none;
+}
 
-  h2 {
-    text-align: center;
-    color: #555;
-    margin-bottom: 20px;
-  }
+.submit-button {
+  padding: 10px;
+  background-color: #a23fff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.submit-button:hover {
+  background-color: #8337ca;
+}
 
-  .password-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
+button.submit-button {
+  background-color: #a23fff !important; /* Aquí aseguras que tu color se aplique */
+  color: white !important;
+}
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
+.error-message {
+  color: #d9534f;
+  font-weight: bold;
+  text-align: center;
+}
+.success-message {
+  color: #5cb85c;
+  font-weight: bold;
+  text-align: center;
+}
 
-  label {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
+/* Contenedor del formulario */
+.update-user-info {
+  background-color: #f4f7fc;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 20px auto;
+  font-family: 'Arial', sans-serif;
+  width: 100%;
+}
 
-  input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-  }
+/* Título del formulario */
+.update-user-info h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
 
-  input:focus {
-    border-color: #007bff;
-    outline: none;
-  }
+/* Contenedor de cada grupo de formulario */
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
 
-  .submit-button {
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
+/* Etiquetas de los campos */
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #b392d8;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
 
-  .submit-button:hover {
-    background-color: #0056b3;
-  }
 
-  .error-message {
-    color: #d9534f;
-    font-weight: bold;
-    text-align: center;
-  }
+/* Cuando el formulario no está en modo edición, muestra la información */
+.user-info {
+  font-size: 16px;
+  color: #333;
+  background-color: #eaeaea;
+  padding: 8px;
+  border-radius: 5px;
+}
 
-  .success-message {
-    color: #5cb85c;
-    font-weight: bold;
-    text-align: center;
-  }
+/* Estilo de la foto de perfil */
+.photo-container {
+  display: flex;
+  flex-direction: column; /* Cambiamos la dirección a columna para que el botón esté debajo */
+  align-items: center; /* Alineamos la imagen verticalmente */
+}
+
+.profile-photo {
+  width: 200px; /* Ajustamos el tamaño de la foto */
+  height: 200px;
+  border-radius: 50%; /* Hacemos la foto circular */
+  object-fit: cover; /* Asegura que la imagen se recorte bien */
+  margin: 10px; /* Espaciado entre el texto y la foto */
+  cursor: pointer; /* Hacemos que el cursor cambie para indicar que se puede hacer clic */
+}
+
+/* Texto de ayuda debajo de los inputs */
+.input-help-text {
+  font-size: 12px;
+  color: #4b4453;
+  margin-top: 4px;
+  font-style: italic;
+  display: inline-block;
+  width: 100%;
+}
+
+.input-help-text:hover {
+  color: #782da3;
+}
+

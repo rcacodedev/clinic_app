@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchWorkerDetails, deleteWorker, fetchWorkerAppointments } from '../../services/workerService';
-import Boton from '../../components/Boton';
+import { fetchGrupos } from '../../services/django';
 import EditarEmpleadoModal from '../../components/Workers/EditarEmpleadoModal';
 import EliminarEmpleadoModal from '../../components/Workers/EliminarEmpleadoModal';
 import CrearCita from '../../components/Workers/CrearCitaWorker';
 import Agenda from '../../components/Agenda';
 import EditarCitaModal from '../../components/Workers/EditarCitaWorker';
+import WorkerPDFUpload from '../../components/Workers/RegistroJornada';
 import '../../styles/Workers/workerProfile.css'
 
 const WorkerProfile = () => {
@@ -20,9 +21,9 @@ const WorkerProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [currentWeek, setCurrentWeek] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isEditCitaModalOpen, setIsEditCitaModalOpen] = useState(false);
   const [selectedCita, setSelectedCita] = useState(null); // Aquí inicializamos selectedCita
+  const [groups, setGroups] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,6 +44,17 @@ const WorkerProfile = () => {
   const loadWorker = async () => {
     const data = await fetchWorkerDetails(id);
     setWorker(data);
+
+    // Obtener todos los grupos disponibles
+    const allGroups = await fetchGrupos(); // Esto debería devolver todos los grupos
+
+    // Filtrar los nombres de los grupos a los que pertenece el trabajador
+    const groupNames = data.groups.map((groupId) => {
+      const group = allGroups.find((g) => g.id === groupId);
+      return group ? group.name : "Grupo desconocido";
+    });
+
+    setGroups(groupNames);
   };
 
   const loadAppointments = async () => {
@@ -77,7 +89,7 @@ const WorkerProfile = () => {
     try {
       await deleteWorker(id);
       alert('Empleado eliminado correctamente');
-      navigate('/workers');
+      navigate('/api/workers');
     } catch (error) {
       console.error('Error al eliminar el empleado:', error);
       alert('No se pudo eliminar al empleado. Inténtelo de nuevo.');
@@ -89,33 +101,47 @@ const WorkerProfile = () => {
     setIsEditCitaModalOpen(true); // Abrimos el modal
   };
 
-  const closeModal = () => {
-    setIsEditCitaModalOpen(false); // Corregir: Aquí cambiamos a `setIsEditCitaModalOpen`
-    setSelectedCita(null); // Limpiar la cita seleccionada cuando se cierre el modal
-  };
-
   if (loading) return <p>Cargando...</p>;
   if (error) return <p>{error}</p>;
-  if (!worker) return <p>No se encontraron datos del trabajador.</p>;
+  if (!worker) return <p>No se encontraron datos del empleado.</p>;
 
   return (
     <div className="worker-profile-container">
       <div className="worker-header">
         <h1>Perfil de {worker.user.first_name} {worker.user.last_name}</h1>
+        <div className='photo-container'>
+          <img src={worker.user.userInfo.photo} alt="Foto del empleado" className='profile-photo'/>
+        </div>
       </div>
-
+      <h2>Datos del Empleado</h2>
       <div className="worker-info">
         <div className="worker-field"><strong>Username:</strong> <span>{worker.user.username}</span></div>
         <div className="worker-field"><strong>Email:</strong> <span>{worker.user.email}</span></div>
-        <div className="worker-field"><strong>DNI:</strong> <span>{worker.dni}</span></div>
-        <div className="worker-field"><strong>Dirección:</strong> <span>{worker.address}</span></div>
-        <div className="worker-field"><strong>Código Postal:</strong> <span>{worker.postal_code}</span></div>
-        <div className="worker-field"><strong>País:</strong> <span>{worker.country}</span></div>
-        <div className="worker-field"><strong>Sección:</strong> <span>{worker.branch}</span></div>
-        <div className="worker-field"><strong>Teléfono:</strong> <span>{worker.phone}</span></div>
+        <div className="worker-field"><strong>Teléfono:</strong> <span>{worker.user.userInfo.phone}</span></div>
+        <div className="worker-field"><strong>DNI:</strong> <span>{worker.user.userInfo.dni}</span></div>
+        <div className="worker-field"><strong>Dirección:</strong> <span>{worker.user.userInfo.address}</span></div>
+        <div className="worker-field"><strong>Código Postal:</strong> <span>{worker.user.userInfo.postal_code}</span></div>
+        <div className="worker-field"><strong>País:</strong> <span>{worker.user.userInfo.country}</span></div>
+        <div className="worker-field">
+          <strong>Departamento:</strong>
+          <span>
+            {groups.length > 0 ? groups.join(", ") : "No asignado"}
+          </span>
+        </div>
         <div className="worker-field"><strong>Estado:</strong> <span>{worker.is_active ? 'Activo' : 'Inactivo'}</span></div>
+        <div className="worker-field">
+          <strong>Color del Empleado:</strong>
+          <div
+            style={{
+              width: '50px',
+              height: '20px',
+              backgroundColor: worker.color,
+              marginTop: '5px',
+              borderRadius: '5px'
+            }}
+          />
+        </div>
       </div>
-
       <div className="worker-actions">
         <button className="btn-primary" onClick={() => setIsEditModalOpen(true)}>Editar</button>
         <button className="btn-danger" onClick={() => setIsDeleteConfirmOpen(true)}>Eliminar</button>
@@ -134,7 +160,7 @@ const WorkerProfile = () => {
         worker={worker}
         onConfirmDelete={handleDeleteWorker}
       />
-
+      <h2>Agenda de {worker.user.first_name} {worker.user.last_name}</h2>
       <div className="worker-agenda">
         <CrearCita refreshCitas={loadAppointments} workerId={id} />
         <Agenda
@@ -154,6 +180,10 @@ const WorkerProfile = () => {
         refreshCitas={loadAppointments}
         workerId={id}
       />
+      <div className='Documentacion'>
+        <WorkerPDFUpload workerId={id} />
+      </div>
+
     </div>
   );
 };

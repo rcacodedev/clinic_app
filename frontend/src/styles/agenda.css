@@ -16,7 +16,7 @@
 .agenda-controls button {
   padding: 10px;
   border: none;
-  background: #007bff;
+  background: #b603a7;
   color: white;
   font-size: 14px;
   border-radius: 5px;
@@ -25,7 +25,7 @@
 }
 
 .agenda-controls button:hover {
-  background: #0056b3;
+  background: #770447;
 }
 
 .agenda-table {
@@ -35,7 +35,7 @@
 }
 
 .agenda-table thead th {
-  background: #007bff;
+  background: #6d0167;
   color: white;
   padding: 10px;
   text-transform: uppercase;
@@ -43,7 +43,8 @@
 
 .agenda-hour-cell {
   font-weight: bold;
-  background: #e6e6e6;
+  background: #650272;
+  color: whitesmoke;
   padding: 10px;
   border-right: 1px solid #dcdcdc;
 }
@@ -61,7 +62,7 @@
 .agenda-cita {
   padding: 10px;
   margin: 5px 0;
-  background: #007bff;
+  background: #9aacc0;
   color: white;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);

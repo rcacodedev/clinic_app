@@ -12,7 +12,10 @@ function PatientList({ onEditSuccess }) {
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [isLoading, setIsLoading] = useState(false); // Cargando
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false); // Modal de añadir paciente
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    alergias: false,
+    patologias: [],
+  });
   const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
@@ -67,6 +70,30 @@ function PatientList({ onEditSuccess }) {
     setIsAddPatientModalOpen(false);
   };
 
+
+// Manejar la adición de nuevas patologías
+const handleAddPathology = () => {
+  const newPathology = prompt("Ingresa una nueva patología:");
+  if (newPathology) {
+    setFormData((prevState) => {
+      const updatedFormData = {
+        ...prevState,
+        patologias: prevState.patologias ? [...prevState.patologias, newPathology] : [newPathology],
+      };
+      return updatedFormData;
+    });
+  }
+};
+
+
+  // Elimina una patología
+  const handleRemovePathology = (index) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      patologias: prevState.patologias.filter((_, i) => i !== index),
+    }));
+  };
+
   // Función para manejar el cambio de los campos del formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -89,7 +116,7 @@ function PatientList({ onEditSuccess }) {
 
   // Función para redirigir al perfil del paciente
   const goToPatientProfile = (patientId) => {
-    navigate(`/pacientes/${patientId}`);  // Navega a la ruta del perfil del paciente
+    navigate(`/api/pacientes/${patientId}`);  // Navega a la ruta del perfil del paciente
   };
 
   return (
@@ -116,8 +143,6 @@ function PatientList({ onEditSuccess }) {
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Primer Apellido</th>
-            <th>Segundo Apellido</th>
             <th>Teléfono</th>
             <th>Email</th>
             <th>Fecha de Nacimiento</th>
@@ -127,9 +152,7 @@ function PatientList({ onEditSuccess }) {
         <tbody>
           {patients.map((patient) => (
             <tr key={patient.id}>
-              <td>{patient.nombre}</td>
-              <td>{patient.primer_apellido}</td>
-              <td>{patient.segundo_apellido}</td>
+              <td>{patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</td>
               <td>{patient.phone}</td>
               <td>{patient.email}</td>
               <td>{patient.fecha_nacimiento}</td>
@@ -269,6 +292,33 @@ function PatientList({ onEditSuccess }) {
             placeholder="País"
             tabIndex="6"
           />
+          <label>Patologías</label>
+          <div className="pathologies-container">
+            {formData.patologias && formData.patologias.length > 0 ? (
+              <ul>
+                {formData.patologias.map((pathology, index) => (
+                  <li key={index}>
+                    {pathology} <button type="button" onClick={() => handleRemovePathology(index)}>Eliminar</button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No se han añadido patologías aún.</p>
+            )}
+            <button className="button-pathology" type="button" onClick={handleAddPathology}>Añadir Patología</button>
+          </div>
+          <label>Alergias</label>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>{formData.alergias ? "Sí" : "No"}</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={formData.alergias}
+                onChange={() => setFormData({ ...formData, alergias: !formData.alergias })}
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
           <Boton texto="Guardar" onClick={handleAddPatient} tipo="guardar" />
         </form>
       </CustomModal>

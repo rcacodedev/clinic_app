@@ -5,6 +5,7 @@ import CustomModal from "../../components/Modal";
 import Boton from "../../components/Boton";
 import PatientAppointments from "../../components/CitasPacientes";
 import Notification from "../../components/Notification";
+import UploadPDF from "../../components/pacientes/uploadPDF";
 import "../../styles/pacientes/patientsProfile.css";
 
 function PatientProfile() {
@@ -14,7 +15,9 @@ function PatientProfile() {
   const [error, setError] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    patologias: [],
+  });
   const [refreshAppointments, setRefreshAppointments] = useState(false); // Para refrescar las citas
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const navigate = useNavigate();
@@ -36,16 +39,12 @@ function PatientProfile() {
     fetchPatientData();
   }, [id, refreshAppointments]); // Refrescar cuando el ID del paciente o `refreshAppointments` cambian
 
-  // const handleCitaUpdate = () => {
-    // setRefreshAppointments(prev => !prev);
-  // }
-
   // Eliminar paciente
   const handleDelete = async () => {
     try {
       await patientService.deletePatient(id);
       alert("Paciente eliminado correctamente");
-      navigate("/pacientes");
+      navigate("/api/pacientes");
     } catch (error) {
       console.error("Error al eliminar el paciente:", error);
       alert("Error al eliminar el paciente");
@@ -71,6 +70,25 @@ function PatientProfile() {
     }
   };
 
+  // Función para añadir patologías
+  const handleAddPathology = () => {
+    const newPathology = prompt("Ingresa una nueva patología:");
+    if (newPathology) {
+      setFormData((prevState) => ({
+        ...prevState,
+        patologias: [...prevState.patologias, newPathology],
+      }));
+    }
+  };
+
+  // Función para eliminar patologías
+  const handleRemovePathology = (index) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      patologias: prevState.patologias.filter((_, i) => i !== index),
+    }));
+  };
+
   if (loading) return <div className="loading">Cargando...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -78,15 +96,28 @@ function PatientProfile() {
     <div className="patient-profile-container">
       <h1 className="profile-title">Perfil del Paciente</h1>
       <div className="patient-details">
-        <p><strong>Nombre:</strong> {patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</p>
-        <p><strong>Email:</strong> {patient.email}</p>
-        <p><strong>Teléfono:</strong> {patient.phone}</p>
-        <p><strong>Fecha de Nacimiento:</strong> {new Date(patient.fecha_nacimiento).toLocaleDateString()}</p>
-        <p><strong>DNI:</strong> {patient.dni}</p>
-        <p><strong>Dirección:</strong> {patient.address}</p>
-        <p><strong>Ciudad:</strong> {patient.city}</p>
-        <p><strong>Código Postal:</strong> {patient.code_postal}</p>
-        <p><strong>País:</strong> {patient.country}</p>
+        <div className="patient-field"><strong>Nombre:</strong><span>{patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</span></div>
+        <div className="patient-field"><strong>Email:</strong><span>{patient.email}</span></div>
+        <div className="patient-field"><strong>Teléfono:</strong><span>{patient.phone}</span></div>
+        <div className="patient-field"><strong>Fecha de nacimiento:</strong><span>{new Date(patient.fecha_nacimiento).toLocaleDateString()}</span></div>
+        <div className="patient-field"><strong>DNI:</strong><span>{patient.dni}</span></div>
+        <div className="patient-field"><strong>Dirección:</strong><span>{patient.address}</span></div>
+        <div className="patient-field"><strong>Ciudad:</strong><span>{patient.city}</span></div>
+        <div className="patient-field"><strong>Código Postal:</strong><span>{patient.code_postal}</span></div>
+        <div className="patient-field"><strong>País:</strong><span>{patient.country}</span></div>
+        <div className="patient-field"><strong>Alergías:</strong><span>{patient.alergias ? "Sí" : "No"}</span></div>
+        <div className="patient-field"><strong>Patologías:</strong>
+          {Array.isArray(patient.patologias) && patient.patologias.length > 0 ? (
+            <ul className="no-bullets">
+              {patient.patologias.map((patologia, index) => (
+                <li key={index}>{patologia}</li>
+              ))}
+            </ul>
+          ) : (
+            <span>No hay patologías registradas.</span>
+          )}
+        </div>
+        <div className="patient-field patient-notes"><strong>Notas:</strong><span>{patient.notas}</span></div>
       </div>
 
       <Boton  texto="Editar Perfil" onClick={() => setIsEditModalOpen(true)} />
@@ -117,6 +148,36 @@ function PatientProfile() {
           <input type="text" name="code_postal" value={formData.code_postal || ''} onChange={e => setFormData({...formData, code_postal: e.target.value})} />
           <label>País</label>
           <input type="text" name="country" value={formData.country || ''} onChange={e => setFormData({...formData, country: e.target.value})} />
+          <label>Patologías</label>
+          <div className="pathologies-container">
+            {formData.patologias && formData.patologias.length > 0 ? (
+              <ul>
+                {formData.patologias.map((pathology, index) => (
+                  <li key={index}>
+                    {pathology} <button type="button" onClick={() => handleRemovePathology(index)}>Eliminar</button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No se han añadido patologías aún.</p>
+            )}
+            <button type="button" onClick={handleAddPathology}>Añadir Patología</button>
+          </div>
+          <label>Alergías</label>
+          <div style={{display: "flex", alignItems:"center", gap:"10px"}}>
+            <span>{formData.alergias ? "Sí" : "No"}</span>
+            <label className="switch">
+              <input type="checkbox" checked={formData.alergias} onChange={() => setFormData({...formData, alergias: !formData.alergias})} />
+              <span className="slider"></span>
+            </label>
+          </div>
+          <label htmlFor="notas">Notas:</label>
+          <textarea
+            name="notas"
+            value={formData.notas || ""}
+            onChange={e => setFormData({...formData, notas: e.target.value})}
+            placeholder="Escribe notas sobre el paciente..."
+          />
           <Boton texto="Guardar Cambios" onClick={handleSave} tipo="guardar" />
         </form>
       </CustomModal>
@@ -127,14 +188,18 @@ function PatientProfile() {
         <Boton texto="Eliminar" onClick={handleDelete} tipo="peligro" />
         <Boton texto="Cancelar" onClick={() => setIsDeleteModalOpen(false)} />
       </CustomModal>
+      <div className="proteccion-datos">
+        <UploadPDF patientId={id}/>
+      </div>
+
 
       {/* Componente de citas */}
       <PatientAppointments patientId={id} refreshAppointments={refreshAppointments} />
       <Notification
-        message="Paciente Actualizado correctamente"
+        message="Perfil actualizado correctamente"
         isVisible={isNotificationVisible}
         onClose={() => setIsNotificationVisible(false)}
-        />
+      />
     </div>
   );
 }

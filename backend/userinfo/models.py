@@ -11,6 +11,7 @@ class UserInfo(models.Model):
     city = models.CharField(max_length=200, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
     segundo_apellido = models.CharField(max_length=200, blank=True)
+    photo = models.ImageField(upload_to='media/foto_perfil/', blank=True, null=True, default='default_photo.jpg')
 
     def __str__(self):
         return f"Información de {self.user.username}"

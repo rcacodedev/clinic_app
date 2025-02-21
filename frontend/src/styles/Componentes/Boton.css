@@ -16,12 +16,12 @@
 
   /* Variantes de color */
   .boton-primario {
-    background-color: #007bff;
+    background-color: #4b4453;
     color: #fff;
   }
 
   .boton-primario:hover {
-    background-color: #0056b3;
+    background-color: rgb(58, 19, 66);
   }
 
   .boton-peligro {
@@ -53,12 +53,12 @@
 
   /* Estilo por defecto */
   .boton-default {
-    background-color: #6c757d;
+    background-color: #7d1a9bef;
     color: #fff;
   }
 
   .boton-default:hover {
-    background-color: #5a6268;
+    background-color: #822599;
   }
 
   .boton-disabled {

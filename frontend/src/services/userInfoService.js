@@ -1,4 +1,6 @@
-import api from "./api"; // Importa tu instancia de Axios
+import api from "./api";
+import { getAuthHeaders } from "../utils/auth";
+import { handleApiError } from "../utils/error_log";
 
 const URL_BACKEND = 'api/userInfo/'
 
@@ -19,7 +21,25 @@ export const updateUserInfo = async (userData) => {
     const response = await api.patch(`${URL_BACKEND}update/`, userData);
     return response.data; // Devuelve los datos actualizados
   } catch (error) {
-    console.error("Error al actualizar la información del usuario:", error);
+    console.error("Error al actualizar la información del usuario:", error.response ? error.response.data : error.message);
     throw error; // Lanza el error para que sea manejado en el componente
+  }
+};
+
+
+export const updatePhoto = async (file) => {
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  try {
+    const response = await api.patch(`${URL_BACKEND}update-photo/`, formData, {
+      headers: {
+        'Content-Type' : 'multipart/form-data',
+        ...getAuthHeaders().headers,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Error al actualizar foto')
   }
 };

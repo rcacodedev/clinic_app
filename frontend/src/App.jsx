@@ -14,6 +14,7 @@ import Ajustes from "./pages/Ajustes"
 import FinanzasPage from "./pages/Finanzas"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
+import Documentacion from "./pages/Documentacion"
 
 function Logout() {
   localStorage.clear();
@@ -27,63 +28,69 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/" element={
+        <Route path="/api" element={
             <ProtectedRoute >
               <Home />
             </ProtectedRoute>
           }
         />
-        <Route path="/pacientes/" element={
+        <Route path="api/pacientes/" element={
           <ProtectedRoute>
             <Patients />
           </ProtectedRoute>
         }
         />
-        <Route path="/pacientes/:id" element={
+        <Route path="api/pacientes/:id" element={
           <ProtectedRoute>
             <PatientsProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="/citas/" element={
+        <Route path="api/citas/" element={
           <ProtectedRoute>
             <CitasPage/>
           </ProtectedRoute>
         }
         />
-        <Route path="/workers/" element={
+        <Route path="api/workers/" element={
           <ProtectedRoute>
             <Workers />
           </ProtectedRoute>
         }
         />
-        <Route path="/workers/:id" element={
+        <Route path="api/workers/:id" element={
           <ProtectedRoute>
             <WorkersProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="/actividades/" element={
+        <Route path="api/actividades/" element={
           <ProtectedRoute>
             <Actividades />
           </ProtectedRoute>
         }
         />
-        <Route path="/actividades/:id" element={
+        <Route path="api/actividades/:id" element={
           <ProtectedRoute>
             <ActividadesProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="/ajustes" element={
+        <Route path="api/ajustes" element={
           <ProtectedRoute>
             <Ajustes />
           </ProtectedRoute>
         }
         />
-        <Route path="/finanzas" element={
+        <Route path="api/finanzas" element={
           <ProtectedRoute>
             <FinanzasPage/>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="api/documentacion" element={
+          <ProtectedRoute>
+            <Documentacion/>
           </ProtectedRoute>
         }
         />

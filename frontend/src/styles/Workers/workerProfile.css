@@ -101,3 +101,11 @@
   color: #333;
   margin-bottom: 20px;
 }
+
+.worker-photo img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%; /* Esto hace que la imagen tenga forma de círculo */
+  object-fit: cover;  /* Esto asegura que la imagen mantenga sus proporciones dentro del recuadro */
+  border: 2px solid #ccc;
+}
