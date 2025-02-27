@@ -31,7 +31,7 @@ const Navbar = () => {
       <div className="navbar-buttons">
         <div className="navbar-items">
           <div className="navbar-button">
-            <Link to="api/">
+            <Link to="/">
               <div className="navbar-content">
                 <img src={homeIcon} alt="Inicio" className="navbar-icon" />
                 <span className="navbar-text">Inicio</span>

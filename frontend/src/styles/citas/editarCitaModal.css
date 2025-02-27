@@ -1,0 +1,21 @@
+.suggested-patients-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    position: absolute;
+    width: 100%;
+    z-index: 100;
+  }
+
+  .suggested-patient {
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  .suggested-patient:hover {
+    background-color: #f0f0f0;
+  }

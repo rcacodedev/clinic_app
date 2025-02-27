@@ -1,0 +1,103 @@
+/* Estilos generales para el contenedor principal */
+.container-home {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Centrar los elementos horizontalmente */
+    justify-content: center;  /* Centrar los elementos verticalmente */
+    min-height: 100vh;  /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+    padding: 20px;
+    background-color: #f4f7fb;
+}
+
+/* Estilos para el título principal */
+.container-home h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Estilos para la sección de notas */
+.container-notas {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* Limita el ancho máximo */
+    text-align: center;
+}
+
+/* Estilos para el título de la sección de notas */
+.container-notas h1 {
+    font-size: 2rem;
+    color: #4f4f4f;
+    margin-bottom: 10px;
+}
+
+/* Estilo para el texto de la sección de notas */
+.container-notas h3 {
+    font-size: 1.2rem;
+    color: #888;
+}
+
+/* Contenedor de la agenda */
+.agenda-container {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 600px;  /* Limita el ancho máximo */
+}
+
+/* Estilos para la sección de citas filtradas */
+.citas-filtradas {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;  /* Limita el ancho máximo */
+    text-align: left;
+}
+
+/* Estilos para los títulos de las citas */
+.citas-filtradas p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Estilos para las listas de citas */
+.citas-filtradas ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.citas-filtradas li {
+    font-size: 1.1rem;
+    color: #555;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Estilo para el mensaje cuando no hay citas */
+.citas-filtradas p.no-citas {
+    font-size: 1rem;
+    color: #888;
+}
+
+/* Estilos para los botones o acciones, si los necesitas */
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

@@ -1,73 +1,93 @@
+/* Estilos generales */
 .agenda-container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
 }
 
 .agenda-controls {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
-.agenda-controls button {
-  padding: 10px;
-  border: none;
-  background: #b603a7;
+button {
+  padding: 8px 12px;
+  background-color: #6200ea;
   color: white;
-  font-size: 14px;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
-.agenda-controls button:hover {
-  background: #770447;
+button:hover {
+  background-color: #3700b3;
 }
 
+/* Tabla */
 .agenda-table {
   width: 100%;
   border-collapse: collapse;
-  background: #f9f9f9;
+  table-layout: fixed; /* Evita expansión de celdas */
 }
 
-.agenda-table thead th {
-  background: #6d0167;
-  color: white;
+.agenda-header-month {
+  text-align: center;
+  font-size: 1.2rem;
   padding: 10px;
-  text-transform: uppercase;
+  background-color: #c574f3;
+  font-weight: bold;
+}
+
+.agenda-header-hour {
+  width: 80px; /* Mantiene la columna de horas fija */
+  text-align: center;
+  background-color: #e0b8f7;
+}
+
+.agenda-header-day {
+  text-align: center;
+  font-weight: bold;
+  background-color: #e0b8f7;
+  padding: 10px;
+  white-space: nowrap;
+}
+
+.agenda-today {
+  background-color: #ffd700 !important;
+}
+
+/* Filas y celdas */
+.agenda-row {
+  border-bottom: 1px solid #ddd;
 }
 
 .agenda-hour-cell {
+  text-align: center;
   font-weight: bold;
-  background: #650272;
-  color: whitesmoke;
-  padding: 10px;
-  border-right: 1px solid #dcdcdc;
+  background-color: #e0b8f7;
+  border-right: 1px solid #ddd;
 }
 
 .agenda-slot {
-  padding: 15px;
+  height: 40px;
+  text-align: center;
   border: 1px solid #ddd;
-  transition: background 0.3s;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .agenda-slot:hover {
-  background: #e6f7ff;
+  background-color: #f1f1f1;
 }
 
+/* Citas */
 .agenda-cita {
-  padding: 10px;
-  margin: 5px 0;
-  background: #9aacc0;
-  color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.agenda-cita:hover {
-  background: #0056b3;
+  padding: 5px;
+  color: rgb(0, 0, 0);
+  font-size: 0.9rem;
+  border-radius: 4px;
+  text-align: center;
 }

@@ -4,20 +4,27 @@ import { handleApiError } from '../utils/error_log';
 
 const API_URL = '/api/citas/';  // Ajusta la URL de tu API
 
-// Función para obtener la lista de citas
-const getCitas = async (page = 1, searchTerm = '') => {
+// Función para obtener la lista de citas con filtros por fecha
+const getCitas = async (page = 1, searchTerm = '', filterType = 'hoy') => {
   try {
-    const response = await api.get(`${API_URL}?page=${page}&search=${searchTerm}`, getAuthHeaders());
-    const citasOrdenadas = response.data.results.sort((a, b) => {
+    // Pasar el 'filterType' al backend como parámetro de la consulta
+    const response = await api.get(`${API_URL}?page=${page}&search=${searchTerm}&filter_type=${filterType}`, getAuthHeaders());
+    console.log(response.data);
+
+    const citas = response.data.results || response.data; // Asegúrate de usar la respuesta directamente si no hay 'results'
+
+    const citasOrdenadas = citas.sort((a, b) => {
       const fechaA = new Date(`${a.fecha}T${a.finalizar}`);
       const fechaB = new Date(`${b.fecha}T${b.finalizar}`);
       return fechaB - fechaA; // Ordenar de la más reciente a la más antigua
     });
+
     return citasOrdenadas || [];
   } catch (error) {
     handleApiError(error, 'Obtener las citas');
   }
 };
+
 // Función para obtener una cita específica por su ID
 const getCitaDetail = async (id) => {
   try {
@@ -65,4 +72,3 @@ export default {
   updateCita,
   deleteCita,
 }
-

@@ -5,6 +5,7 @@ import Home from "./pages/Home"
 import NotFound from "./pages/NotFound"
 import Patients from "./pages/Pacientes/Patients"
 import CitasPage from "./pages/Citas"
+import DetailCita from "./pages/Citas/DetailCita"
 import PatientsProfile from "./pages/Pacientes/PatientsProfile"
 import Workers from "./pages/Workers/Workers"
 import WorkersProfile from "./pages/Workers/WorkersProfile"
@@ -49,6 +50,12 @@ function App() {
         <Route path="api/citas/" element={
           <ProtectedRoute>
             <CitasPage/>
+          </ProtectedRoute>
+        }
+        />
+        <Route path="api/citas/:id" element={
+          <ProtectedRoute>
+            <DetailCita/>
           </ProtectedRoute>
         }
         />

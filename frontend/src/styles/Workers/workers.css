@@ -18,8 +18,10 @@ h1 {
 
 /* Lista de trabajadores */
 .container-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  display: flex;
+  flex-direction: column; /* Asegura que los elementos estén en columna */
+  align-items: center; /* Centra las tarjetas horizontalmente */
+  justify-content: center; /* Opcional: centra verticalmente si es necesario */
   gap: 20px;
   margin-top: 20px;
 }
@@ -35,6 +37,7 @@ h1 {
   width: 100%;
   border: 3px solid var(--worker-color, #ccc);
   gap: 9px;
+  text-align: center;
 }
 
 .worker-card:hover {

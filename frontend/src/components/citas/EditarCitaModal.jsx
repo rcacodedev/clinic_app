@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import citasService from "../../services/citasService";
 import Boton from "../Boton";
 import CustomModal from "../Modal";
+import '../../styles/citas/crearCitasModal.css'
 
-const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas }) => {
+const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas, patients }) => {
     const [formData, setFormData] = useState({
       patient_name_input: "",
       fecha: "",
@@ -13,6 +14,8 @@ const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas }) => {
     });
 
     const [isDeleted, setIsDeleted] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(""); // Estado para manejar la búsqueda
+    const [filteredPatients, setFilteredPatients] = useState([]); // Estado para almacenar pacientes filtrados
 
     useEffect(() => {
       if (cita) {
@@ -26,6 +29,21 @@ const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas }) => {
         setIsDeleted(false);
       }
     }, [cita]);
+
+    useEffect(() => {
+      if (searchTerm) {
+        // Filtrar pacientes según la búsqueda
+        setFilteredPatients(
+          patients.filter(patient =>
+            `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
+          ));
+
+      } else {
+        setFilteredPatients([]);
+      }
+    }, [searchTerm, patients]);
 
     const handleChange = (e) => {
       const { name, value } = e.target;
@@ -68,7 +86,29 @@ const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas }) => {
         ...formData,
         patient_name_input: `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`,
       });
+      setSearchTerm(""); // Limpiar el campo de búsqueda después de seleccionar un paciente
+      setFilteredPatients([]);
     };
+
+    const handlePatientInputChange = (e) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+      setFormData((prevState) => ({
+        ...prevState,
+        patient_name_input: value,
+      }));
+
+      if (value.trim()) {
+        const filtered = patients.filter(patient =>
+          `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`
+            .toLowerCase()
+            .includes(value.toLowerCase())
+        );
+        setFilteredPatients(filtered);
+      } else {
+        setFilteredPatients([]);
+      }
+    }
 
     return (
       <CustomModal
@@ -82,17 +122,24 @@ const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas }) => {
             type="text"
             name="patient_name_input"
             value={formData.patient_name_input}
-            onChange={handleChange}
+            onChange={handlePatientInputChange} // Actualiza el término de búsqueda
             placeholder="Nombre del paciente"
             required
           />
-          <div>
-            {cita && cita.patients && cita.patients.map(patient => (
-              <div key={patient.id} onClick={() => handlePatientSelect(patient)}>
-                {patient.nombre} {patient.primer_apellido}
-              </div>
-            ))}
-          </div>
+          {/* Mostrar la lista de sugerencias de pacientes */}
+          {searchTerm && filteredPatients.length > 0 && (
+            <ul className="suggested-patients-list">
+              {filteredPatients.map(patient => (
+                <li
+                  key={patient.id}
+                  onClick={() => handlePatientSelect(patient)}
+                  className="suggested-patient"
+                >
+                  {patient.nombre} {patient.primer_apellido}
+                </li>
+              ))}
+            </ul>
+          )}
           <input
             type="date"
             name="fecha"

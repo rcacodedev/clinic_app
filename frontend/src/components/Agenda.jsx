@@ -12,14 +12,6 @@ const Agenda = ({
     selectedCita,
     setSelectedCita,
 }) => {
-    const getStartOfWeek = (date) => {
-        const startOfWeek = new Date(date);
-        const day = startOfWeek.getDay();
-        const diff = day === 0 ? -6 : 1 - day; // Ajusta al lunes
-        startOfWeek.setDate(startOfWeek.getDate() + diff);
-        startOfWeek.setHours(0, 0, 0, 0);
-        return startOfWeek;
-    };
 
     const generateWeek = (startDate) => {
         return Array.from({ length: 7 }, (_, i) => {
@@ -30,20 +22,28 @@ const Agenda = ({
     };
 
     const changeWeek = (direction) => {
-        const newStartDate = new Date(currentWeek[0]); // Tomar el lunes actual
-        newStartDate.setDate(newStartDate.getDate() + direction * 7); // Avanzar o retroceder 7 días
+        const newStartDate = new Date(currentWeek[0]);
+        newStartDate.setDate(newStartDate.getDate() + direction * 7);
         const newWeek = generateWeek(newStartDate);
-        setCurrentWeek(newWeek); // Actualiza el estado de la semana
+        setCurrentWeek(newWeek);
     };
 
-    const findCita = (date, hour) => {
+    const findCita = (date, hour, minute) => {
         return citas.filter((cita) => {
-            const citaDate = new Date(cita.fecha).toDateString();
-            const slotDate = date.toDateString();
-            const citaStartHour = parseInt(cita.comenzar.split(':')[0], 10);
-            const citaEndHour = parseInt(cita.finalizar.split(':')[0], 10);
+            const citaFecha = new Date(cita.fecha);
+            const [startHour, startMinute] = cita.comenzar.split(":").map(Number);
+            const [endHour, endMinute] = cita.finalizar.split(":").map(Number);
 
-            return citaDate === slotDate && citaStartHour <= hour && hour < citaEndHour;
+            const citaStartDate = new Date(citaFecha);
+            const citaEndDate = new Date(citaFecha);
+
+            citaStartDate.setHours(startHour, startMinute, 0);
+            citaEndDate.setHours(endHour, endMinute, 0);
+
+            const slotDate = new Date(date);
+            slotDate.setHours(hour, minute, 0, 0);
+
+            return citaStartDate.getTime() <= slotDate.getTime() && slotDate.getTime() < citaEndDate.getTime();
         });
     };
 
@@ -52,7 +52,41 @@ const Agenda = ({
         openModal(cita);
     };
 
-    const hours = Array.from({ length: 12 }, (_, i) => 8 + i);
+    const handleSlotClick = (date, hour, minute) => {
+        setSelectedCita(null);
+        const formattedDate = date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+        const newCita = {
+            fecha: formattedDate,
+            comenzar: formattedTime,
+            finalizar: '',
+            patient_name: '',
+            patient_primer_apellido: '',
+            descripcion: ''
+        };
+
+        setSelectedCita(newCita);
+        openModal(newCita);
+    };
+
+    // Obtener duracion de las citas
+    const getCitaDurationInSlots = (cita) => {
+        const [startHour, startMinutes] = cita.comenzar.split(':').map(Number);
+        const [endHour, endMinutes] = cita.finalizar.split(':').map(Number);
+
+        const startTime = startHour * 60 + startMinutes;
+        const endTime = endHour * 60 + endMinutes;
+
+        return (endTime - startTime) / 15; // Número de intervalos de 15 min
+    };
+
+    const hours = Array.from({ length: 57 }, (_, i) => {
+        const hour = Math.floor(i / 4) + 8;
+        const minute = (i % 4) * 15;
+        return { hour, minute };
+    });
+
     const today = new Date().toDateString();
     const currentMonth =
         currentWeek && currentWeek.length > 0
@@ -69,18 +103,14 @@ const Agenda = ({
             <table className="agenda-table">
                 <thead>
                     <tr>
-                        <th colSpan={8} className="agenda-header-month">
-                            {currentMonth}
-                        </th>
+                        <th colSpan={8} className="agenda-header-month">{currentMonth}</th>
                     </tr>
                     <tr>
                         <th className="agenda-header-hour">Hora</th>
                         {currentWeek.map((date) => (
                             <th
-                                key={date.toDateString()}
-                                className={`agenda-header-day ${
-                                    today === date.toDateString() ? 'agenda-today' : ''
-                                }`}
+                                key={date.toISOString()}
+                                className={`agenda-header-day ${today === date.toDateString() ? 'agenda-today' : ''}`}
                             >
                                 {date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' })}
                             </th>
@@ -88,32 +118,54 @@ const Agenda = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {hours.map((hour) => (
-                        <tr key={hour} className="agenda-row">
-                            <td className="agenda-hour-cell">{`${hour}:00`}</td>
+                    {hours.map(({ hour, minute }) => (
+                        <tr key={`${hour}-${minute}`} className="agenda-row">
+                            <td className="agenda-hour-cell">{`${hour}:${minute.toString().padStart(2, '0')}`}</td>
                             {currentWeek.map((date) => {
-                                const citasInSlot = findCita(date, hour);
+                                const citasInSlot = findCita(date, hour, minute);
                                 const isToday = today === date.toDateString();
                                 return (
                                     <td
-                                        key={`${date.toDateString()}-${hour}`}
-                                        className={`agenda-slot ${
-                                            isToday ? 'agenda-slot-today' : ''
-                                        }`}
-                                        onClick={() =>
-                                            citasInSlot.length > 0 && handleClick(citasInSlot[0])
-                                        }
+                                        key={`${date.toISOString()}-${hour}-${minute}`}
+                                        className={`agenda-slot ${isToday ? 'agenda-slot-today' : ''}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (citasInSlot.length > 0) {
+                                                handleClick(citasInSlot[0]); // Editar cita existente
+                                            } else {
+                                                handleSlotClick(date, hour, minute); // Crear nueva cita
+                                            }
+                                        }}
                                     >
-                                        {citasInSlot.map((cita) => (
-                                            <div
-                                                className="agenda-cita"
-                                                key={cita.id}
-                                                onClick={() => handleClick(cita)}
-                                            >
-                                                <strong>{cita.patient_name} {cita.patient_primer_apellido}</strong>
-                                                <p>{cita.descripcion}</p>
-                                            </div>
-                                        ))}
+                                        {citasInSlot.map((cita) => {
+                                            // Calculamos el número de celdas a ocupar dependiendo de la duración de la cita
+                                            const citaStartHour = parseInt(cita.comenzar.split(":")[0], 10);
+                                            const citaStartMinute = parseInt(cita.comenzar.split(":")[1], 10);
+                                            const citaEndHour = parseInt(cita.finalizar.split(":")[0], 10);
+                                            const citaEndMinute = parseInt(cita.finalizar.split(":")[1], 10);
+
+                                            const startCell = (citaStartHour - 8) * 4 + Math.floor(citaStartMinute / 15);
+                                            const endCell = (citaEndHour - 8) * 4 + Math.floor(citaEndMinute / 15);
+
+                                            const rowspan = (endCell - startCell); // Número de celdas que ocupa la cita
+
+                                            return (
+                                                <div
+                                                    key={cita.id}
+                                                    className="agenda-cita"
+                                                    style={{
+                                                        gridRow: `${startCell + 1} / span ${rowspan}`,
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleClick(cita);
+                                                    }}
+                                                >
+                                                    <strong>{cita.patient_name} {cita.patient_primer_apellido}</strong>
+                                                    <p>{cita.descripcion}</p>
+                                                </div>
+                                            );
+                                        })}
                                     </td>
                                 );
                             })}
@@ -121,29 +173,11 @@ const Agenda = ({
                     ))}
                 </tbody>
             </table>
-            <CustomModal
-                isOpen={modalVisible}
-                onRequestClose={closeModal}
-                title="Editar o Eliminar Cita"
-            >
+            <CustomModal isOpen={modalVisible} onRequestClose={closeModal} title={selectedCita ? "Editar Cita" : "Nueva Cita"}>
                 {selectedCita ? (
                     <div className="modal-body">
-                        <h3>Paciente: {selectedCita.patient_name}</h3>
-                        <p>{selectedCita.descripcion}</p>
-                        <div className="modal-actions">
-                            <button
-                                className="modal-save"
-                                onClick={() => console.log('Editando...')}
-                            >
-                                Editar
-                            </button>
-                            <button
-                                className="modal-cancel"
-                                onClick={() => console.log('Eliminando...')}
-                            >
-                                Eliminar
-                            </button>
-                        </div>
+                        <h3>Paciente: {selectedCita.patient_name || "Nuevo paciente"}</h3>
+                        <p>{selectedCita.descripcion || "Añadir descripción"}</p>
                     </div>
                 ) : (
                     <p>Cargando información de la cita...</p>

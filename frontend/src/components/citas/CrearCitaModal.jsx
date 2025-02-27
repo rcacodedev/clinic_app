@@ -13,17 +13,20 @@ const initialFormState = {
   descripcion: "",
 };
 
-const CreateCitaModal = ({ showModal, onClose, refreshCitas }) => {
+const CreateCitaModal = ({ showModal, onClose, refreshCitas, showDateTimeFields, cita }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (showModal) {
-      setFormData(initialFormState); // Reinicia el formulario cuando se abre el modal
+      setFormData({...initialFormState,
+        fecha: cita?.fecha || "",
+        comenzar: cita?.comenzar || "",
+    }); // Reinicia el formulario cuando se abre el modal
       setPatients([]); // Limpia la lista de pacientes sugeridos
     }
-  }, [showModal]);
+  }, [showModal, cita]);
 
   const handleChange = async (e) => {
     const { name, value } = e.target;

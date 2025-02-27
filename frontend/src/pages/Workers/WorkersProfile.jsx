@@ -29,7 +29,6 @@ const WorkerProfile = () => {
     const loadData = async () => {
       try {
         await Promise.all([loadWorker(), loadAppointments()]);
-        initializeWeek();
       } catch (err) {
         console.error('Error al cargar datos:', err);
         setError('Error al cargar los datos del trabajador');
@@ -40,6 +39,10 @@ const WorkerProfile = () => {
 
     loadData();
   }, [id]);
+
+  useEffect(() => {
+    initializeWeek();
+  }, [])
 
   const loadWorker = async () => {
     const data = await fetchWorkerDetails(id);
@@ -166,10 +169,14 @@ const WorkerProfile = () => {
         <Agenda
           citas={appointments}
           currentWeek={currentWeek}
+          setCurrentWeek={setCurrentWeek}
           changeWeek={changeWeek}
           openModal={openModal} // Pasamos openModal a Agenda
           selectedCita={selectedCita}
           setSelectedCita={setSelectedCita} // Pasamos setSelectedCita a Agenda
+          workerColor={worker.color}
+          isWorkerView={true}
+          workerId={id}
         />
       </div>
 

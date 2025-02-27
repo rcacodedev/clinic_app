@@ -156,8 +156,8 @@ const CitasPage = () => {
             });
         } else {
             setNewCita(initialCitaState);
+            setSelectedCita(null);  // Asegurarse de limpiar selectedCita al crear una nueva
         }
-        setSelectedCita(cita);
         setShowModal(true);
     };
 
@@ -176,49 +176,51 @@ const CitasPage = () => {
                 </div>
 
                 {/* Modal de creación o edición */}
-                {selectedCita ? (
-                    <EditarCitaModal
-                        showModal={showModal}
-                        onClose={handleCloseModal}
-                        onSave={handleSaveCita}
-                        onDelete={handleDeleteCita}
-                        onConfirmDelete={confirmDelete}
-                        onCancelDelete={cancelDelete}
-                        showConfirmDelete={showConfirmDelete}
-                        cita={newCita}
-                        handleChange={handleChange}
-                        patients={patients}
-                        onPatientSelect={(patient) =>
-                            setNewCita({
-                                ...newCita,
-                                patient_name_input: `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`,
-                            })
-                        }
-                        loading={loading}
-                        error={error}
-                        selectedCita={selectedCita}
-                        refreshCitas={refreshCitas}
-                    />
-                ) : (
-                    <CrearCitaModal
-                        showModal={showModal}
-                        onClose={handleCloseModal}
-                        onSave={handleSaveCita}
-                        onDelete={handleDeleteCita}
-                        cita={newCita}
-                        handleChange={handleChange}
-                        patients={patients}
-                        onPatientSelect={(patient) =>
-                            setNewCita({
-                                ...newCita,
-                                patient_name_input: `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`,
-                            })
-                        }
-                        loading={loading}
-                        error={error}
-                        refreshCitas={refreshCitas}
-                    />
+                {showModal && (
+                    selectedCita ? (
+                        <EditarCitaModal
+                            showModal={showModal}
+                            onClose={handleCloseModal}
+                            onSave={handleSaveCita}
+                            onDelete={handleDeleteCita}
+                            onConfirmDelete={confirmDelete}
+                            onCancelDelete={cancelDelete}
+                            showConfirmDelete={showConfirmDelete}
+                            cita={newCita}
+                            handleChange={handleChange}
+                            patients={patients}
+                            onPatientSelect={(patient) =>
+                                setNewCita({
+                                    ...newCita,
+                                    patient_name_input: `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`,
+                                })
+                            }
+                            loading={loading}
+                            error={error}
+                            selectedCita={selectedCita}
+                            refreshCitas={refreshCitas}
+                        />
+                    ) : (
+                        <CrearCitaModal
+                            showModal={showModal}
+                            onClose={handleCloseModal}
+                            onSave={handleSaveCita}
+                            cita={newCita}
+                            handleChange={handleChange}
+                            patients={patients}
+                            onPatientSelect={(patient) =>
+                                setNewCita({
+                                    ...newCita,
+                                    patient_name_input: `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`,
+                                })
+                            }
+                            loading={loading}
+                            error={error}
+                            refreshCitas={refreshCitas}
+                        />
+                    )
                 )}
+
 
                 <div className="container-agenda">
                     <Agenda
