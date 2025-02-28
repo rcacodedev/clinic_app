@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.views.generic import TemplateView
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import (
@@ -20,4 +21,9 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('api/userInfo/', include('userinfo.urls')),
     path('api/finanzas/', include('finanzas.urls')),
+    # Ruta para servir el archivo index.html
+    path('', TemplateView.as_view(template_name='index.html')),  # Para la raíz
+
+    # Redirigir todas las demás rutas a index.html (para React Router)
+    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name='index.html')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
