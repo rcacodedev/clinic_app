@@ -21,9 +21,4 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('api/userInfo/', include('userinfo.urls')),
     path('api/finanzas/', include('finanzas.urls')),
-    # Ruta para servir el archivo index.html
-    path('', TemplateView.as_view(template_name='index.html')),  # Para la raíz
-
-    # Redirigir todas las demás rutas a index.html (para React Router)
-    re_path(r'^(?!api/).*', TemplateView.as_view(template_name='index.html')),  # Para todas las rutas no API
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
