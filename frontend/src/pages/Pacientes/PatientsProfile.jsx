@@ -44,7 +44,7 @@ function PatientProfile() {
     try {
       await patientService.deletePatient(id);
       alert("Paciente eliminado correctamente");
-      navigate("/api/pacientes");
+      navigate("/pacientes");
     } catch (error) {
       console.error("Error al eliminar el paciente:", error);
       alert("Error al eliminar el paciente");

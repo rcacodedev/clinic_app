@@ -35,67 +35,67 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="api/pacientes/" element={
+        <Route path="pacientes/" element={
           <ProtectedRoute>
             <Patients />
           </ProtectedRoute>
         }
         />
-        <Route path="api/pacientes/:id" element={
+        <Route path="pacientes/:id" element={
           <ProtectedRoute>
             <PatientsProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="api/citas/" element={
+        <Route path="citas/" element={
           <ProtectedRoute>
             <CitasPage/>
           </ProtectedRoute>
         }
         />
-        <Route path="api/citas/:id" element={
+        <Route path="citas/:id" element={
           <ProtectedRoute>
             <DetailCita/>
           </ProtectedRoute>
         }
         />
-        <Route path="api/workers/" element={
+        <Route path="workers/" element={
           <ProtectedRoute>
             <Workers />
           </ProtectedRoute>
         }
         />
-        <Route path="api/workers/:id" element={
+        <Route path="workers/:id" element={
           <ProtectedRoute>
             <WorkersProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="api/actividades/" element={
+        <Route path="actividades/" element={
           <ProtectedRoute>
             <Actividades />
           </ProtectedRoute>
         }
         />
-        <Route path="api/actividades/:id" element={
+        <Route path="actividades/:id" element={
           <ProtectedRoute>
             <ActividadesProfile />
           </ProtectedRoute>
         }
         />
-        <Route path="api/ajustes" element={
+        <Route path="ajustes/" element={
           <ProtectedRoute>
             <Ajustes />
           </ProtectedRoute>
         }
         />
-        <Route path="api/finanzas" element={
+        <Route path="finanzas/" element={
           <ProtectedRoute>
             <FinanzasPage/>
           </ProtectedRoute>
         }
         />
-        <Route path="api/documentacion" element={
+        <Route path="documentacion/" element={
           <ProtectedRoute>
             <Documentacion/>
           </ProtectedRoute>
