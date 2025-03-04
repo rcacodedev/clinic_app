@@ -7,7 +7,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 5px;
   background-color: var(--container-color);
   color: var(--container-color);
   font-family: var(--font-family-header);
@@ -31,7 +31,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 /* Botón de logout */
@@ -58,8 +58,8 @@
 
 /* Icono */
 .navbar-icon {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   fill: white;
   transition: transform 0.3s ease-in-out;
   margin-bottom: 5px;

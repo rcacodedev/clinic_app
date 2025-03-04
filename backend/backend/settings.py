@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'finanzas',
     'cloudinary',
     'cloudinary_storage',
+    'formacion',
 ]
 
 MIDDLEWARE = [
@@ -154,9 +155,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    BASE_DIR / "frontend" / "dist",  # Asegúrate de que esta ruta sea correcta
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "frontend" / "dist",  # Asegúrate de que esta ruta sea correcta
+# ]
 
 # cloudinary.config(
     # cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME", ""),

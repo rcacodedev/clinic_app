@@ -13,6 +13,8 @@ import Actividades from "./pages/Actividades/Actividades"
 import ActividadesProfile from "./pages/Actividades/ActividadesProfile"
 import Ajustes from "./pages/Ajustes"
 import FinanzasPage from "./pages/Finanzas"
+import Formacion from "./pages/Formacion/Formacion"
+import FormacionDetail from "./pages/Formacion/FormacionDetail"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
 import Documentacion from "./pages/Documentacion"
@@ -80,6 +82,18 @@ function App() {
         <Route path="api/actividades/:id" element={
           <ProtectedRoute>
             <ActividadesProfile />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="api/formacion/" element={
+          <ProtectedRoute>
+            <Formacion />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="api/formacion/:id" element={
+          <ProtectedRoute>
+            <FormacionDetail />
           </ProtectedRoute>
         }
         />

@@ -1,0 +1,67 @@
+.container-formacion {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title-formacion {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.formacion-boton-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Estilo del formulario dentro del modal */
+.formacion-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formacion-form label {
+    font-weight: bold;
+    color: #555;
+    display: flex;
+    flex-direction: column;
+}
+
+.formacion-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.formacion-form input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Contenedor de la agenda */
+.container-agenda {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title-agenda-formacion {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 15px;
+}

@@ -1,0 +1,93 @@
+.agenda-container {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.calendar-header button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.calendar-header button:hover {
+    background-color: #0056b3;
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 20px;
+    text-transform: capitalize;
+}
+
+/* Estructura de la cuadrícula */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+/* Encabezado de los días de la semana */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: bold;
+    text-align: center;
+    background-color: #ddd;
+    padding: 5px 0;
+    border-radius: 5px;
+}
+
+.weekday {
+    padding: 5px;
+    text-transform: capitalize;
+}
+
+/* Estilo de cada día en el calendario */
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #ddd;
+    min-height: 100px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Estilo para los eventos */
+.formaciones-list {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.formacion-item {
+    background: #e2b3f8;
+    color: rgb(0, 0, 0);
+    padding: 5px;
+    border-radius: 3px;
+    margin-top: 3px;
+}
+
+.formacion-item strong {
+    display: block;
+    font-size: 14px;
+}

@@ -9,7 +9,6 @@ const getCitas = async (page = 1, searchTerm = '', filterType = 'hoy') => {
   try {
     // Pasar el 'filterType' al backend como parámetro de la consulta
     const response = await api.get(`${API_URL}?page=${page}&search=${searchTerm}&filter_type=${filterType}`, getAuthHeaders());
-    console.log(response.data);
 
     const citas = response.data.results || response.data; // Asegúrate de usar la respuesta directamente si no hay 'results'
 

@@ -10,6 +10,7 @@ import actividadesIcon from "../assets/actividades.svg";
 import logoutIcon from "../assets/salir.svg";
 import ajusteIcon from "../assets/ajuste.svg";
 import finanzasIcon from "../assets/coin.svg";
+import formacionIcon from "../assets/formacion.svg";
 import documentacionIcon from "../assets/documentacion.svg";
 
 const Navbar = () => {
@@ -82,6 +83,14 @@ const Navbar = () => {
               <div className="navbar-content">
                 <img src={actividadesIcon} alt="Actividades" className="navbar-icon" />
                 <span className="navbar-text">Actividades</span>
+              </div>
+            </Link>
+          </div>
+          <div className="navbar-button">
+            <Link to="api/formacion">
+              <div className="navbar-content">
+                <img src={formacionIcon} alt="Formacion" className="navbar-icon" />
+                <span className="navbar-text">Formación</span>
               </div>
             </Link>
           </div>

@@ -16,49 +16,49 @@
 
   /* Variantes de color */
   .boton-primario {
-    background-color: #4b4453;
+    background-color: #4b4453 !important;
     color: #fff;
   }
 
   .boton-primario:hover {
-    background-color: rgb(58, 19, 66);
+    background-color: rgb(58, 19, 66) !important;
   }
 
   .boton-peligro {
-    background-color: #ff4136;
+    background-color: #ff4136 !important;
     color: #fff;
   }
 
   .boton-peligro:hover {
-    background-color: #c0392b;
+    background-color: #c0392b !important;
   }
 
   .boton-guardar {
-    background-color: #05bd15;
+    background-color: #05bd15 !important;
     color: #fff;
   }
 
   .boton-guardar:hover {
-    background-color: #028a0f;
+    background-color: #028a0f !important;
   }
 
   .boton-eliminar {
-    background-color: #f5730f;
+    background-color: #f5730f !important;
     color: #fff;
   }
 
   .boton-eliminar:hover {
-    background-color: #e04e00;
+    background-color: #e04e00 !important;
   }
 
   /* Estilo por defecto */
   .boton-default {
-    background-color: #7d1a9bef;
+    background-color: #7d1a9bef !important;
     color: #fff;
   }
 
   .boton-default:hover {
-    background-color: #822599;
+    background-color: #822599 !important;
   }
 
   .boton-disabled {
