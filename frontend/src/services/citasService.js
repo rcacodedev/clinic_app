@@ -5,7 +5,7 @@ import { handleApiError } from '../utils/error_log';
 const API_URL = '/api/citas/';  // Ajusta la URL de tu API
 
 // Función para obtener la lista de citas con filtros por fecha
-const getCitas = async (page = 1, searchTerm = '', filterType = 'hoy') => {
+const getCitas = async (page = 1, searchTerm = '', filterType = 'todos') => {
   try {
     // Pasar el 'filterType' al backend como parámetro de la consulta
     const response = await api.get(`${API_URL}?page=${page}&search=${searchTerm}&filter_type=${filterType}`, getAuthHeaders());

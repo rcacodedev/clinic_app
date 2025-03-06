@@ -86,8 +86,11 @@ button:hover {
 /* Citas */
 .agenda-cita {
   padding: 5px;
-  color: rgb(0, 0, 0);
+  color: #000000; /* Texto blanco */
+  background-color: #d1b7f7; /* Color de fondo, en este caso un tono púrpura */
   font-size: 0.9rem;
   border-radius: 4px;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Opcional: sombra para darle relieve */
+  cursor: pointer; /* Para indicar que es interactivo */
 }

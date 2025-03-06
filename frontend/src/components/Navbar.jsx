@@ -16,6 +16,7 @@ import documentacionIcon from "../assets/documentacion.svg";
 const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
+
   useEffect(() => {
     const token = getToken();
     if (token) {

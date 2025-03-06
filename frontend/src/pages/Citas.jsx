@@ -28,6 +28,7 @@ const CitasPage = () => {
     const [patients, setPatients] = useState([]); // Lista de pacientes sugeridos
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [citaToDelete, setCitaToDelete] = useState(null);
+    const [modalMode, setModalMode] = useState('create'); // 'create' o 'edit'
 
 
     const token = getToken();
@@ -69,7 +70,8 @@ const CitasPage = () => {
     const loadCitas = async () => {
         try {
             const data = await citasService.getCitas();
-            setCitas(data);
+            const personalCitas = data.filter(cita => cita.worker === null);
+            setCitas(personalCitas);
         } catch (error) {
             console.error('Error al cargar las citas:', error);
         }
@@ -110,19 +112,24 @@ const CitasPage = () => {
         e.preventDefault();
         try {
             let updatedCita;
-            if (selectedCita) {
+            // Si selectedCita existe y tiene id, es edición; de lo contrario, creación.
+            if (selectedCita && selectedCita.id) {
                 updatedCita = await citasService.updateCita(selectedCita.id, newCita);
-                setCitas((prev) => prev.map((cita) => (cita.id === updatedCita.id ? updatedCita : cita)));
+                setCitas((prev) =>
+                    prev.map((cita) => (cita.id === updatedCita.id ? updatedCita : cita))
+                );
             } else {
                 updatedCita = await citasService.createCita(newCita);
-                setCitas((prev) => [...prev, updatedCita]);  // Aquí agregas la cita al estado directamente
+                setCitas((prev) => [...prev, updatedCita]);
             }
+            loadCitas();
             handleCloseModal();
         } catch (error) {
             setError(error.response ? error.response.data : error.message);
             console.error('Error al guardar la cita:', error);
         }
     };
+
 
     // Eliminar cita
     const handleDeleteCita = async (id) => {
@@ -149,14 +156,24 @@ const CitasPage = () => {
 
     // Abrir el modal
     const handleShowModal = (cita = null) => {
-        if (cita) {
+        if (cita && cita.id) {
+            // Modo edición: existe una cita con id
+            setModalMode('edit');
+            setSelectedCita(cita);
             setNewCita({
                 ...cita,
                 patient_name_input: `${cita.patient_name || ''} ${cita.patient_primer_apellido || ''} ${cita.patient_segundo_apellido || ''}`.trim(),
             });
+        } else if (cita) {
+            // Modo creación: se ha pasado una cita (con fecha y hora) pero sin id
+            setModalMode('create');
+            setNewCita(cita);
+            setSelectedCita(cita);
         } else {
+            // Sin datos: se abre el modal para crear, pero sin datos predefinidos
+            setModalMode('create');
             setNewCita(initialCitaState);
-            setSelectedCita(null);  // Asegurarse de limpiar selectedCita al crear una nueva
+            setSelectedCita(null);
         }
         setShowModal(true);
     };
@@ -164,6 +181,7 @@ const CitasPage = () => {
     // Cerrar el modal
     const handleCloseModal = () => {
         setShowModal(false);
+        loadCitas();
         setNewCita(initialCitaState);
         setPatients([]);
     };
@@ -177,7 +195,7 @@ const CitasPage = () => {
 
                 {/* Modal de creación o edición */}
                 {showModal && (
-                    selectedCita ? (
+                    modalMode === 'edit' ? (
                         <EditarCitaModal
                             showModal={showModal}
                             onClose={handleCloseModal}
