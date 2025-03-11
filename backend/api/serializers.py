@@ -31,4 +31,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Agregar grupos del usuario al token
         token['groups'] = [group.name for group in user.groups.all()]
 
+        # Agregar información adicional al token
+        token['first_name'] = user.first_name
+        token['last_name'] = user.last_name
+
         return token

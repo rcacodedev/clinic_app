@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Boton from './Boton';
-import '../styles/listCitas.css';
+import Boton from '../Boton';
+import { Link } from 'react-router-dom';
+import '../../styles/citas/listCitas.css';
 
 const ListCitas = ({ citas, userId }) => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -43,13 +44,14 @@ const ListCitas = ({ citas, userId }) => {
     return (
         <div className="list-citas">
             <h2>Citas Finalizadas</h2>
-            <table>
+            <table className='list-citas-table'>
                 <thead>
                     <tr>
                         <th>Paciente</th>
                         <th>Fecha</th>
                         <th>Comenzar</th>
                         <th>Finalizar</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,6 +66,11 @@ const ListCitas = ({ citas, userId }) => {
                                 <td>{cita.fecha}</td>
                                 <td>{cita.comenzar}</td>
                                 <td>{cita.finalizar}</td>
+                                <td>
+                                    <Link to={`/api/citas/${cita.id}`}>
+                                        <Boton texto="Ver Cita"/>
+                                    </Link>
+                                </td>
                             </tr>
                         ))
                     )}
@@ -75,7 +82,6 @@ const ListCitas = ({ citas, userId }) => {
                     texto="Anterior"
                     onClick={() => paginate(currentPage - 1)}
                     disabled={currentPage === 1}
-                    tipo="primario"
                 />
                 {pageNumbers.map(number => (
                     <button
@@ -90,7 +96,6 @@ const ListCitas = ({ citas, userId }) => {
                     texto="Siguiente"
                     onClick={() => paginate(currentPage + 1)}
                     disabled={currentPage === pageNumbers.length}
-                    tipo="primario"
                 />
             </div>
         </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import patientService from "../../services/patientService";
 import CustomModal from "../../components/Modal";
 import Boton from "../../components/Boton";
-import PatientAppointments from "../../components/CitasPacientes";
+import PatientAppointments from "../../components/pacientes/CitasPacientes";
 import Notification from "../../components/Notification";
 import UploadPDF from "../../components/pacientes/uploadPDF";
 import "../../styles/pacientes/patientsProfile.css";
@@ -44,7 +44,7 @@ function PatientProfile() {
     try {
       await patientService.deletePatient(id);
       alert("Paciente eliminado correctamente");
-      navigate("/pacientes");
+      navigate("/api/pacientes");
     } catch (error) {
       console.error("Error al eliminar el paciente:", error);
       alert("Error al eliminar el paciente");
@@ -189,7 +189,7 @@ function PatientProfile() {
         <Boton texto="Cancelar" onClick={() => setIsDeleteModalOpen(false)} />
       </CustomModal>
       <div className="proteccion-datos">
-        <UploadPDF patientId={id}/>
+        <UploadPDF patientId={id} />
       </div>
 
 

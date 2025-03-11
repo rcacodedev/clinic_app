@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import patientService from "../../services/patientService";
 import { FaFilePdf } from 'react-icons/fa'; // Importar el icono de PDF
+import Boton from "../Boton";
 import Notification from "../Notification";
 import '../../styles/pacientes/uploadpdf.css'
 
@@ -16,17 +17,17 @@ const UploadPDF = ({ patientId }) => {
   const [pdfUrls, setPdfUrls] = useState({});
   const [patient, setPatient] = useState({ pdf_firmado_general: "", pdf_firmado_menor: "", pdf_firmado_inyecciones: "" });
   const [isNotificationVisibleSubir, setIsNotificationVisibleSubir] = useState(false);
-  const [isNotificationVisibleError, setIsNotificationVisibleError] = useState(false);
+
+  const loadPatientsData = async () => {
+    try {
+        const response = await patientService.getPatientById(patientId)
+        setPatient(response)
+    } catch (error) {
+        console.error("Error al obtener los datos del paciente:", error);
+    }
+  };
 
   useEffect(() => {
-    const loadPatientsData = async () => {
-        try {
-            const response = await patientService.getPatientById(patientId)
-            setPatient(response)
-        } catch (error) {
-            console.error("Error al obtener los datos del paciente:", error);
-        }
-    };
     loadPatientsData();
   }, [patientId])
 
@@ -49,17 +50,15 @@ const UploadPDF = ({ patientId }) => {
 
     try {
       const response = await patientService.uploadSignedPDFs(patientId, selectedFiles);
-
       setIsNotificationVisibleSubir(true)
       setPdfUrls(response.pdf_urls); // La API devuelve las URLs de los PDFs subidos
+      await loadPatientsData();
     } catch (error) {
       setMessage("Error al subir los PDFs.", error);
     }
 
     setUploading(false);
   };
-
-  console.log(patient.pdf_firmado_general)
 
   return (
     <div className="container-proteccion-datos">
@@ -69,29 +68,6 @@ const UploadPDF = ({ patientId }) => {
       <div className="input-proteccion-datos">
         <label>Protección de Datos</label>
         <input type="file" name="pdf_firmado_general" accept="application/pdf" onChange={handleFileChange} />
-      </div>
-
-      <div>
-        <label>Consentimiento Menor</label>
-        <input type="file" name="pdf_firmado_menor" accept="application/pdf" onChange={handleFileChange} />
-      </div>
-
-      <div>
-        <label>Consentimiento Fisioterapia Invasiva</label>
-        <input type="file" name="pdf_firmado_inyecciones" accept="application/pdf" onChange={handleFileChange} />
-      </div>
-
-      <button onClick={handleUpload} disabled={uploading}>
-        {uploading ? "Subiendo..." : "Subir PDFs"}
-      </button>
-
-      <Notification message="Archivo subido correctamente." isVisible={isNotificationVisibleSubir} onClose={() => setIsNotificationVisibleSubir(false)} />
-      {message && (<p>Hubo un error. {message}</p>)}
-
-      {/* Mostrar PDFs subidos con enlaces */}
-      <div className="archivos-proteccion">
-        <h1>Archivos de Protección de Datos del Paciente</h1>
-
         {patient.pdf_firmado_general && (
           <p>
             <a href={patient.pdf_firmado_general} target="_blank" rel="noopener noreferrer">
@@ -99,7 +75,11 @@ const UploadPDF = ({ patientId }) => {
             </a>
           </p>
         )}
+      </div>
 
+      <div>
+        <label>Consentimiento Menor</label>
+        <input type="file" name="pdf_firmado_menor" accept="application/pdf" onChange={handleFileChange} />
         {patient.pdf_firmado_menor && (
             <p>
                 <a href={patient.pdf_firmado_menor} target="_blank" rel="noopener noreferrer">
@@ -107,6 +87,11 @@ const UploadPDF = ({ patientId }) => {
                 </a>
             </p>
         )}
+      </div>
+
+      <div>
+        <label>Consentimiento Fisioterapia Invasiva</label>
+        <input type="file" name="pdf_firmado_inyecciones" accept="application/pdf" onChange={handleFileChange} />
         {patient.pdf_firmado_inyecciones && (
             <p>
             <a href={patient.pdf_firmado_inyecciones} target="_blank" rel="noopener noreferrer">
@@ -115,6 +100,11 @@ const UploadPDF = ({ patientId }) => {
           </p>
         )}
       </div>
+      <Boton onClick={handleUpload} disabled={uploading} texto={uploading ? "Subiendo..." : "Subir PDFs"} />
+
+      <Notification message="Archivo subido correctamente." isVisible={isNotificationVisibleSubir} onClose={() => setIsNotificationVisibleSubir(false)} />
+      {message && (<p>Hubo un error. {message}</p>)}
+
     </div>
   );
 };

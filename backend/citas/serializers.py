@@ -8,13 +8,14 @@ class CitasSerializer(serializers.ModelSerializer):
     patient_primer_apellido = serializers.StringRelatedField(source='patient.primer_apellido', read_only=True)
     patient_segundo_apellido = serializers.StringRelatedField(source='patient.segundo_apellido', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
+    patient_phone = serializers.StringRelatedField(source='patient.phone', read_only=True)
 
     # Campo para la creación de citas basado en el nombre completo del paciente
     patient_name_input = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Citas
-        fields = ['id', 'patient', 'patient_name', 'patient_primer_apellido', 'cotizada', 'patient_segundo_apellido', 'fecha', 'comenzar', 'finalizar', 'descripcion', 'user_id', 'worker', 'patient_name_input']
+        fields = ['id', 'patient', 'patient_name', 'patient_primer_apellido', 'patient_segundo_apellido', 'patient_phone', 'fecha', 'comenzar', 'finalizar', 'descripcion', 'user_id', 'worker', 'patient_name_input', 'cotizada', 'bizum', 'efectivo', 'pagado', 'precio']
         extra_kwargs = {
             'patient': {'required': False}
         }

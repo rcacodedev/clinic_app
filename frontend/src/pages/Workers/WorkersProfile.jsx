@@ -6,9 +6,10 @@ import EditarEmpleadoModal from '../../components/Workers/EditarEmpleadoModal';
 import EliminarEmpleadoModal from '../../components/Workers/EliminarEmpleadoModal';
 import CrearCita from '../../components/Workers/CrearCitaWorker';
 import Agenda from '../../components/Agenda';
+import Boton from '../../components/Boton';
 import EditarCitaModal from '../../components/Workers/EditarCitaWorker';
 import WorkerPDFUpload from '../../components/Workers/RegistroJornada';
-import '../../styles/Workers/workerProfile.css'
+import '../../styles/Workers/workerProfile.css';
 
 const WorkerProfile = () => {
   const { id } = useParams();
@@ -24,6 +25,7 @@ const WorkerProfile = () => {
   const [isEditCitaModalOpen, setIsEditCitaModalOpen] = useState(false);
   const [selectedCita, setSelectedCita] = useState(null); // Aquí inicializamos selectedCita
   const [groups, setGroups] = useState([]);
+  const [isCreateCitaModalOpen, setIsCreateCitaModalOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -42,7 +44,7 @@ const WorkerProfile = () => {
 
   useEffect(() => {
     initializeWeek();
-  }, [])
+  }, []);
 
   const loadWorker = async () => {
     const data = await fetchWorkerDetails(id);
@@ -99,9 +101,16 @@ const WorkerProfile = () => {
     }
   };
 
-  const openModal = (cita) => {
-    setSelectedCita(cita); // Aquí actualizamos el estado de selectedCita
-    setIsEditCitaModalOpen(true); // Abrimos el modal
+  const openModal = (cita = null) => {
+    if (cita && cita.id) {
+      // Si la cita tiene un ID, significa que ya existe -> Abrir modal de edición
+      setSelectedCita(cita);
+      setIsEditCitaModalOpen(true);
+    } else {
+      // Si la cita es nula o no tiene ID -> Abrir modal de creación
+      setSelectedCita(null); // Reiniciar la cita seleccionada si es nueva
+      setIsCreateCitaModalOpen(true);
+    }
   };
 
   if (loading) return <p>Cargando...</p>;
@@ -146,8 +155,8 @@ const WorkerProfile = () => {
         </div>
       </div>
       <div className="worker-actions">
-        <button className="btn-primary" onClick={() => setIsEditModalOpen(true)}>Editar</button>
-        <button className="btn-danger" onClick={() => setIsDeleteConfirmOpen(true)}>Eliminar</button>
+        <Boton onClick={() => setIsEditModalOpen(true)} texto="Editar"/>
+        <Boton onClick={() => setIsDeleteConfirmOpen(true)} texto="Eliminar" tipo='peligro' />
       </div>
 
       <EditarEmpleadoModal

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import patientService from "../services/patientService";
-import citasService from "../services/citasService";
+import citasService from "../../services/citasService";
+import Boton from '../Boton'
+import { Link } from "react-router-dom";
+import '../../styles/pacientes/citasPacientes.css'
 
 function PatientAppointments({ patientId, refreshAppointments }) {
   const [appointments, setAppointments] = useState([]);
@@ -96,8 +98,9 @@ function PatientAppointments({ patientId, refreshAppointments }) {
                   <td>{appointment.finalizar}</td>
                   <td>{appointment.descripcion}</td>
                   <td>
-                    <button>Editar</button>
-                    <button>Eliminar</button>
+                    <Link to={`/api/citas/${appointment.id}`}>
+                        <Boton texto="Ver Cita" />
+                    </Link>
                   </td>
                 </tr>
               ))}

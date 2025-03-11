@@ -4,6 +4,7 @@ from finanzas.models import Transaccion, ConfiguracionFinanzas
 from citas.models import Citas
 from userinfo.models import UserInfo
 from patients.models import Patient
+from actividades.models import Activity
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from datetime import datetime
@@ -39,10 +40,20 @@ class CitaSerializers(serializers.ModelSerializer):
             raise ValidationError("La fecha de la cita no puede ser en el futuro.")
         return data
 
+class ActividadesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ['precio']
+
+    def validate_precio(self, value):
+        if value < 0:
+            raise ValidationError("El precio de la actividad no puede ser negativo.")
+        return value
+
 class ConfiguracionFinanzasSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConfiguracionFinanzas
-        fields = ['id', 'precio_cita_base', 'ultima_actualizacion']
+        fields = ['id', 'precio_cita_base', 'precio_actividad_base', 'ultima_actualizacion']
 
     def validate_precio_cita_base(self, value):
         if value < 0:

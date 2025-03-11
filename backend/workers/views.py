@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +220,46 @@ class GetPDFs(APIView):
                 "current_page": paginator.page.number if admin_pdfs_paginated or worker_pdfs_paginated else 1
             }, status=status.HTTP_200_OK)
 
+class DeletePDF(APIView):
+    """Vista para eliminar pdf"""
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pdf_id, *args, **kwargs):
+        # Obtener el registro del PDF
+        pdf_registro = get_object_or_404(PDFRegistro, id=pdf_id)
+
+        # Verificar si el usuario es el que subió el archivo
+        if pdf_registro.created_by != request.user:
+            return Response(
+                {"error": "No tienes permiso para eliminar este archivo."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Eliminar el archivo físico del sistema
+        if pdf_registro.file:
+            file_path = pdf_registro.file.path  # Obtener la ruta absoluta del archivo
+            if os.path.exists(file_path):  # Verificar si el archivo existe
+                os.remove(file_path)  # Eliminar el archivo del sistema
+
+        # Eliminar el registro de la base de datos
+        pdf_registro.delete()
+
+        return Response(
+            {
+                "message": "PDF eliminado correctamente."
+            },
+            status=status.HTTP_200_OK
+        )
+
+class WorkerIdFromUserId(APIView):
+    """Vista para obtener el ID del worker"""
+    def get(self, request, user_id, format=None):
+        try:
+            # Obtener el Worker asociado al user_id
+            worker = Worker.objects.get(user_id=user_id)
+            return Response({'workerId': worker.id}, status=status.HTTP_200_OK)
+        except Worker.DoesNotExist:
+            return Response({'workerId': None}, status=status.HTTP_200_OK)
 @api_view(['GET'])
 def get_worker_by_user(request, user_id):
     try:

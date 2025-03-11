@@ -161,7 +161,7 @@ const Ajustes = () => {
       <div className="update-user-info">
         <h2>Actualizar Información de Usuario</h2>
         <form onSubmit={handleUserInfoSubmit} className="user-form">
-          {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country"]
+          {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country", "whatsapp_token", "phone_number_id"]
             .filter((key) => key !== "user" && key !== 'photo') // Filtramos el campo "user" para que nunca se muestre
             .map((key) => (
               <div key={key} className="form-group">
@@ -185,6 +185,12 @@ const Ajustes = () => {
                     )}
                     {key === 'dni' && (
                       <small className="input-help-text">Formato de DNI: 53564522W</small>
+                    )}
+                    {key === 'whatsapp_token' && (
+                      <small className="input-help-text">Poner el Token que se obtiene en Meta Cloud API</small>
+                    )}
+                    {key === 'phone_number_id' && (
+                      <small className="input-help-text">Poner el número de ID del teléfono obtenido en Meta Cloud API</small>
                     )}
                   </div>
                 ) : (

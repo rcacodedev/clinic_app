@@ -15,7 +15,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo']
+        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo', 'whatsapp_token', 'phone_number_id']
 
     def update(self, instance, validated_data):
         # Extraer datos de 'user'

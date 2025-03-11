@@ -64,7 +64,7 @@ const Activity = () => {
         <>
             <div className="activity-container">
                 <h1>Gestión de Actividades</h1>
-                <Boton texto="Añadir Actividad" onClick={toggleModal} tipo="primario" className="boton-actividad" />
+                <Boton texto="Añadir Actividad" onClick={toggleModal}  className="boton-actividad" />
 
                 {currentUserId && (
                     <CrearActividadModal

@@ -13,6 +13,9 @@ class Citas(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE, related_name='appointments', null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     cotizada = models.BooleanField(default=False)
+    efectivo = models.BooleanField(default=True)
+    bizum = models.BooleanField(default=False)
+    pagado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # Si el precio no se especifica, usa el precio base de ConfiguracionFinanzas

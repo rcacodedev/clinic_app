@@ -50,3 +50,11 @@ export const getAuthHeaders = () => {
         },
     };
   };
+
+export const isAdmin = () => {
+    const token = getToken();
+    if (!token) return false;
+
+    const decoded = decodeJWT(token);
+    return decoded.groups && decoded.groups.includes('Admin');
+}

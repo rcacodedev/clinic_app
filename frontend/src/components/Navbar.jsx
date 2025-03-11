@@ -98,8 +98,8 @@ const Navbar = () => {
           <div className="navbar-button">
             <Link to="api/finanzas">
               <div className="navbar-content">
-                <img src={finanzasIcon} alt="Finanzas" className="navbar-icon" />
-                <span className="navbar-text">Finanzas</span>
+                <img src={finanzasIcon} alt="Facturación" className="navbar-icon" />
+                <span className="navbar-text">Facturación</span>
               </div>
             </Link>
           </div>

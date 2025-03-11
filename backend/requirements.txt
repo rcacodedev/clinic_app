@@ -14,3 +14,4 @@ gunicorn
 dj-database-url
 cloudinary
 django-cloudinary-storage
+requests

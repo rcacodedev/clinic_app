@@ -3,8 +3,10 @@ import { getConfiguracionFinanzas, putConfiguracionFinanzas } from '../services/
 import CitasFinalizadas from '../components/finanzas/ListCitasFInalizadas';
 import Gastos from '../components/finanzas/Gastos';
 import Balances from '../components/finanzas/Balances';
+import Boton from '../components/Boton';
 import { getToken, getUserIdFromToken } from '../utils/auth';
 import citasService from '../services/citasService';
+import { getActivities } from '../services/activityService';
 import '../styles/finanzas/finanzas.css'
 
 const Finanzas = () => {
@@ -12,6 +14,7 @@ const Finanzas = () => {
   const [precioCita, setPrecioCita] = useState(null);
   const [nuevoPrecioCita, setNuevoPrecioCita] = useState('');
   const [citas, setCitas] = useState([]);
+  const [activity, setActivity] = useState([]);
 
   // Obtener ID del user
   const token = getToken();
@@ -29,7 +32,17 @@ const Finanzas = () => {
       }
     }
 
+    const fetchActivity = async () => {
+      try {
+        const response = await getActivities();
+        setActivity(response)
+      } catch (error) {
+        console.error('Error al cargar las actividades', error)
+      }
+    }
+
     fetchCitas();
+    fetchActivity();
   }, [])
 
   // Cargar configuración al montar el componente
@@ -87,7 +100,7 @@ const Finanzas = () => {
       <h1>Configuración de Finanzas</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="precioCita">Precio Actual de las Citas:</label>
+          <label htmlFor="precioCita">Precio Global de las Citas:</label>
           <input
             type="number"
             id="precioCita"

@@ -9,7 +9,6 @@ const getCitas = async (page = 1, searchTerm = '', filterType = 'todos') => {
   try {
     // Pasar el 'filterType' al backend como parámetro de la consulta
     const response = await api.get(`${API_URL}?page=${page}&search=${searchTerm}&filter_type=${filterType}`, getAuthHeaders());
-
     const citas = response.data.results || response.data; // Asegúrate de usar la respuesta directamente si no hay 'results'
 
     const citasOrdenadas = citas.sort((a, b) => {
@@ -64,10 +63,22 @@ const deleteCita = async (id) => {
   }
 };
 
+// Función enviar whatsApp
+const sendWhatsapp = async () => {
+  try {
+    const response = await api.post(`${API_URL}enviar-whatsapp/`, getAuthHeaders());
+    console.log('Respuesta del backend:', response.data);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Error al enviar WhatsApp')
+  }
+};
+
 export default {
   getCitas,
   getCitaDetail,
   createCita,
   updateCita,
   deleteCita,
+  sendWhatsapp,
 }

@@ -15,6 +15,7 @@ class Activity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     patients = models.ManyToManyField(Patient)
     monitor = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, related_name='monitored_activities')
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
     def __str__(self):

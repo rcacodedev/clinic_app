@@ -20,25 +20,28 @@ def custom_user_payload(user):
     """
     return {
         'user_id': user.id,
-        'groups': [group.name for group in user.groups.all()]  # Incluir los grupos del usuario
+        'groups': [group.name for group in user.groups.all()],  # Incluir los grupos del usuario
+        'first_name': user.first_name,
+        'last_name': user.last_name
     }
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
+    access = refresh.access_token  # Generar el token de acceso
 
-    # Verificar si los grupos existen y se agregan correctamente al payload
-    groups = [group.name for group in user.groups.all()]
-    print(f"Grupos del usuario {user.id}: {groups}")  # Debug para verificar los grupos
+    # Agregar información personalizada al token de acceso
+    access['user_id'] = user.id
+    access['groups'] = [group.name for group in user.groups.all()]
+    access['first_name'] = user.first_name
+    access['last_name'] = user.last_name
 
-    # Actualizar el payload con los grupos y el user_id
-    refresh.payload['user_id'] = user.id
-    refresh.payload['groups'] = groups  # Asegurarnos de que los grupos se añaden correctamente
+    # Debugging para verificar los valores añadidos
+    print(f"Token de acceso generado para el usuario {user.username}: {access}")
 
-
-    # Asegúrate de que los grupos estén realmente añadidos
-    print(f"Payload del token: {refresh.payload}")
-
-    return str(refresh.access_token), str(refresh.refresh_token)
+    return {
+        'refresh': str(refresh),
+        'access': str(access),
+    }
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()

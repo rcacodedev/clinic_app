@@ -1,0 +1,84 @@
+.container-detail-cita {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.title-detail-cita {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.cita-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cita-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cita-field strong {
+    color: #555;
+}
+
+.cita-field span {
+    font-weight: bold;
+    color: #222;
+}
+
+.boolean-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.boolean-buttons button {
+    padding: 5px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.boolean-buttons button.active {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.boolean-buttons button:not(.active) {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-detail-cita {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .title-detail-cita {
+        font-size: 20px;
+    }
+
+    .cita-field {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

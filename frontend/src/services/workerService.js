@@ -139,3 +139,23 @@ export const getWorkerIdByUserId = async (userId) => {
     handleApiError(error, "Error al obtener el workerID")
   }
 }
+
+// Eliminar PDF
+export const deletePDF = async (pdfId) => {
+  try {
+    await api.delete(`${API_URL}delete/${pdfId}/`, getAuthHeaders());
+    alert("PDF eliminado correctamente")
+  } catch (error) {
+    handleApiError(error, "Error al eliminar PDF")
+  }
+};
+
+// Obtener ID del worker
+export const getWorkerID = async (userId) => {
+  try {
+    const response = await api.get(`${API_URL}worker-id/${userId}/`, getAuthHeaders())
+    return response.data.workerId;
+  } catch (error) {
+    handleApiError(error, "Error al obtener el ID del worker")
+  }
+};

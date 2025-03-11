@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import citasService from '../services/citasService';
-import patientService from '../services/patientService'; // Servicio de pacientes
-import { getToken, getUserIdFromToken } from '../utils/auth';
-import Boton from '../components/Boton';
-import Agenda from '../components/Agenda';
-import ListCitas from '../components/ListCitas';
-import CrearCitaModal from '../components/citas/CrearCitaModal'; // Importamos el nuevo modal
-import EditarCitaModal from '../components/citas/EditarCitaModal'; // Importamos el EditarCitaModal
-import '../styles/citas.css'
+import citasService from '../../services/citasService';
+import patientService from '../../services/patientService'; // Servicio de pacientes
+import { getWorkerID } from '../../services/workerService';
+import { getToken, getUserIdFromToken, isAdmin } from '../../utils/auth';
+import Boton from '../../components/Boton';
+import Agenda from '../../components/Agenda';
+import ListCitas from '../../components/citas/ListCitas';
+import CrearCitaModal from '../../components/citas/CrearCitaModal'; // Importamos el nuevo modal
+import EditarCitaModal from '../../components/citas/EditarCitaModal'; // Importamos el EditarCitaModal
+import '../../styles/citas/citas.css'
 
 const initialCitaState = {
     patient_name_input: '',
@@ -29,17 +30,27 @@ const CitasPage = () => {
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [citaToDelete, setCitaToDelete] = useState(null);
     const [modalMode, setModalMode] = useState('create'); // 'create' o 'edit'
-
+    const [workerId, setWorkerID] = useState(null);
 
     const token = getToken();
     const userId = getUserIdFromToken(token);
 
     useEffect(() => {
         if (userId) {
+            const fetchWorkerID = async () => {
+                try {
+                    const worid = await getWorkerID(userId);
+                    setWorkerID(worid)
+                } catch (error) {
+                    console.error("Error al obtener el workerID", error)
+                }
+            };
+
             loadCitas();
+            fetchWorkerID();
         }
         initializeWeek();
-    }, []);
+    }, [userId, workerId]);
 
     // Inicializar la semana actual
     const initializeWeek = () => {
@@ -70,8 +81,18 @@ const CitasPage = () => {
     const loadCitas = async () => {
         try {
             const data = await citasService.getCitas();
-            const personalCitas = data.filter(cita => cita.worker === null);
-            setCitas(personalCitas);
+
+            let filteredCitas = [];
+
+            if (isAdmin()) {
+                // Si es admin, carga todas las citas (sin importar el worker)
+                filteredCitas = data.filter(cita => cita.worker === null);
+            } else {
+                // Si no es admin, carga solo las citas que el usuario ha creado
+                filteredCitas = data.filter(cita => cita.worker === workerId);
+            }
+
+            setCitas(filteredCitas);
         } catch (error) {
             console.error('Error al cargar las citas:', error);
         }

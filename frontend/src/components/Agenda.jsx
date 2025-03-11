@@ -1,5 +1,6 @@
 import React from 'react';
 import CustomModal from './Modal';
+import Boton from './Boton';
 import '../styles/agenda.css';
 
 const Agenda = ({
@@ -109,8 +110,8 @@ const Agenda = ({
         <div className="agenda-container">
           <h1>Agenda de Citas</h1>
           <div className="agenda-controls">
-            <button onClick={() => changeWeek(-1)}>Semana Anterior</button>
-            <button onClick={() => changeWeek(1)}>Semana Siguiente</button>
+            <Boton onClick={() => changeWeek(-1)} texto="Semana Anterior" />
+            <Boton onClick={() => changeWeek(1)} texto="Semana Siguiente" />
           </div>
           <table className="agenda-table">
             <thead>

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  WorkerListCreateView, WorkerDetailView, WorkerAppointmentsView, CreateWorkerAppointmentView, AppointmentDetailView, GetPDFs, UploadPDF
+from .views import  WorkerListCreateView, WorkerDetailView, WorkerAppointmentsView, CreateWorkerAppointmentView, AppointmentDetailView, GetPDFs, UploadPDF, DeletePDF, WorkerIdFromUserId
 from . import views
 
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:pk>/upload-pdf/', UploadPDF.as_view(), name='upload-pdf'),
     path('<int:pk>/get-pdfs/', GetPDFs.as_view(), name='get-pdfs'),
     path('get-worker-id/<int:user_id>/', views.get_worker_by_user, name='get_worker_by_user'),
+    path('delete/<int:pdf_id>/', DeletePDF.as_view(), name='delete-pdf'),
+    path('worker-id/<int:user_id>/', WorkerIdFromUserId.as_view(), name='worker-id-from-user-id'),
 ]
