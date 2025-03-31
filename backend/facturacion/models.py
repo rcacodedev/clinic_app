@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from citas.models import Citas
 
 def get_default_user():
-    default_user = User.objects.filter(user__is_superuser=True).first() or User.objects.first()
+    default_user = User.objects.filter(is_superuser=True).first() or User.objects.first()
     return default_user.id if default_user else None
 
 class Factura(models.Model):
