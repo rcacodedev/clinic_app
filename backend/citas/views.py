@@ -55,8 +55,8 @@ class CitasListCreateAPIView(ListCreateAPIView):
             # Filtrar por fecha
             queryset = queryset.filter(fecha__range=[start_date, end_date])
 
-        return queryset.filter(Q(worker__user=user) | Q(user=user))
-#
+        return queryset.distinct().filter(Q(worker__user=user) | Q(user=user))
+
     def perform_create(self, serializer):
         """Guardar citas asociadas al usuario actual."""
         user = self.request.user
