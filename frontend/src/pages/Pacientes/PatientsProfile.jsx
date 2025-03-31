@@ -6,6 +6,8 @@ import Boton from "../../components/Boton";
 import PatientAppointments from "../../components/pacientes/CitasPacientes";
 import Notification from "../../components/Notification";
 import UploadPDF from "../../components/pacientes/uploadPDF";
+import PatientDocuments from "../../components/pacientes/patientsDocument";
+import ListFacturasPatients from "../../components/facturacion/ListFacturasPacientes";
 import "../../styles/pacientes/patientsProfile.css";
 
 function PatientProfile() {
@@ -190,6 +192,7 @@ function PatientProfile() {
       </CustomModal>
       <div className="proteccion-datos">
         <UploadPDF patientId={id} />
+        <PatientDocuments patientId={id} />
       </div>
 
 
@@ -200,6 +203,7 @@ function PatientProfile() {
         isVisible={isNotificationVisible}
         onClose={() => setIsNotificationVisible(false)}
       />
+      <ListFacturasPatients patientId={id} />
     </div>
   );
 }

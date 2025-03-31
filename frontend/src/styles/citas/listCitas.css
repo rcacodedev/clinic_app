@@ -93,3 +93,26 @@ td[colspan="5"] {
     cursor: not-allowed;
 }
 
+/* Estilo para los botones */
+.toggle-btn {
+    padding: 8px 16px;
+    border: none;
+    background-color: #d3d3d3;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-btn.active {
+    background-color: #4CAF50;  /* Cambia el color cuando está activado */
+    color: white;
+}
+
+.toggle-btn.inactive {
+    background-color: red;
+}
+
+.toggle-btn:hover {
+    background-color: #bbb;  /* Color cuando pasa el mouse */
+}

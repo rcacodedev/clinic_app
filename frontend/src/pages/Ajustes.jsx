@@ -29,17 +29,17 @@ const Ajustes = () => {
   const [isEditing, setIsEditing] = useState(false); // Estado para controlar si estamos en modo edición
   const [newPhoto, setNewPhoto] = useState(null); // Estado para manejar la nueva foto seleccionada
 
+  const loadUserInfo = async () => {
+    try {
+      const data = await fetchUserInfo();
+      setUserInfo(data); // Carga los datos en el estado
+    } catch (err) {
+      console.error("Error al cargar userInfo:", err);
+    }
+  };
+
   // Cargar los datos de userInfo al montar el componente
   useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const data = await fetchUserInfo();
-        setUserInfo(data); // Carga los datos en el estado
-      } catch (err) {
-        console.error("Error al cargar userInfo:", err);
-      }
-    };
-
     loadUserInfo();
   }, []);
 
@@ -118,6 +118,7 @@ const Ajustes = () => {
         photo: response.photo, // Suponiendo que la respuesta contiene la URL de la foto actualizada
       }));
       setNewPhoto(null); // Limpiar el estado de la foto seleccionada
+      loadUserInfo();
     } catch (err) {
       setError("Error al subir la foto.");
       console.error(err);

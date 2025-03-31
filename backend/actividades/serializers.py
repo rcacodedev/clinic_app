@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)  # Usuario que crea la actividad
     patients = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), many=True)
-    monitor = serializers.PrimaryKeyRelatedField(queryset=Worker.objects.all(), required=False)
+    monitor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)
 
     # Campos adicionales que ahora vas a incluir
     recurrence_days = serializers.ListField(
@@ -53,7 +53,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 
 class CreateActivitySerializer(serializers.ModelSerializer):
-    monitor = serializers.PrimaryKeyRelatedField(queryset=Worker.objects.all())
+    monitor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Activity

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import '../../styles/actividades/listaActividades.css';
 
 const ActivityList = ({ activities }) => { // Recibe activities como prop
-    console.log(activities)
     return (
         <div className="actividades-lista">
             {activities.length === 0 ? (

@@ -18,10 +18,11 @@ function PatientList({ onEditSuccess }) {
   });
   const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
-
   const firstInputRef = useRef(null);
 
   const navigate = useNavigate(); // Hook de navegación
+
+
 
   // Función para obtener pacientes de la API
   const fetchPatients = async (page, searchTerm) => {
@@ -118,6 +119,7 @@ const handleAddPathology = () => {
   const goToPatientProfile = (patientId) => {
     navigate(`/api/pacientes/${patientId}`);  // Navega a la ruta del perfil del paciente
   };
+
 
   return (
     <div className="patient-list-container">
@@ -326,6 +328,7 @@ const handleAddPathology = () => {
         message="Paciente añadido correctamente."
         isVisible={isNotificationVisible}
         onClose={() => setIsNotificationVisible(false)}
+        type="success"
       />
     </div>
   );

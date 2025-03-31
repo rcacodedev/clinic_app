@@ -1,5 +1,6 @@
 import api from "./api";
 import { handleApiError } from "../utils/error_log";
+import { getAuthHeaders } from "../utils/auth";
 
 const API_URL = '/api/pacientes/';
 
@@ -83,6 +84,41 @@ const uploadSignedPDFs = async (id, pdfFiles) => {
     handleApiError(error, 'Subir los PDFs firmados');
   }
 };
+
+// Obtener documentos del paciente
+export const fetchDocuments = async (patientId) => {
+  try {
+    const response = await api.get(`${API_URL}documents/?patient_id=${patientId}`, getAuthHeaders())
+    return response.data.results || response.data;
+  } catch (error) {
+    handleApiError(error, 'Error al obtener documentos del paciente')
+    return [];
+  }
+};
+
+// Subir documentos al paciente
+export const uploadDocuments = async (patientId, file) => {
+  const formData = new FormData();
+  formData.append('patient', patientId);
+  formData.append('file', file);
+
+  try {
+    const response = await api.post(`${API_URL}documents/`, formData, getAuthHeaders())
+    return response.data
+  } catch (error) {
+    handleApiError(error, 'Error al subir archivos al paciente')
+  }
+};
+
+// Eliminar un documento
+export const deleteDocument = async (documentId) => {
+  try {
+    await api.delete(`${API_URL}delete-document/${documentId}/`, getAuthHeaders())
+    return {success: true}
+  } catch (error) {
+    handleApiError(error, 'Error al eliminar el documento.')
+  }
+}
 
 export default {
   getPatients,

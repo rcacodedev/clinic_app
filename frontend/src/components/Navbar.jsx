@@ -9,7 +9,7 @@ import workersIcon from "../assets/workers.svg";
 import actividadesIcon from "../assets/actividades.svg";
 import logoutIcon from "../assets/salir.svg";
 import ajusteIcon from "../assets/ajuste.svg";
-import finanzasIcon from "../assets/coin.svg";
+import facturasIcon from "../assets/facturacion.svg";
 import formacionIcon from "../assets/formacion.svg";
 import documentacionIcon from "../assets/documentacion.svg";
 
@@ -96,9 +96,9 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="navbar-button">
-            <Link to="api/finanzas">
+            <Link to="api/facturacion">
               <div className="navbar-content">
-                <img src={finanzasIcon} alt="Facturación" className="navbar-icon" />
+                <img src={facturasIcon} alt="Facturación" className="navbar-icon" />
                 <span className="navbar-text">Facturación</span>
               </div>
             </Link>

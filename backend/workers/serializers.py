@@ -61,7 +61,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Citas
-        fields = ['id', 'worker', 'patient', 'fecha', 'comenzar', 'finalizar', 'descripcion']
+        fields = ['id', 'worker', 'patient', 'fecha', 'comenzar', 'finalizar', 'descripcion', 'cotizada']
 
     def create(self, validated_data):
         # Extraer los datos de la cita validados

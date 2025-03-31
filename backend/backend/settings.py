@@ -72,10 +72,11 @@ INSTALLED_APPS = [
     'workers',
     'actividades',
     'userinfo',
-    'finanzas',
     'cloudinary',
     'cloudinary_storage',
     'formacion',
+    'notes',
+    'facturacion',
 ]
 
 MIDDLEWARE = [
@@ -153,31 +154,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-# STATICFILES_DIRS = [
-#     BASE_DIR / "frontend" / "dist",  # Asegúrate de que esta ruta sea correcta
-# ]
-
-# cloudinary.config(
-    # cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME", ""),
-    # api_key=os.getenv("CLOUDINARY_API_KEY", ""),
-    # api_secret=os.getenv("CLOUDINARY_API_SECRET", ""),
-# )
-#
-# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")  # Tu nombre de bucket
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-# MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
-
-MEDIA_URL = "/media/"
+MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type

@@ -6,13 +6,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from .models import Patient
-from .serializers import PatientSerializer
-from cloudinary.uploader import upload
-from cloudinary.utils import cloudinary_url
-from django.conf import settings
-import os
-
+from .models import Patient, PatientDocument
+from .serializers import PatientSerializer, PatientDocumentSerializer
 
 # Listar y Crear Pacientes
 class PatientListCreateView(generics.ListCreateAPIView):
@@ -108,3 +103,36 @@ class UploadSignedPDFView(APIView):
             "message": "PDF(s) guardado(s) correctamente",
             "pdf_urls": saved_files
         })
+
+# Subir documentos al paciente y listar
+class PatientDocumentListCreateView(generics.ListCreateAPIView):
+    queryset = PatientDocument.objects.all()
+    serializer_class = PatientDocumentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Filtra los documentos por paciente si se proporciona id"""
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            return PatientDocument.objects.filter(patient_id=patient_id)
+        return PatientDocument.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+# Eliminar documento del paciente
+class PatientDocumentDeleteView(generics.DestroyAPIView):
+    queryset = PatientDocument.objects.all()
+    serializer_class = PatientDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk, *args, **kwargs):
+        document = get_object_or_404(PatientDocument, pk=pk)
+
+        if document.file:
+            document.file.delete(save=False)
+
+        document.delete()
+        return Response({"message": "Documento eliminado correctamente"}, status=status.HTTP_204_NO_CONTENT)

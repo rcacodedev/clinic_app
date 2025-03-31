@@ -13,7 +13,8 @@ const initialFormacionData = {
     profesional: '',
     lugar: '',
     tematica: '',
-    fecha: '',
+    fecha_inicio: '',
+    fecha_fin: '',
     hora: '',
 }
 
@@ -103,8 +104,12 @@ const Formacion = () => {
                         <input type="text" name="tematica" value={newFormacion.tematica} onChange={handleChange}/>
                     </label>
                     <label>
-                        Fecha:
-                        <input type="date" name="fecha" value={newFormacion.fecha} onChange={handleChange}/>
+                        Fecha de inicio:
+                        <input type="date" name="fecha_inicio" value={newFormacion.fecha_inicio} onChange={handleChange}/>
+                    </label>
+                    <label>
+                        Fecha de finalización:
+                        <input type="date" name="fecha_fin" value={newFormacion.fecha_fin} onChange={handleChange}/>
                     </label>
                     <label>
                         Hora:
@@ -116,6 +121,7 @@ const Formacion = () => {
                 message="Formación creada correctamente"
                 isVisible={notificationVisibleCrear}
                 onClose={() => setNotificationVisibleCrear(false)}
+                type="success"
             />
             <div className="container-agenda">
                 <h1 className="title-agenda-formacion">Agenda de Formación</h1>

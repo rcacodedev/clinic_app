@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/actividades/', include('actividades.urls')),
     path('api/', include('api.urls')),
     path('api/userInfo/', include('userinfo.urls')),
-    path('api/finanzas/', include('finanzas.urls')),
     path('api/formacion/', include('formacion.urls')),
+    path('api/notas/', include('notes.urls')),
+    path('api/facturas/', include('facturacion.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

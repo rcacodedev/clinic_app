@@ -1,45 +1,53 @@
 .notification-container {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #28a745;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
-    z-index: 999;
-    animation: slideUp 0.5s ease-out;
-  }
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  z-index: 999;
+  animation: slideUp 0.5s ease-out;
+}
 
-  .notification-message {
-    flex: 1;
-    padding-right: 15px;
-  }
+.notification-message {
+  flex: 1;
+  padding-right: 15px;
+}
 
-  .notification-close {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    padding: 5px;
-    font-weight: bold;
-  }
+.notification-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  font-weight: bold;
+}
 
-  .notification-close:hover {
-    color: #ffcccc;
-  }
+.notification-close:hover {
+  color: #ffcccc;
+}
 
-  @keyframes slideUp {
-    0% {
-      transform: translateY(100%);
-    }
-    100% {
-      transform: translateY(0);
-    }
+.notification-container.success {
+  background-color: #28a745; /* Verde para éxito */
+}
+
+.notification-container.error {
+  background-color: #dc3545; /* Rojo para error */
+  color: whitesmoke;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
   }
+  100% {
+    transform: translateY(0);
+  }
+}

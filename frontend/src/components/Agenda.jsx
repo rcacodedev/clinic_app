@@ -29,6 +29,12 @@ const Agenda = ({
         setCurrentWeek(newWeek);
     };
 
+    const changeMonth = (direction) => {
+      const newStartDate = new Date(currentWeek[0]);
+      newStartDate.setMonth(newStartDate.getMonth() + direction);
+      setCurrentWeek(generateWeek(newStartDate));
+  };
+
     // Función para obtener el índice de fila en función del tiempo.
     // Asumimos que la agenda inicia a las 8:00 y cada fila representa 15 minutos.
     const getRowIndex = (timeStr) => {
@@ -96,7 +102,7 @@ const Agenda = ({
     const today = new Date().toDateString();
     const currentMonth =
         currentWeek && currentWeek.length > 0
-            ? currentWeek[0].toLocaleDateString('es-ES', { month: 'long' })
+            ? currentWeek[0].toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()
             : 'Mes desconocido';
 
     // Matriz para marcar las celdas ocupadas (por columna/día y fila/intervalo)
@@ -109,6 +115,11 @@ const Agenda = ({
     return (
         <div className="agenda-container">
           <h1>Agenda de Citas</h1>
+          <div className="agenda-controls">
+                <Boton onClick={() => changeMonth(-1)} texto="Mes Anterior" />
+                <h2>{currentMonth}</h2>
+                <Boton onClick={() => changeMonth(1)} texto="Mes Siguiente" />
+          </div>
           <div className="agenda-controls">
             <Boton onClick={() => changeWeek(-1)} texto="Semana Anterior" />
             <Boton onClick={() => changeWeek(1)} texto="Semana Siguiente" />

@@ -17,14 +17,5 @@ class Citas(models.Model):
     bizum = models.BooleanField(default=False)
     pagado = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        # Si el precio no se especifica, usa el precio base de ConfiguracionFinanzas
-        from finanzas.models import ConfiguracionFinanzas
-        if self.precio is None or self.precio == 0:
-            configuracion = ConfiguracionFinanzas.objects.first()
-            if configuracion:
-                self.precio = configuracion.precio_cita_base
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"Cita de {self.patient.nombre} {self.patient.primer_apellido} el {self.fecha} a las {self.comenzar}"

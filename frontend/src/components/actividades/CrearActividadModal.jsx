@@ -111,6 +111,7 @@ const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
                 ...activityData,
                 start_date: formattedStartDate,  // Enviar la fecha en formato ISO
             };
+            console.log("Datos enviados", dataToSend)
             await onCreate(dataToSend);
             onClose();
         } catch (error) {

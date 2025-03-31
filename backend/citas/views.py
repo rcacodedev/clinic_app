@@ -2,11 +2,13 @@ import requests
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.conf import settings
+from django.db.models import Q
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Citas
+from workers.models import Worker
 from .serializers import CitasSerializer
 from userinfo.models import UserInfo
 
@@ -21,8 +23,15 @@ class CitasListCreateAPIView(ListCreateAPIView):
         user = self.request.user
         queryset = Citas.objects.select_related('patient', 'worker', 'user')
 
+        # Filtrar según el tipo de usuario
+        if user.groups.filter(name='worker').exists():
+            queryset = queryset.filter(worker__user=user)  # Buscar solo las citas asignadas al worker
+        else:
+            queryset = queryset.filter(Q(user=user) | Q(worker__user=user))  # Admin ve sus citas y las de los trabajadores
+
         # Obtener el tipo de filtro desde los parámetros de la URL
-        filter_type = self.request.query_params.get('filter_type', 'hoy')
+        filter_type = self.request.query_params.get('filter_type')
+        today = datetime.today()
 
         if filter_type != 'todos':
             today = datetime.today()
@@ -46,13 +55,22 @@ class CitasListCreateAPIView(ListCreateAPIView):
             # Filtrar por fecha
             queryset = queryset.filter(fecha__range=[start_date, end_date])
 
-        if user.is_staff:
-            return queryset.filter(worker__user=user)
-        return queryset.filter(worker__user=user) | queryset.filter(user=user)
-
+        return queryset.filter(Q(worker__user=user) | Q(user=user))
+#
     def perform_create(self, serializer):
         """Guardar citas asociadas al usuario actual."""
-        serializer.save(user=self.request.user)
+        user = self.request.user
+
+        # Asegurarse de que el worker es el mismo que el usuario
+        if user.is_authenticated:
+            # Obtener el objeto Worker relacionado con el usuario
+            try:
+                worker = Worker.objects.get(user=user)
+            except Worker.DoesNotExist:
+                worker = None  # Si el usuario no es un trabajador, no asignar un worker
+
+            # Si el worker es un trabajador, asignar ese worker a la cita
+            serializer.save(user=user, worker=worker)
 
 class CitasDetailAPIView(RetrieveUpdateDestroyAPIView):
     """Vista para obtener, actualizar o eliminar una cita."""

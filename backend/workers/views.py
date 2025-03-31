@@ -5,6 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db import IntegrityError
+from django.contrib.auth.models import Group
 from .models import Worker, PDFRegistro
 from .serializers import WorkerSerializer
 from citas.models import Citas  # Importar modelo de citas
@@ -32,7 +33,17 @@ class WorkerListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get_queryset(self):
-        return Worker.objects.filter(created_by=self.request.user)
+        user = self.request.user
+
+        # Obtener los grupos del usuario
+        user_groups = user.groups.values_list("name", flat=True)
+
+        #Verificar si pertenece a "Admin + Fisioterapia" o "Admin + Psicología"
+        if "Admin" in user_groups and ("Fisioterapia" in user_groups or "Psicología" in user_groups):
+            return Worker.objects.all()
+
+        # Si no pertenece a esos grupos, solo ve los trabajadores creados por el user
+        return Worker.objects.filter(created_by=user)
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -79,7 +90,6 @@ class WorkerDetailView(RetrieveUpdateDestroyAPIView):
 
         instance.delete()
 
-
 # Vista para listar citas de un trabajador
 class WorkerAppointmentsView(ListAPIView):
     serializer_class = CitasSerializer
@@ -87,11 +97,10 @@ class WorkerAppointmentsView(ListAPIView):
 
     def get_queryset(self):
         worker_id = self.kwargs.get('pk')
-        worker = Worker.objects.filter(id=worker_id, created_by=self.request.user).first()
+        worker = Worker.objects.filter(id=worker_id).first()
         if not worker:
             raise PermissionDenied("No tienes permiso para ver las citas de este trabajador.")
         return Citas.objects.filter(worker=worker)
-
 
 # Vista para crear una cita para un trabajador
 class CreateWorkerAppointmentView(CreateAPIView):
@@ -105,7 +114,7 @@ class CreateWorkerAppointmentView(CreateAPIView):
         if worker.created_by != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("No tienes permiso para agregar citas a este trabajador.")
 
-        serializer.save(worker=worker)
+        serializer.save(worker=worker, user=self.request.user)
 
 # Vista para editar una cita (permitir a admin editar cualquier cita)
 class AppointmentDetailView(RetrieveUpdateDestroyAPIView):

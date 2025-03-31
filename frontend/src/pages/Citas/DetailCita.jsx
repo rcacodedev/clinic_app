@@ -1,59 +1,134 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import citasService from "../../services/citasService";
+import { createFactura } from "../../services/facturaService";
+import Notification from '../../components/Notification'
 import "../../styles/citas/citasDetail.css";
 
 function DetailCita() {
     const { id } = useParams();
     const [cita, setCita] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [precioEditable, setPrecioEditable] = useState(false);
+    const [nuevoPrecio, setNuevoPrecio] = useState("");
+    const [notificacionFactura, setNotificacionFactura] = useState(false);
 
-    useEffect(() => {
-        const fetchCita = async () => {
-            try {
-                const data = await citasService.getCitaDetail(id);
-                setCita(data);
-            } catch (error) {
-                console.error('Error al obtener los datos de la cita', error)
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCita();
-    }, [id]);
-
-    // Función para cambiar el valor booleano y actualizar en el backend
-    const toggleBoolean = async (field) => {
-        const newValue = !cita[field]; // Invertir el valor actual
-
-        // Actualizar el estado local primero
-        setCita((prevCita) => ({
-            ...prevCita,
-            [field]: newValue,
-        }));
-
+    const fetchCita = async () => {
         try {
-            // Llamar a la API para actualizar en el backend
-            await citasService.updateCita(id, { [field]: newValue });
-            console.log(`Campo ${field} actualizado en el backend.`);
+            const data = await citasService.getCitaDetail(id);
+            if (data) {
+                setCita(data);
+                setNuevoPrecio(data.precio);
+            } else {
+                console.error("No se encontraron datos para la cita");
+                setCita({});
+            }
         } catch (error) {
-            console.error(`Error al actualizar ${field}:`, error);
-
-            // Si falla, revertir el cambio en el estado local
-            setCita((prevCita) => ({
-                ...prevCita,
-                [field]: !newValue, // Deshacer la actualización en el frontend
-            }));
+            console.error('Error al obtener los datos de la cita', error);
+            setCita({});
+        } finally {
+            setLoading(false);
         }
     };
 
+    useEffect(() => {
+        fetchCita();
+    }, [id]);
+
+    // Verifica que `cita` esté disponible antes de usarla
+    const isCitaValid = cita && typeof cita === "object" && Object.keys(cita).length > 0;
+
+    const toggleBoolean = async (field) => {
+        if (!isCitaValid) return; // Verificar si cita es válida
+
+        const newValue = !cita[field]; // Invertir el valor actual
+
+        // Si el campo es "cotizada" y el nuevo valor es true, actualizar primero y luego crear la factura
+        if (field === "cotizada" && newValue === true) {
+            // Actualizar el campo 'cotizada' primero en el backend
+            try {
+                await citasService.updateCita(id, { [field]: newValue });
+
+                // Crear la factura después de que el campo 'cotizada' se haya actualizado
+                const facturaData = {
+                    created_at: new Date().toISOString().split('T')[0], // Fecha actual
+                    total: cita.precio, // Total de la cita
+                    cita: cita.id, // ID de la cita
+                    paciente: cita.patient, // ID del paciente
+                };
+
+                try {
+                    await createFactura(facturaData); // Crear la factura
+                    setNotificacionFactura(true)
+                    fetchCita();
+                } catch (error) {
+                    console.error("Error al crear la factura:", error.response || error.message);
+                    // Revertir el cambio en caso de error al crear la factura
+                    setCita((prevCita) => ({
+                        ...prevCita,
+                        [field]: !newValue, // Deshacer la actualización de cotizada
+                    }));
+                }
+
+            } catch (error) {
+                console.error(`Error al actualizar ${field}:`, error.response || error.message);
+                // Si falla la actualización, revertir el cambio en el estado local
+                setCita((prevCita) => ({
+                    ...prevCita,
+                    [field]: !newValue, // Deshacer la actualización en el frontend
+                }));
+            }
+        } else {
+            // Para otros campos booleanos, simplemente actualizamos en el backend
+            try {
+                setCita((prevCita) => ({
+                    ...prevCita,
+                    [field]: newValue,
+                }));
+
+                // Llamar a la API para actualizar el campo en el backend
+                await citasService.updateCita(id, { [field]: newValue });
+            } catch (error) {
+                console.error(`Error al actualizar ${field}:`, error.response || error.message);
+                // Si falla, revertir el cambio en el estado local
+                setCita((prevCita) => ({
+                    ...prevCita,
+                    [field]: !newValue, // Deshacer la actualización en el frontend
+                }));
+            }
+        }
+    };
+
+    // Función para manejar el cambio del precio
+    const handlePrecioChange = (e) => {
+        setNuevoPrecio(e.target.value);
+    };
+
+    // Función para guardar el nuevo precio
+    const handleSavePrecio = async () => {
+        if (!isCitaValid) return; // Verificar si cita es válida
+        try {
+            // Actualizar el estado local
+            setCita((prevCita) => ({
+                ...prevCita,
+                precio: nuevoPrecio,
+            }));
+
+            // Llamar a la API para actualizar en el backend
+            await citasService.updateCita(id, { precio: nuevoPrecio });
+            setPrecioEditable(false); // Deshabilitar el campo de edición
+        } catch (error) {
+            console.error("Error al actualizar el precio:", error);
+            alert("Error al actualizar el precio.");
+        }
+    };
 
     if (loading) return <p>Cargando...</p>;
 
     return (
         <div className="container-detail-cita">
             <h1 className="title-detail-cita">Detalle de la Cita</h1>
-            {cita ? (
+            {isCitaValid ? (
                 <div className="cita-info">
                     <div className="cita-field">
                         <strong>Paciente:</strong>
@@ -62,7 +137,28 @@ function DetailCita() {
                     <div className="cita-field"><strong>Fecha:</strong><span>{cita.fecha}</span></div>
                     <div className="cita-field"><strong>Hora de comienzo:</strong><span>{cita.comenzar}</span></div>
                     <div className="cita-field"><strong>Hora de finalizar:</strong><span>{cita.finalizar}</span></div>
-                    <div className="cita-field"><strong>Precio:</strong><span>{cita.precio}</span></div>
+
+                    {/* Campo editable de precio */}
+                    <div className="cita-field">
+                        <strong>Precio:</strong>
+                        {precioEditable ? (
+                            <div>
+                                <input
+                                    type="number"
+                                    value={nuevoPrecio}
+                                    onChange={handlePrecioChange}
+                                    step="0.01"
+                                />
+                                <button onClick={handleSavePrecio}>Guardar</button>
+                                <button onClick={() => setPrecioEditable(false)}>Cancelar</button>
+                            </div>
+                        ) : (
+                            <div>
+                                <span>{cita.precio}</span>
+                                <button onClick={() => setPrecioEditable(true)}>Editar</button>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Botones de Sí/No para booleanos */}
                     {["pagado", "bizum", "cotizada", "efectivo"].map((field) => (
@@ -86,9 +182,16 @@ function DetailCita() {
                     ))}
                 </div>
             ) : (
-                <p>No se encontró la cita.</p>
+                <p>No se encontró la cita o los datos están incompletos.</p>
             )}
+            <Notification
+                message="Factura creada correctamente"
+                type="success"
+                onClose={() => setNotificacionFactura(false)}
+                isVisible={notificacionFactura}
+                />
         </div>
+
     );
 }
 

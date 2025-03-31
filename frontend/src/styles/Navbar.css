@@ -11,9 +11,10 @@
   background-color: var(--container-color);
   color: var(--container-color);
   font-family: var(--font-family-header);
-  height: 100vh;
+  height: auto;
   box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  overflow-y: auto;
 }
 
 /* Contenedor de los botones */
@@ -23,6 +24,8 @@
   justify-content: space-between;
   height: 100%; /* Permite que los elementos ocupen toda la altura */
   width: 100%;
+  overflow-y: auto;
+  max-height: 100vh; /* Limita la altura a la ventana */
 }
 
 /* Botones principales */
@@ -70,4 +73,17 @@
   font-size: 14px;
   font-weight: bold;
   color: var(--link-color);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+  }
+  .navbar-button {
+    font-size: 12px;
+  }
+  .navbar-icon {
+    width: 24px;
+    height: 24px;
+  }
 }

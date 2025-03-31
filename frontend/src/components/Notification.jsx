@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Componentes/Notification.css'; // Importar el CSS de estilo
 
-const Notification = ({ message, isVisible, onClose }) => {
+const Notification = ({ message, isVisible, onClose, type }) => {
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
@@ -13,7 +13,7 @@ const Notification = ({ message, isVisible, onClose }) => {
 
   return (
     isVisible && (
-      <div className="notification-container">
+      <div className={`notification-container ${type}`}>
         <div className="notification-message">
           {message}
         </div>

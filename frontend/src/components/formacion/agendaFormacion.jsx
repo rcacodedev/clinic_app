@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { updateFormacion, deleteFormacion } from "../../services/formacionService";
 import Boton from "../Boton";
 import CustomModal from "../Modal";
+import Notification from "../Notification";
 import '../../styles/formacion/agendaFormacion.css'
 
 const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
@@ -21,11 +22,12 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
         profesional: '',
         lugar: '',
         tematica: '',
-        fecha: '',
+        fecha_inicio: '',
+        fecha_fin: '',
         hora: '',
     });
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-
+    const [notificationVisibleEliminar, setNotificationVisibleEliminar] = useState(false)
 
     // Obtener los dias del mes alineados con los dias de la semana
     const generateCalendarDays = (month, year) => {
@@ -51,6 +53,20 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
         return days;
     };
 
+    const getDaysInRange = (startDate, endDate) => {
+        const days = [];
+        let currentDate = new Date(startDate);
+
+        // Iterar desde la fecha de inicio hasta la fecha de finalización
+        while (currentDate <= endDate) {
+            days.push(new Date(currentDate)); // Añadir el día actual
+            currentDate.setDate(currentDate.getDate() + 1); // Avanzar un día
+        }
+
+        return days;
+    };
+
+
     // Funcion para asociar las formaciones a los días correspondientes
     const associteFormacionestoDays = () => {
         const updateDays = generateCalendarDays(month, year).map(dayObj => {
@@ -61,7 +77,15 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
 
             // Asegurar que la fecha de la formación se compara correctamente
             const formacionesDia = Array.isArray(formaciones)
-                ? formaciones.filter(f => new Date(f.fecha + "T00:00:00").toISOString().split('T')[0] === formattedDate)
+                ? formaciones.filter(f => {
+                    const startDate = new Date(f.fecha_inicio + "T00:00:00");
+                    const endDate = new Date(f.fecha_fin + "T23:59:59");
+
+                    // Obtener los días entre la fecha de inicio y la de finalización
+                    const formacionDays = getDaysInRange(startDate, endDate);
+                    // Verificar si la fecha del día actual está en el rango de la formación
+                    return formacionDays.some(day => day.toISOString().split('T')[0] === formattedDate);
+                })
                 : [];
 
             return { ...dayObj, formaciones: formacionesDia };
@@ -69,6 +93,7 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
 
         setDays(updateDays);
     };
+
 
     // Asignar las formaciones cuando cambian los datos o la fecha
     useEffect(() => {
@@ -83,7 +108,8 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
             profesional: formacion.profesional,
             lugar: formacion.lugar,
             tematica: formacion.tematica,
-            fecha: formacion.fecha,
+            fecha_inicio: formacion.fecha_inicio,
+            fecha_fin: formacion.fecha_fin,
             hora: formacion.hora,
         });
         setModalOpen(true);
@@ -114,6 +140,7 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
         fetchFormaciones();
         setConfirmDeleteOpen(false);
         setModalOpen(false);
+        setNotificationVisibleEliminar(true);
     }
 
     return (
@@ -176,8 +203,10 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
                         <input type="text" value={formacionData.lugar} onChange={(e) => setFormacionData({...formacionData, lugar: e.target.value})} />
                         <label>Temática:</label>
                         <input type="text" value={formacionData.tematica} onChange={(e) => setFormacionData({...formacionData, tematica: e.target.value})} />
-                        <label>Fecha:</label>
-                        <input type="date" value={formacionData.fecha} onChange={(e) => setFormacionData({...formacionData, fecha: e.target.value})} />
+                        <label>Fecha de Inicio:</label>
+                        <input type="date" value={formacionData.fecha_inicio} onChange={(e) => setFormacionData({...formacionData, fecha_inicio: e.target.value})} />
+                        <label>Fecha de Finalización:</label>
+                        <input type="date" value={formacionData.fecha_fin} onChange={(e) => setFormacionData({...formacionData, fecha_fin: e.target.value})} />
                         <label>Hora:</label>
                         <input type="time" value={formacionData.hora} onChange={(e) => setFormacionData({...formacionData, hora: e.target.value})} />
                     </div>
@@ -196,6 +225,12 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
                         <p>¿Estás seguro de que quieres eliminar esta formación? Esta acción no se puede deshacer.</p>
                     </CustomModal>
             )}
+            <Notification
+                message="Formación eliminada correctamente."
+                isVisible={notificationVisibleEliminar}
+                onClose={() => setNotificationVisibleEliminar(false)}
+                type="error"
+                />
         </div>
     );
 };

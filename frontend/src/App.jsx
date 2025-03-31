@@ -12,9 +12,9 @@ import WorkersProfile from "./pages/Workers/WorkersProfile"
 import Actividades from "./pages/Actividades/Actividades"
 import ActividadesProfile from "./pages/Actividades/ActividadesProfile"
 import Ajustes from "./pages/Ajustes"
-import FinanzasPage from "./pages/Finanzas"
 import Formacion from "./pages/Formacion/Formacion"
 import FormacionDetail from "./pages/Formacion/FormacionDetail"
+import FacturasPage from "./pages/Facturas/Facturacion"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
 import Documentacion from "./pages/Documentacion"
@@ -97,15 +97,15 @@ function App() {
           </ProtectedRoute>
         }
         />
-        <Route path="api/ajustes" element={
+        <Route path="api/facturacion/" element={
           <ProtectedRoute>
-            <Ajustes />
+            <FacturasPage />
           </ProtectedRoute>
         }
         />
-        <Route path="api/finanzas" element={
+        <Route path="api/ajustes" element={
           <ProtectedRoute>
-            <FinanzasPage/>
+            <Ajustes />
           </ProtectedRoute>
         }
         />

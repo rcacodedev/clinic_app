@@ -15,50 +15,49 @@ const WorkerPDFUpload = ({ workerId }) => {
     const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
 
-    // Obtener PDFs al cargar
-    useEffect(() => {
-        const fetchPDFsWorkers = async () => {
-            if (!workerId) return;
-            try {
-                const workerData = await getPDF(workerId, currentPageWorker);
+    const fetchPDFsWorkers = async () => {
+        if (!workerId) return;
+        try {
+            const workerData = await getPDF(workerId, currentPageWorker);
 
-                if (workerData.error === "No hay PDFs disponibles") {
-                    setWorkerPdfs([]);
-                    setTotalPagesWorker(1);
-                    return;
-                }
-                const pdfs = workerData.worker_pdfs?.map(url => ({
-                    url,
-                    date: new Date() // Usa la fecha del backend o la actual si no hay
-                })) || [];
-                setWorkerPdfs(pdfs);
-                setCurrentPageWorker(workerData.current_page || 1);
-                setTotalPagesWorker(workerData.total_pages_worker || 1);
-            } catch (error) {
-                 // 🚨 Aquí evitamos que salga en la consola
-                if (error?.response?.data?.error !== "No hay PDFs disponibles") {
-                    console.error("Error al obtener los PDFs:", error);
-                }
+            if (workerData.error === "No hay PDFs disponibles") {
+                setWorkerPdfs([]);
+                setTotalPagesWorker(1);
+                return;
             }
-        }
-
-        const fetchPDFsAdmins = async () => {
-            if (!workerId) return;
-            try {
-                const adminData = await getPDF(workerId, currentPageAdmin);
-                const pdfs = adminData.admin_pdfs?.map((url, index) => ({
-                    id: index +1,
-                    url: url,
-                    date: new Date()
-                })) || [];
-                setAdminPdfs(pdfs);
-                setCurrentPageAdmin(adminData.current_page || 1);
-                setTotalPagesAdmin(adminData.total_pages_admin || 1);
-            } catch (error) {
+            const pdfs = workerData.worker_pdfs?.map(url => ({
+                url,
+                date: new Date() // Usa la fecha del backend o la actual si no hay
+            })) || [];
+            setWorkerPdfs(pdfs);
+            setCurrentPageWorker(workerData.current_page || 1);
+            setTotalPagesWorker(workerData.total_pages_worker || 1);
+        } catch (error) {
+             // 🚨 Aquí evitamos que salga en la consola
+            if (error?.response?.data?.error !== "No hay PDFs disponibles") {
                 console.error("Error al obtener los PDFs:", error);
             }
-        };
+        }
+    }
 
+    const fetchPDFsAdmins = async () => {
+        if (!workerId) return;
+        try {
+            const adminData = await getPDF(workerId, currentPageAdmin);
+            const pdfs = adminData.admin_pdfs?.map((url, index) => ({
+                id: index +1,
+                url: url,
+                date: new Date()
+            })) || [];
+            setAdminPdfs(pdfs);
+            setCurrentPageAdmin(adminData.current_page || 1);
+            setTotalPagesAdmin(adminData.total_pages_admin || 1);
+        } catch (error) {
+            console.error("Error al obtener los PDFs:", error);
+        }
+    };
+    // Obtener PDFs al cargar
+    useEffect(() => {
         fetchPDFsWorkers();
         fetchPDFsAdmins();
     }, [workerId, currentPageWorker, currentPageAdmin]);
@@ -86,6 +85,8 @@ const WorkerPDFUpload = ({ workerId }) => {
             setWorkerPdfs([...workerPdfs, newPdf]);
             setIsNotificationVisible(true);
             setSelectedFile(null);
+            fetchPDFsWorkers();
+            fetchPDFsAdmins();
         } catch (error) {
             alert("Error al subir el PDF: " + (error?.response?.data?.message || "Error desconocido"));
         }
@@ -98,6 +99,8 @@ const WorkerPDFUpload = ({ workerId }) => {
         try {
             await deletePDF(pdfId)
             setAdminPdfs(prevPdfs => prevPdfs.filter(pdf => pdf.id !== pdfId));
+            fetchPDFsWorkers();
+            fetchPDFsAdmins();
         } catch (error) {
             console.error("Error al eliminar el PDF:", error)
         }

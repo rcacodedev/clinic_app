@@ -1,12 +1,18 @@
 from rest_framework import serializers
-from .models import Patient
+from .models import Patient, PatientDocument
 from citas.serializers import CitasSerializer
+
+class PatientDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientDocument
+        fields = '__all__'
 
 class PatientSerializer(serializers.ModelSerializer):
     citas = CitasSerializer(many=True, read_only=True)
     created_at_formatted = serializers.SerializerMethodField()
     pdf_urls = serializers.SerializerMethodField()  # Nuevo campo
     group_name = serializers.SerializerMethodField()  # Campo para mostrar el nombre del grupo
+    documents = PatientDocumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Patient

@@ -28,39 +28,39 @@ const Documentacion = () => {
         }
     }, [userID]);
 
-    useEffect(() => {
-        const fetchPDFsAdmin = async () => {
-            if (!workerId) return;
-            try {
-                const adminData = await getPDF(workerId, currentPageAdmin);
-                const pdfs = adminData.admin_pdfs?.map(url => ({
-                    url,
-                    date: new Date()
-                })) || [];
-                setAdminPdfs(pdfs);
-                setCurrentPageAdmin(adminData.current_page || 1);
-                setTotalPagesAdmin(adminData.total_pages_admin || 1);
-            } catch (error) {
-                console.error("Error al obtener los Admin PDFs:", error);
-            }
-        };
-        const fetchPDFsWorkers = async () => {
-            if (!workerId) return;
-            try {
-                const workerData = await getPDF(workerId, currentPageWorker);
-                const pdfs = workerData.worker_pdfs?.map((url, index) =>({
-                    id: index + 1,
-                    url: url,
-                    date: new Date()
-                })) || [];
-                setWorkerPdfs(pdfs);
-                setCurrentPageWorker(workerData.current_page || 1);
-                setTotalPagesWorker(workerData.total_pages_worker || 1);
-            } catch (error) {
-                console.error("Error al obtener tus PDFs:", error)
-            }
-        };
+    const fetchPDFsAdmin = async () => {
+        if (!workerId) return;
+        try {
+            const adminData = await getPDF(workerId, currentPageAdmin);
+            const pdfs = adminData.admin_pdfs?.map(url => ({
+                url,
+                date: new Date()
+            })) || [];
+            setAdminPdfs(pdfs);
+            setCurrentPageAdmin(adminData.current_page || 1);
+            setTotalPagesAdmin(adminData.total_pages_admin || 1);
+        } catch (error) {
+            console.error("Error al obtener los Admin PDFs:", error);
+        }
+    };
+    const fetchPDFsWorkers = async () => {
+        if (!workerId) return;
+        try {
+            const workerData = await getPDF(workerId, currentPageWorker);
+            const pdfs = workerData.worker_pdfs?.map((url, index) =>({
+                id: index + 1,
+                url: url,
+                date: new Date()
+            })) || [];
+            setWorkerPdfs(pdfs);
+            setCurrentPageWorker(workerData.current_page || 1);
+            setTotalPagesWorker(workerData.total_pages_worker || 1);
+        } catch (error) {
+            console.error("Error al obtener tus PDFs:", error)
+        }
+    };
 
+    useEffect(() => {
         fetchPDFsAdmin();
         fetchPDFsWorkers();
     }, [workerId, currentPageAdmin, currentPageWorker]);
@@ -86,6 +86,8 @@ const Documentacion = () => {
 
             setAdminPdfs([...adminPdfs, newPdf]);
             setSelectedFile(null);
+            fetchPDFsAdmin();
+            fetchPDFsWorkers();
         } catch (error) {
             alert("Error al subir el PDF: " + (error?.response?.data?.message || "Error desconocido"));
         }
@@ -98,6 +100,8 @@ const Documentacion = () => {
         try {
             await deletePDF(pdfId)
             setWorkerPdfs(prevPdfs => prevPdfs.filter(pdf => pdf.id !== pdfId));
+            fetchPDFsAdmin();
+            fetchPDFsWorkers();
         } catch (error) {
             console.error("Error al eliminar el PDF:", error)
         }
