@@ -1,22 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
 
 :root {
-  --background-color: #F9F7F7;
-  --link-color: #DBE2EF;
-  --link-color-hover: #89abe9;
-  --link-color-visited: #157741;
-  --header-color: #9840bb;
-  --container-color: #4a356d;
-  --font-family-base: "Roboto", serif;
-  --font-family-header: "Montserrat", serif;
-  --input-text-color: #8a1a52;
+  --color-black: #292421;
+  --color-tan: #A75F37;
+  --color-vanilla: #F2E7DD;
+  --color-flora: #A7A155;
+
+  --font-main: "Roboto", sans-serif;
+  --font-title: "Inter", sans-serif;
 }
 
-
-
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-header);
-  color: var(--header-color) !important;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-style: normal;
   margin: 0;
 }
 
@@ -28,3 +26,12 @@ h2 {
   font-size: 2rem;
 }
 
+p {
+  margin: 0;
+}
+
+* {
+  font-family: var(--font-main);
+  font-weight: 200;
+  font-style: normal;
+}

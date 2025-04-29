@@ -11,6 +11,7 @@ from .models import Citas
 from workers.models import Worker
 from .serializers import CitasSerializer
 from userinfo.models import UserInfo
+from twilio.rest import Client
 
 class CitasListCreateAPIView(ListCreateAPIView):
     """Vista para listar y crear citas"""
@@ -87,70 +88,53 @@ class CitasDetailAPIView(RetrieveUpdateDestroyAPIView):
         return queryset.filter(user=user)
 
 class EnviarRecordatorioWhatsAppAPIView(APIView):
-    """Vista para enviar recordatorios de WhatsApp a los pacientes de las citas de mañana"""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
         user_info = UserInfo.objects.filter(user=user).first()
 
-        if not user_info or not user_info.whatsapp_token or not user_info.phone_number_id:
-            return Response({"error": "Faltan credenciales de WhatsApp"}, status=400)
+        if not user_info or not user_info.twilio_account_sid or not user_info.twilio_auth_token or not user_info.twilio_whatsapp_number:
+            return Response({"error": "Faltan credenciales de Twilio"}, status=400)
 
-        # Filtramos citas de mañana
-        tomorrow = timezone.localdate() + timedelta(days=1)
-        print('Fecha mañana', tomorrow)
+        citas_ids = request.data.get("citas_ids")
+        if not citas_ids or not isinstance(citas_ids, list):
+            return Response({"error": "Se requiere una lista de IDs de citas"}, status=400)
 
-        # Ajustamos el rango de búsqueda a todas las citas que ocurren durante todo el día de mañana
-        tomorrow_start = datetime.combine(tomorrow, datetime.min.time())  # Comienza a las 00:00:00
-        tomorrow_end = datetime.combine(tomorrow, datetime.max.time())  # Termina a las 23:59:59
-
-        # Filtramos citas en el rango de tiempo de mañana
-        citas = Citas.objects.filter(fecha__gte=tomorrow_start, fecha__lte=tomorrow_end, worker__user=user)
-        print(f"Citas encontradas: {citas}")
-
+        citas = Citas.objects.filter(id__in=citas_ids, worker__user=user)
         if not citas.exists():
-            return Response({"message": "No hay citas para mañana"}, status=200)
+            return Response({"message": "No hay citas encontradas con esos IDs"}, status=404)
 
-        # Enviar WhatsApp a cada paciente
-        headers = {
-            "Authorization": f"Bearer {user_info.whatsapp_token}",
-            "Content-Type": "application/json"
-        }
-
-        url = f"https://graph.facebook.com/v18.0/{user_info.phone_number_id}/messages"
+        client = Client(user_info.twilio_account_sid, user_info.twilio_auth_token)
         mensajes_enviados = []
 
         for cita in citas:
             paciente = cita.patient
-            if not paciente.phone or paciente.phone == "":
-                continue  # Si el paciente no tiene teléfono, lo saltamos
+            if not paciente.phone:
+                continue
 
-            mensaje = {
-                "messaging_product": "whatsapp",
-                "to": paciente.phone,
-                "type": "template",
-                "template": {
-                    "name": "hello_world",  # Asegúrate de tener esta plantilla aprobada en Meta
-                    "language": {"code": "es"},
-                    "components": [
-                        {
-                            "type": "body",
-                            "parameters": [
-                                {"type": "text", "text": paciente.name},  # Nombre del paciente
-                                {"type": "text", "text": cita.fecha.strftime("%d-%m-%Y")},  # Fecha de la cita
-                                {"type": "text", "text": cita.comenzar.strftime("%H:%M")}  # Hora de la cita
-                            ]
-                        }
-                    ]
-                }
-            }
+            mensaje_texto = (
+                f"Hola {paciente.name}, te recordamos tu cita el {cita.fecha.strftime('%d-%m-%Y')} "
+                f"a las {cita.comenzar.strftime('%H:%M')}."
+            )
 
-            response = requests.post(url, headers=headers, json=mensaje)
-            mensajes_enviados.append({
-                "paciente": paciente.name,
-                "telefono": paciente.phone,
-                "status": response.json()
-            })
+            try:
+                message = client.messages.create(
+                    from_=f"whatsapp:{user_info.twilio_whatsapp_number}",
+                    to=f"whatsapp:{paciente.phone}",
+                    body=mensaje_texto
+                )
+
+                mensajes_enviados.append({
+                    "paciente": paciente.name,
+                    "telefono": paciente.phone,
+                    "status": message.status
+                })
+            except Exception as e:
+                mensajes_enviados.append({
+                    "paciente": paciente.name,
+                    "telefono": paciente.phone,
+                    "error": str(e)
+                })
 
         return Response({"mensajes_enviados": mensajes_enviados}, status=200)

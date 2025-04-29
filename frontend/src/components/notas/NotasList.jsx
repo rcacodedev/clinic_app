@@ -4,6 +4,7 @@ import Boton from '../Boton'
 import CrearNotaModal from "./crearNotaModal";
 import EditarNotaModal from "./editarNotaModal";
 import Notification from "../Notification";
+import '../../styles/notas/notasList.css'
 
 const NotasList = () => {
     const [notas, setNotas] = useState([])
@@ -42,8 +43,9 @@ const NotasList = () => {
     // Guardar nota
     const handleSaveNote = async (newNote) => {
         try {
-            const savedNote = await createNote(newNote);
-            setNotas((prevNotas) => [savedNote, ...prevNotas])
+            await createNote(newNote);
+            setNotas((prevNotas) => [...prevNotas]);
+            loadNotes();
             setIsModalOpenCreate(false)
             setNotificationVisibleCrear(true)
         } catch (error) {
@@ -72,9 +74,8 @@ const NotasList = () => {
     const handleUpdateNota = async (updatedNote) => {
         try {
             const savedNota = await updateNote(updatedNote.id, updatedNote);
-            setNotas((prevNotas) => prevNotas.map((note) => (note.id === savedNota.id ? savedNota : note)),
-            setNotificationVisibleUpdate(true)
-        );
+            setNotas((prevNotas) => prevNotas.map((note) => (note.id === savedNota.id ? savedNota : note)));
+            setNotificationVisibleUpdate(true);
         } catch (error) {
             console.error("Error al actualizar la nota", error)
         }
@@ -82,19 +83,23 @@ const NotasList = () => {
 
     return (
         <div className="container-notas">
-            <h2>Mis notas</h2>
+            <h2 className="title-section">Mis notas</h2>
             <Boton texto="Añadir nota" onClick={() => setIsModalOpenCreate(true)} />
             <div className="list-notas-container">
-                <ul className="notes-list">
-                    {notas.map((note) => (
-                        <li key={note.id} className="note-item">
-                            <h3>{note.titulo}</h3>
-                            <p>{note.contenido}</p>
-                            <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} />
-                            <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro"/>
-                        </li>
-                    ))}
-                </ul>
+              {notas.map((note) => (
+                <div
+                  key={note.id}
+                  className="note-item"
+                  style={{ backgroundColor: note.color }} // Color de fondo dinámico
+                >
+                  <h3 className="note-title">{note.titulo}</h3>
+                  <p className="note-contenido">{note.contenido}</p>
+                  <div className="botones-notas">
+                    <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} />
+                    <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro" />
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="pagination">

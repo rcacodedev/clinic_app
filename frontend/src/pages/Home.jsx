@@ -7,6 +7,7 @@ import PrecioModal from "../components/citas/precioModal";
 import Notification from "../components/Notification";
 import { createFactura } from "../services/facturaService";
 import { getToken, getUserIdFromToken } from "../utils/auth";
+import { fetchUserInfo } from "../services/userInfoService";
 import '../styles/home.css'
 
 
@@ -17,6 +18,8 @@ function Home() {
     const [selectedCita, setSelectedCita] = useState(null);
     const [notificationPrecio, setNotificationPrecio] = useState(false)
     const [notificacionFactura, setNotificacionFactura] = useState(false)
+    const [notificacionWhatsApp, setNotificacionWhatsApp] = useState(false);
+    const [userInfo, setUserInfo] = useState([]);
 
     const token = getToken();
     const userId = getUserIdFromToken(token);
@@ -40,8 +43,18 @@ function Home() {
             }
         }
 
+        const fetchUserData = async () => {
+            try {
+                const data = await fetchUserInfo();
+                setUserInfo(data); // Aquí guardamos los datos del usuario
+            } catch (error) {
+                console.error("Error al obtener los datos del usuario:", error);
+            }
+        };
+
         fetchCitasHoy();
         fetchCitasTomorrow();
+        fetchUserData(); // Llamada a la función del usuario
     }, []);
 
     // Función para manejar el cambio de toggle y actualizar la cita
@@ -114,31 +127,49 @@ function Home() {
         setIsModalOpen(false);  // Cerramos el modal
     };
 
+    const enviarWhatsApp = async () => {
+        if (citasTomorrow.length === 0) {
+            alert('Añade al menos una cita para mañana');
+            return;
+        }
 
+        const citasValidas = citasTomorrow.filter(cita => cita.patient_phone); // Asegúrate de tener este campo en cada cita
+
+        if (citasValidas.length === 0) {
+            alert('Ninguna cita de mañana tiene número de teléfono del paciente');
+            return;
+        }
+
+        try {
+            const result = await citasService.sendWhatsapp(citasValidas);
+            console.log(result);
+            setNotificacionWhatsApp(true)
+        } catch (error) {
+            console.error("Error al enviar los WhatsApp:", error);
+            alert('Ocurrió un error al enviar los mensajes');
+        }
+    };
     return (
         <div className="container-home">
-            <h1>Bienvenida</h1>
-            <div className="container-notas">
-                <NotasList/>
-            </div>
+            <NotasList/>
             <div className="citas-filtradas">
                 <div className="columnas">
                     <div className="columna">
-                        <h2>Citas de Hoy</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Paciente</th>
-                                    <th>Hora</th>
-                                    <th>Acciones</th>
+                        <h2 className="title-section">Citas de Hoy</h2>
+                        <table className="tabla-citas">
+                            <thead className="head-table">
+                                <tr className="tr-table">
+                                    <th className="th-table">Paciente</th>
+                                    <th className="th-table">Hora</th>
+                                    <th className="th-table">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="tbody-table">
                                 {citasHoy.map(cita => (
-                                    <tr key={cita.id}>
-                                        <td>{cita.patient_name} {cita.patient_primer_apellido}</td>
-                                        <td>{cita.comenzar}</td>
-                                        <td>
+                                    <tr className="tr-table" key={cita.id}>
+                                        <td className="td-table">{cita.patient_name} {cita.patient_primer_apellido}</td>
+                                        <td className="td-table">{cita.comenzar}</td>
+                                        <td className="td-table">
                                             <div className="toggle-buttons">
                                                 <button
                                                     className="toggle-btn"
@@ -182,21 +213,21 @@ function Home() {
                     </div>
 
                     <div className="columna">
-                        <h2>Citas de Mañana</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Paciente</th>
-                                    <th>Hora</th>
-                                    <th>Acciones</th>
+                        <h2 className="title-section">Citas de Mañana</h2>
+                        <table className="tabla-citas">
+                            <thead className="head-table">
+                                <tr className="tr-table">
+                                    <th className="th-table">Paciente</th>
+                                    <th className="th-table">Hora</th>
+                                    <th className="th-table">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="tbody-table">
                                 {citasTomorrow.map(cita => (
-                                    <tr key={cita.id}>
-                                        <td>{cita.patient_name} {cita.patient_primer_apellido}</td>
-                                        <td>{cita.comenzar}</td>
-                                        <td>
+                                    <tr className="tr-table" key={cita.id}>
+                                        <td className="td-table">{cita.patient_name} {cita.patient_primer_apellido}</td>
+                                        <td className="td-table">{cita.comenzar}</td>
+                                        <td className="td-table">
                                             <div className="toggle-buttons">
                                                 <button
                                                     className="toggle-btn"
@@ -237,42 +268,44 @@ function Home() {
                                 ))}
                             </tbody>
                         </table>
+                        <Boton texto="Enviar WhatsApps" onClick={enviarWhatsApp} />
                     </div>
                 </div>
             </div>
 
             {/* Nueva columna con el paciente asignado a las citas de hoy */}
             <div className="pacientes">
-                <div className="columna">
-                    <p>Paciente con cita hoy</p>
-                    <ul>
+                <p className="title-section">Pacientes con cita hoy</p>
+                <div className="columna-pacientes">
+
+                    <ul className="lista-pacientes">
                         {citasHoy.length > 0 ? (
                             citasHoy.map((cita) => (
-                                <li key={cita.id}>
+                                <li className="link-pacientes" key={cita.id}>
                                     <Link to={`api/pacientes/${cita.patient}`}>
                                         {cita.patient_name} {cita.patient_primer_apellido}
                                     </Link>
                                 </li>
                             ))
                         ) : (
-                            <p>No hay pacientes con citas hoy.</p>
+                            <p className="pacientes-paragraph">No hay pacientes con citas hoy.</p>
                         )}
                     </ul>
                 </div>
 
-                <div className="columna">
-                    <p>Paciente con cita mañana</p>
-                    <ul>
+                <p className="title-section">Pacientes con cita mañana</p>
+                <div className="columna-pacientes">
+                    <ul className="lista-pacientes">
                         {citasTomorrow.length > 0 ? (
                             citasTomorrow.map((cita) => (
-                                <li key={cita.id}>
+                                <li className="link-pacientes" key={cita.id}>
                                     <Link to={`api/pacientes/${cita.patient}`}>
                                         {cita.patient_name} {cita.patient_primer_apellido}
                                     </Link>
                                 </li>
                             ))
                         ) : (
-                            <p>No hay pacientes con citas mañana.</p>
+                            <p className="pacientes-paragraph">No hay pacientes con citas mañana.</p>
                         )}
                     </ul>
                 </div>
@@ -297,6 +330,12 @@ function Home() {
                 isVisible={notificacionFactura}
                 onClose={() => setNotificacionFactura(false)}
                 type="success"
+                />
+            <Notification
+                message="WhatsApp de citas enviados correctamente"
+                isVisible={notificacionWhatsApp}
+                onClose={() => setNotificacionWhatsApp(false)}
+                type="succes"
                 />
         </div>
     );

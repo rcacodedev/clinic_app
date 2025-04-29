@@ -1,57 +1,85 @@
-.appointments-section {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+:root {
+  --color-black: #292421;
+  --color-tan: #A75F37;
+  --color-vanilla: #F2E7DD;
+  --color-flora: #A7A155;
 
-  .appointments-section h2 {
-    text-align: center;
-    color: #333;
-  }
+  --font-main: "Roboto", sans-serif;
+  --font-title: "Inter", sans-serif;
+}
 
-  .appointments-list {
-    margin-top: 15px;
-  }
+.container-appointments-section {
+  background-color: var(--color-vanilla);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-main);
+  margin-top: 2rem;
+}
 
-  .appointments-list table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+.title-section {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  color: var(--color-black);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
 
-  .appointments-list th, .appointments-list td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
+.appointments-list {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
 
-  .appointments-list th {
-    background-color: #9852e9;
-    color: white;
-  }
+.table-appointments {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.95rem;
+}
 
-  .appointments-list tr:hover {
-    background-color: #f1f1f1;
-  }
 
-  .appointments-list td a {
-    text-decoration: none;
-  }
+.table-appointments th,
+.table-appointments td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-tan);
+}
 
-  .appointments-list td button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.3s;
-  }
+.table-appointments th {
+  background-color: var(--color-flora);
+  color: whitesmoke;
+  font-weight: 600;
+  font-family: var(--font-title);
+}
 
-  .appointments-list td button:hover {
-    background-color: #0056b3;
-  }
+.table-appointments td {
+  color: var(--color-black);
+  background-color: #fff;
+}
+
+.table-appointments tr:nth-child(even) td {
+  background-color: #f9f5f1;
+}
+
+.table-appointments tr:hover td {
+  background-color: #f0e9e2;
+}
+
+.table-appointments td:last-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Estilo para mensaje sin citas */
+.appointments-list p {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-tan);
+  font-style: italic;
+  font-weight: 500;
+  font-family: var(--font-main);
+}

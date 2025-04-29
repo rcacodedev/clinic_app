@@ -103,11 +103,36 @@ const handleAddPathology = () => {
 
   const handleAddPatient = async (e) => {
     e.preventDefault();
+
+    const patientFormData = new FormData();
+    // Añadir datos del paciente
+    Object.keys(formData).forEach((key) => {
+      if (key !== "pdf_firmado_general" && key !== "pdf_firmado_menor") {
+        patientFormData.append(key, formData[key]);
+      }
+    });
+
+    // Añadir archivos PDF si existen
+    if (formData.pdf_firmado_general) {
+      patientFormData.append('pdf_firmado_general', formData.pdf_firmado_general);
+    }
+    if (formData.pdf_firmado_menor) {
+      patientFormData.append('pdf_firmado_menor', formData.pdf_firmado_menor);
+    }
+
     try {
-      await patientService.createPatient(formData);  // Método para crear paciente en el servicio
-      onEditSuccess();  // Actualizar la lista de pacientes
-      closeAddPatientModal(); // Cerrar el modal de añadir
-      fetchPatients(page, searchTerm); // Actualizar la lista de pacientes después de añadir uno
+      // 1. Crear el paciente con los datos del FormData
+      const newPatient = await patientService.createPatient(patientFormData);
+
+      // 2. Subir los archivos si se añadieron
+      if (formData.pdf_firmado_general || formData.pdf_firmado_menor) {
+        await patientService.uploadSignedPDFs(newPatient.id, patientFormData);
+      }
+
+      // 3. Actualizar vista
+      onEditSuccess();
+      closeAddPatientModal();
+      fetchPatients(page, searchTerm);
       setIsNotificationVisible(true);
     } catch (error) {
       console.error('Error añadiendo paciente:', error);
@@ -189,7 +214,7 @@ const handleAddPathology = () => {
             id="nombre"
             value={formData.nombre || ''}
             onChange={handleInputChange}
-            placeholder="Nombre"
+            placeholder="Nombre del paciente"
             ref={firstInputRef}  // Referencia al primer input
             tabIndex="1"
             autoFocus
@@ -293,6 +318,27 @@ const handleAddPathology = () => {
             onChange={handleInputChange}
             placeholder="País"
             tabIndex="6"
+          />
+          <label htmlFor="proteccion_datos">Protección de Datos (PDF)</label>
+          <input
+            type="file"
+            name="proteccion_datos"
+            id="proteccion_datos"
+            accept="application/pdf"
+            onChange={(e) =>
+              setFormData({ ...formData, pdf_firmado_general: e.target.files[0] })
+            }
+          />
+
+          <label htmlFor="consentimiento_menor">Consentimiento del Menor (PDF)</label>
+          <input
+            type="file"
+            name="consentimiento_menor"
+            id="consentimiento_menor"
+            accept="application/pdf"
+            onChange={(e) =>
+              setFormData({ ...formData, pdf_firmado_menor: e.target.files[0] })
+            }
           />
           <label>Patologías</label>
           <div className="pathologies-container">

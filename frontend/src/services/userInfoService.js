@@ -2,7 +2,7 @@ import api from "./api";
 import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
-const URL_BACKEND = 'api/userInfo/'
+const URL_BACKEND = '/userInfo/'
 
 // Obtiene los datos del usuario actual
 export const fetchUserInfo = async () => {

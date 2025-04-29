@@ -2,7 +2,7 @@ import api from "./api";
 import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
-const URL_BACKEND = 'api/notas/'
+const URL_BACKEND = '/notas/'
 
 // Obtener todas las notas
 export const fetchNotes = async (page = 1) =>{

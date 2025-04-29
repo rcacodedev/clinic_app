@@ -1,89 +1,83 @@
-/* Estilo base de la barra de navegación */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
+  width: 200px;
+  height: 100vh;
+  background-color: var(--color-black);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  padding: 5px;
-  background-color: var(--container-color);
-  color: var(--container-color);
-  font-family: var(--font-family-header);
-  height: auto;
-  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  overflow-y: auto;
 }
 
-/* Contenedor de los botones */
 .navbar-buttons {
   display: flex;
   flex-direction: column;
+  height: 100%;
   justify-content: space-between;
-  height: 100%; /* Permite que los elementos ocupen toda la altura */
-  width: 100%;
-  overflow-y: auto;
-  max-height: 100vh; /* Limita la altura a la ventana */
 }
 
-/* Botones principales */
 .navbar-items {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
+  gap: 1rem;
 }
 
-/* Botón de logout */
-.navbar-logout {
-  margin-top: auto; /* Empuja el botón hacia abajo */
-  margin-bottom: 30px;
-}
-
-/* Botón general */
 .navbar-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  outline: none;
 }
 
-/* Contenedor del icono y texto */
+.navbar-button:hover {
+  background-color: var(--color-tan);
+  transform: translateX(5px);
+}
+
+.navbar-button a {
+  text-decoration: none;
+  outline: none;
+}
+
+.navbar-button a:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .navbar-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
 }
 
-/* Icono */
 .navbar-icon {
-  width: 32px;
-  height: 32px;
-  fill: white;
-  transition: transform 0.3s ease-in-out;
-  margin-bottom: 5px;
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1); /* iconos blancos */
 }
 
-/* Texto */
 .navbar-text {
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--link-color);
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--color-vanilla);
+  font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .navbar {
-    height: auto;
-  }
-  .navbar-button {
-    font-size: 12px;
-  }
-  .navbar-icon {
-    width: 24px;
-    height: 24px;
-  }
+.navbar-logout {
+  margin-top: auto;
+  background-color: var(--color-flora);
+}
+
+.navbar-logout .navbar-text {
+  color: var(--color-black);
+}
+
+.navbar-logout .navbar-icon {
+  filter: brightness(0); /* icono negro */
 }

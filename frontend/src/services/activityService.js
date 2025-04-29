@@ -2,7 +2,7 @@ import api from './api';
 import { handleApiError } from '../utils/error_log';
 import { getAuthHeaders } from '../utils/auth';  // Si necesitas encabezados de autenticación
 
-const BASE_URL = '/api/actividades/';  // La URL base para las actividades
+const BASE_URL = '/actividades/';  // La URL base para las actividades
 
 // Obtener todas las actividades
 export const getActivities = async () => {

@@ -2,7 +2,7 @@ import api from './api'
 import { getAuthHeaders } from '../utils/auth';
 import { handleApiError } from '../utils/error_log';
 
-const API_URL = '/api/citas/';  // Ajusta la URL de tu API
+const API_URL = '/citas/';  // Ajusta la URL de tu API
 
 // Función para obtener la lista de citas con filtros por fecha
 const getCitas = async (page = 1, searchTerm = '', filterType = 'todos') => {
@@ -64,9 +64,9 @@ const deleteCita = async (id) => {
 };
 
 // Función enviar whatsApp
-const sendWhatsapp = async () => {
+const sendWhatsapp = async (citas_ids) => {
   try {
-    const response = await api.post(`${API_URL}enviar-whatsapp/`, getAuthHeaders());
+    const response = await api.post(`${API_URL}enviar-whatsapp/`, {citas_ids}, getAuthHeaders());
     console.log('Respuesta del backend:', response.data);
     return response.data;
   } catch (error) {

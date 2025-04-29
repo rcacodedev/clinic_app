@@ -31,42 +31,46 @@ const UploadPDF = ({ patientId }) => {
     loadPatientsData();
   }, [patientId])
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const { name, files } = e.target;
+    const file = files[0];
+
+    if (!file) return; // Si no se seleccionó un archivo, no hacer nada
+
+    // Actualiza el estado con el archivo seleccionado
     setSelectedFiles((prevFiles) => ({
       ...prevFiles,
-      [name]: files[0],
+      [name]: file,
     }));
-  };
 
-  const handleUpload = async () => {
-    if (!selectedFiles.pdf_firmado_general && !selectedFiles.pdf_firmado_menor && !selectedFiles.pdf_firmado_inyecciones) {
-      setMessage("Por favor, selecciona al menos un archivo PDF.");
-      return;
-    }
+    // Crear el FormData para enviar el archivo al backend
+    const formData = new FormData();
+    formData.append(name, file); // Añadir el archivo al FormData
 
     setUploading(true);
-    setMessage("");
-
     try {
-      const response = await patientService.uploadSignedPDFs(patientId, selectedFiles);
-      setIsNotificationVisibleSubir(true)
-      setPdfUrls(response.pdf_urls); // La API devuelve las URLs de los PDFs subidos
-      await loadPatientsData();
-    } catch (error) {
-      setMessage("Error al subir los PDFs.", error);
-    }
+      // Llamar a la función de uploadSignedPDFs con el patientId y el archivo
+      const response = await patientService.uploadSignedPDFs(patientId, formData);
 
-    setUploading(false);
+      // Actualizar URLs de los PDFs subidos
+      setPdfUrls(response.pdf_urls);
+      setIsNotificationVisibleSubir(true);
+      setMessage('Archivo subido correctamente.');
+      loadPatientsData();
+    } catch (error) {
+      setMessage('Error al subir el archivo.', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <div className="container-proteccion-datos">
-      <h2>Protección de Datos del Paciente</h2>
+      <h2 className="title-section">Protección de Datos del Paciente</h2>
 
       {/* Inputs de archivo para los tres tipos de PDFs */}
       <div className="input-proteccion-datos">
-        <label>Protección de Datos</label>
+        <label className="title-input">Protección de Datos</label>
         <input type="file" name="pdf_firmado_general" accept="application/pdf" onChange={handleFileChange} />
         {patient.pdf_firmado_general && (
           <p>
@@ -78,7 +82,7 @@ const UploadPDF = ({ patientId }) => {
       </div>
 
       <div>
-        <label>Consentimiento Menor</label>
+        <label className="title-input">Consentimiento Menor</label>
         <input type="file" name="pdf_firmado_menor" accept="application/pdf" onChange={handleFileChange} />
         {patient.pdf_firmado_menor && (
             <p>
@@ -90,7 +94,7 @@ const UploadPDF = ({ patientId }) => {
       </div>
 
       <div>
-        <label>Consentimiento Fisioterapia Invasiva</label>
+        <label className="title-input">Consentimiento Fisioterapia Invasiva</label>
         <input type="file" name="pdf_firmado_inyecciones" accept="application/pdf" onChange={handleFileChange} />
         {patient.pdf_firmado_inyecciones && (
             <p>
@@ -100,9 +104,8 @@ const UploadPDF = ({ patientId }) => {
           </p>
         )}
       </div>
-      <Boton onClick={handleUpload} disabled={uploading} texto={uploading ? "Subiendo..." : "Subir PDFs"} />
 
-      <Notification message="Archivo subido correctamente." isVisible={isNotificationVisibleSubir} onClose={() => setIsNotificationVisibleSubir(false)} />
+      <Notification message="Archivo subido correctamente." isVisible={isNotificationVisibleSubir} onClose={() => setIsNotificationVisibleSubir(false)} type="success"/>
       {message && (<p>Hubo un error. {message}</p>)}
 
     </div>

@@ -127,28 +127,34 @@ const ListFacturasPatients = ({ patientId }) => {
 
     return (
         <div className='container-factura'>
-            <h1>Lista de Facturas</h1>
+            <h1 className='title-section'>Lista de Facturas</h1>
             <div className="fecha-selector">
-                <h1>Días</h1>
-                <select name="dia" onChange={handleFechaChange} value={fechaSeleccionada.dia}>
-                    <option value="0">Todos</option>
-                    {Array.from({ length: new Date(fechaSeleccionada.anio, fechaSeleccionada.mes + 1, 0).getDate() }, (_, i) => i + 1).map((dia) => (
-                        <option key={dia} value={dia}>{dia}</option>
-                    ))}
-                </select>
-                <h1>Meses</h1>
-                <select name="mes" onChange={handleFechaChange} value={fechaSeleccionada.mes}>
-                    <option value="-1">Todos</option> {/* Agregar opción "Todos" */}
-                    {meses.map((mes, index) => (
-                        <option key={index} value={index}>{mes}</option>
-                    ))}
-                </select>
-                <h1>Años</h1>
-                <select name="anio" onChange={handleFechaChange} value={fechaSeleccionada.anio}>
-                    {Array.from({ length: 10 }).map((_, index) => (
-                        <option key={index} value={new Date().getFullYear() - index}>{new Date().getFullYear() - index}</option>
-                    ))}
-                </select>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Días</h4>
+                    <select name="dia" onChange={handleFechaChange} value={fechaSeleccionada.dia}>
+                        <option value="0">Todos</option>
+                        {Array.from({ length: new Date(fechaSeleccionada.anio, fechaSeleccionada.mes + 1, 0).getDate() }, (_, i) => i + 1).map((dia) => (
+                            <option key={dia} value={dia}>{dia}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Meses</h4>
+                    <select name="mes" onChange={handleFechaChange} value={fechaSeleccionada.mes}>
+                        <option value="-1">Todos</option> {/* Agregar opción "Todos" */}
+                        {meses.map((mes, index) => (
+                            <option key={index} value={index}>{mes}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Años</h4>
+                    <select name="anio" onChange={handleFechaChange} value={fechaSeleccionada.anio}>
+                        {Array.from({ length: 10 }).map((_, index) => (
+                            <option key={index} value={new Date().getFullYear() - index}>{new Date().getFullYear() - index}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {loading && <p className='loading'>Cargando facturas...</p>}

@@ -2,7 +2,7 @@ import api from "./api";
 import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
-const API_URL = '/api/formacion/';
+const API_URL = '/formacion/';
 
 // Función para obtener Formaciones
 export const getFormacion = async () => {

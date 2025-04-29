@@ -64,41 +64,62 @@ class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return Response({'message': 'Paciente eliminado correctamente'}, status=status.HTTP_204_NO_CONTENT)
 
 # Vista para subir el PDF firmado
+
 class UploadSignedPDFView(APIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, pk, *args, **kwargs):
+        # Obtener al paciente con el id 'pk' (si no existe, 404)
         patient = get_object_or_404(Patient, pk=pk)
 
-        if not any(f in request.FILES for f in ['pdf_firmado_general', 'pdf_firmado_menor', 'pdf_firmado_inyecciones']):
-            return JsonResponse({"error": "No se ha encontrado ningún archivo PDF válido para subir."}, status=400)
+        if not request.FILES:
+            return JsonResponse({"error": "No se ha subido ningún archivo."}, status=400)
 
+        # Asegúrate de que todos los archivos subidos sean PDFs
+        for file in request.FILES.values():
+            if not file.name.endswith('.pdf'):
+                return JsonResponse({"error": "El archivo debe ser un PDF."}, status=400)
+
+        # Diccionario con los campos de archivo del modelo Patient
         file_fields = {
-            "pdf_firmado_general": "paciente_{}_proteccion_datos.pdf",
-            "pdf_firmado_menor": "paciente_{}_consentimiento_menor.pdf",
-            "pdf_firmado_inyecciones": "paciente_{}_consentimiento_medicina_invasiva.pdf"
+            "pdf_firmado_general": "paciente_{}_LPD.pdf",
+            "pdf_firmado_menor": "paciente_{}_CM.pdf",
+            "pdf_firmado_inyecciones": "paciente_{}_CMI.pdf"
         }
 
         saved_files = {}
 
+        # Iterar sobre los archivos y los campos esperados en el modelo
         for field_name, file_name_template in file_fields.items():
             if field_name in request.FILES:
                 file = request.FILES[field_name]
 
+                # Verifica nuevamente que el archivo sea un PDF
                 if not file.name.endswith('.pdf'):
                     return JsonResponse({"error": "El archivo debe ser un PDF."}, status=400)
 
+                # Genera el nombre del archivo para el paciente
                 pdf_name = file_name_template.format(pk)
 
-                # Subir el archivo a S3 y guardarlo en el campo correspondiente
-                setattr(patient, field_name, file)  # Sube el archivo directamente a S3 al asignar al campo
+                # Asigna el archivo al campo correspondiente del modelo (usando un FileField en el modelo)
+                if field_name == "pdf_firmado_general":
+                    patient.pdf_firmado_general = file
+                elif field_name == "pdf_firmado_menor":
+                    patient.pdf_firmado_menor = file
+                elif field_name == "pdf_firmado_inyecciones":
+                    patient.pdf_firmado_inyecciones = file
+
+                # Guarda el modelo después de asignar los archivos
                 patient.save()
 
-                # Obtener la URL del archivo guardado en S3
-                file_url = patient.__getattribute__(field_name).url
+                # Obtener la URL del archivo guardado en S3 o en el almacenamiento configurado
+                file_url = getattr(patient, field_name).url
 
+                # Añadir la URL del archivo al diccionario de archivos guardados
                 saved_files[field_name] = file_url
 
+        # Retornar la respuesta con las URLs de los PDFs guardados
         return JsonResponse({
             "message": "PDF(s) guardado(s) correctamente",
             "pdf_urls": saved_files

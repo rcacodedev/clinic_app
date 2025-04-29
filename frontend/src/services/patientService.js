@@ -2,7 +2,7 @@ import api from "./api";
 import { handleApiError } from "../utils/error_log";
 import { getAuthHeaders } from "../utils/auth";
 
-const API_URL = '/api/pacientes/';
+const API_URL = '/pacientes/';
 
 const getPatients = async ({ page = 1, searchTerm = '', includePagination = true } = {}) => {
   try {
@@ -57,24 +57,11 @@ const deletePatient = async (id) => {
 };
 
 // Subir los PDFs firmados para un paciente
-const uploadSignedPDFs = async (id, pdfFiles) => {
+const uploadSignedPDFs = async (id, formData) => {
   try {
-    const formData = new FormData();
-
-    // Añadir cada archivo PDF al formData
-    if (pdfFiles.pdf_firmado_general) {
-      formData.append("pdf_firmado_general", pdfFiles.pdf_firmado_general);
-    }
-    if (pdfFiles.pdf_firmado_menor) {
-      formData.append("pdf_firmado_menor", pdfFiles.pdf_firmado_menor);
-    }
-    if (pdfFiles.pdf_firmado_inyecciones) {
-      formData.append("pdf_firmado_inyecciones", pdfFiles.pdf_firmado_inyecciones);
-    }
-
     const response = await api.post(`${API_URL}${id}/upload-signed-pdf/`, formData, {
       headers: {
-        "Content-Type": "multipart/form-data", // Necesario para enviar archivos
+        'Content-Type': 'multipart/form-data', // Necesario para enviar archivos
       },
     });
 

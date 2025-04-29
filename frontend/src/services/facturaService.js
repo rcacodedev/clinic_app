@@ -2,7 +2,7 @@ import api from "./api";
 import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
-const URL_BACKEND = 'api/facturas/'
+const URL_BACKEND = '/facturas/'
 
 // Obtener todas las facturas
 export const getFacturas = async (filtro = "", page = 1, pageSize = 10) => {

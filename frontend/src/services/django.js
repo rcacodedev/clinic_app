@@ -1,6 +1,6 @@
 import api from "./api";
 
-const URL_BACKEND= 'api/groups/'
+const URL_BACKEND= '/groups/'
 
 // Obtiene lista de grupos en Django
 

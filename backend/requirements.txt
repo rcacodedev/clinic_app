@@ -12,6 +12,5 @@ xhtml2pdf
 whitenoise
 gunicorn
 dj-database-url
-cloudinary
-django-cloudinary-storage
 requests
+twilio

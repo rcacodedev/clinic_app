@@ -21,13 +21,17 @@ const Ajustes = () => {
     postal_code: "",
     city: "",
     country: "",
-    photo: "" // Asegurándonos de tener un campo photo en el objeto userInfo
+    photo: "", // Asegurándonos de tener un campo photo en el objeto userInfo
+    whatsapp_business_number: "",
+    twilio_whatsapp_service_sid: "",
+    twilio_integration_verified:"",
   });
 
   const [infoMessage, setInfoMessage] = useState("");
   const [infoError, setInfoError] = useState("");
   const [isEditing, setIsEditing] = useState(false); // Estado para controlar si estamos en modo edición
   const [newPhoto, setNewPhoto] = useState(null); // Estado para manejar la nueva foto seleccionada
+  const [isTwilioVisible, setIsTwilioVisible] = useState(false);
 
   const loadUserInfo = async () => {
     try {
@@ -162,7 +166,7 @@ const Ajustes = () => {
       <div className="update-user-info">
         <h2>Actualizar Información de Usuario</h2>
         <form onSubmit={handleUserInfoSubmit} className="user-form">
-          {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country", "whatsapp_token", "phone_number_id"]
+          {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country", "whatsapp_business_number", "twilio_whatsapp_service_sid", "twilio_integration_verified"]
             .filter((key) => key !== "user" && key !== 'photo') // Filtramos el campo "user" para que nunca se muestre
             .map((key) => (
               <div key={key} className="form-group">
@@ -187,11 +191,29 @@ const Ajustes = () => {
                     {key === 'dni' && (
                       <small className="input-help-text">Formato de DNI: 53564522W</small>
                     )}
-                    {key === 'whatsapp_token' && (
-                      <small className="input-help-text">Poner el Token que se obtiene en Meta Cloud API</small>
+                    {key === 'whatsapp_business_number' && (
+                      <small className="input-help-text">Añadir el teléfono registrado en Twilio (usar antes +34)</small>
                     )}
-                    {key === 'phone_number_id' && (
-                      <small className="input-help-text">Poner el número de ID del teléfono obtenido en Meta Cloud API</small>
+                    {key === 'twilio_whatsapp_service_sid' && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setIsTwilioVisible(!isTwilioVisible)}
+                          className="ver-sid-button"
+                        >
+                          {isTwilioVisible ? "Ocultar SID" : "Ver SID"}
+                        </button>
+                        {isTwilioVisible && (
+                          <input
+                            type="password"
+                            id={key}
+                            name={key}
+                            value={userInfo[key]}
+                            onChange={handleUserInfoChange}
+                            placeholder="SID de Twilio"
+                          />
+                        )}
+                      </div>
                     )}
                   </div>
                 ) : (

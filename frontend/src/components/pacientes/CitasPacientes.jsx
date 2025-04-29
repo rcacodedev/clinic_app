@@ -74,13 +74,13 @@ function PatientAppointments({ patientId, refreshAppointments }) {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="appointments-section">
-      <h2>Citas del Paciente</h2>
+    <div className="container-appointments-section">
+      <h2 className="title-section">Citas del Paciente</h2>
       <div className="appointments-list">
         {appointments.length === 0 ? (
           <p>No hay citas programadas.</p>
         ) : (
-          <table>
+          <table className="table-appointments">
             <thead>
               <tr>
                 <th>Fecha</th>

@@ -1,135 +1,138 @@
-/* Contenedor principal */
-.container-factura {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-left: 200px; /* Ajusta este valor para que no se solape con el navbar */
-    width: calc(100% - 250px); /* Ajusta el ancho para que ocupe el espacio disponible */
-}
+:root {
+    --color-black: #292421;
+    --color-tan: #A75F37;
+    --color-vanilla: #F2E7DD;
+    --color-flora: #A7A155;
 
-/* Título */
-h1 {
-    font-size: 24px;
-    color: #333;
+    --font-main: "Roboto", sans-serif;
+    --font-title: "Inter", sans-serif;
+  }
+
+  .container-factura {
+    background-color: whitesmoke;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    font-family: var(--font-main);
+    margin-top: 2rem;
+  }
+
+  .title-section {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--color-black);
+    margin-bottom: 1.5rem;
     text-align: center;
-    margin-bottom: 20px;
-}
+    letter-spacing: 0.5px;
+  }
 
-/* Estilos para los filtros */
-.filtros {
+  /* Selectores de fecha */
+  .fecha-selector {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-main);
+    flex-wrap: wrap;
+  }
 
-/* Estilos para los botones */
-.filtros button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
+  .fecha-selector .filtro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.filtros button:hover {
-    background-color: #45a049;
-}
+  .fecha-selector .filtro h4 {
+    margin-bottom: 0.3rem;
+    color: var(--color-tan);
+    font-size: 0.85rem;
+    font-family: var(--font-title);
+  }
 
-/* Tabla de facturas */
-.tabla-facturas {
+  .fecha-selector .filtro select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--color-flora);
+    border-radius: 5px;
+    background-color: white;
+    color: var(--color-black);
+    min-width: 80px;
+  }
+
+  /* Tabla */
+  .tabla-facturas {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
-}
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.95rem;
+  }
 
-.tabla-facturas th, .tabla-facturas td {
-    padding: 10px;
+  .tabla-facturas th,
+  .tabla-facturas td {
+    padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid #ddd;
-}
+    border-bottom: 1px solid var(--color-vanilla);
+  }
 
-.tabla-facturas th {
-    background-color: #f4f4f4;
-    color: #555;
-}
+  .tabla-facturas th {
+    background-color: var(--color-flora);
+    color: whitesmoke;
+    font-weight: 600;
+    font-family: var(--font-title);
+  }
 
-/* Estilos para la paginación */
-.paginacion {
+  .tabla-facturas td {
+    color: var(--color-black);
+    background-color: #fff;
+  }
+
+  .tabla-facturas tr:nth-child(even) td {
+    background-color: #f9f5f1;
+  }
+
+  .tabla-facturas tr:hover td {
+    background-color: #f0e9e2;
+  }
+
+  .tabla-facturas td:last-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Mensajes de estado */
+  .loading,
+  .error {
+    text-align: center;
+    font-family: var(--font-main);
+    margin-top: 1rem;
+  }
+
+  .loading {
+    color: var(--color-flora);
+    font-style: italic;
+  }
+
+  .error {
+    color: var(--color-tan);
+    font-weight: bold;
+  }
+
+  /* Paginación */
+  .paginacion {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    margin-top: 20px;
-}
+    margin-top: 2rem;
+    gap: 1rem;
+    font-family: var(--font-main);
+  }
 
-.paginacion button {
-    background-color: #008CBA;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.paginacion button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.paginacion button:hover {
-    background-color: #007b9e;
-}
-
-/* Mensajes de carga y error */
-.loading {
-    text-align: center;
-    color: #007b9e;
-}
-
-.error {
-    text-align: center;
-    color: red;
-}
-
-.fecha-selector {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.fecha-selector select {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #333;
-    cursor: pointer;
-    width: 150px;
-    transition: border-color 0.3s ease;
-}
-
-.fecha-selector select:focus {
-    border-color: #4CAF50; /* Color cuando se enfoca */
-    outline: none;
-}
-
-.fecha-selector option {
-    padding: 10px;
-    font-size: 14px;
-}
-
-.fecha-selector select:hover {
-    border-color: #888;
-}
-
-.fecha-selector select:disabled {
-    background-color: #f2f2f2;
-    cursor: not-allowed;
-}
+  .paginacion span {
+    font-weight: bold;
+    color: var(--color-black);
+    font-size: 1.1rem;
+  }

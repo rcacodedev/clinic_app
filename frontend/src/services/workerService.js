@@ -3,7 +3,7 @@ import { getAuthHeaders } from "../utils/auth";
 import { handleApiError } from "../utils/error_log";
 
 
-const API_URL= '/api/workers/';
+const API_URL= '/workers/';
 
 // Obtener la lista de trabajadores
 export const fetchWorkers = async () => {

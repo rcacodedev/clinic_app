@@ -11,7 +11,7 @@ from .serializers import NoteSerializer
 
 # Paginación de las notas
 class NotePagination(PageNumberPagination):
-    page_size = 7
+    page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 50
 

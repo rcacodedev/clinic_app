@@ -15,7 +15,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo', 'whatsapp_token', 'phone_number_id']
+        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo', 'whatsapp_business_number', 'twilio_whatsapp_service_sid', 'twilio_integration_verified']
 
     def update(self, instance, validated_data):
         # Extraer datos de 'user'

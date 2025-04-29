@@ -15,9 +15,6 @@ import os
 from dotenv import load_dotenv
 from datetime import timedelta
 import dj_database_url
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -72,8 +69,6 @@ INSTALLED_APPS = [
     'workers',
     'actividades',
     'userinfo',
-    'cloudinary',
-    'cloudinary_storage',
     'formacion',
     'notes',
     'facturacion',
@@ -159,8 +154,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

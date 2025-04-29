@@ -1,65 +1,141 @@
-/* Ajustes para el contenedor principal */
-.container-home {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;  /* Centra todo el contenido dentro de .container-home */
-    justify-content: flex-start;  /* No es necesario centrar verticalmente todo, solo las secciones */
-    min-height: 100vh;
-    padding: 20px;
-    background-color: #f4f7fb;
-    text-align: center;  /* Centra los textos dentro del contenedor principal */
-}
+  .container-home {
+    background-color: whitesmoke;
+    padding: 2rem;
+    border-radius: 1rem;
+    max-width: 1200px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    margin-left: 240px;
+    margin-right: 20px;
+    max-width: 88%;
+  }
 
-/* Ajustes para las citas y pacientes */
-.citas-filtradas, .pacientes {
+  .container-notas {
+    margin-bottom: 2rem;
+    border-bottom: 20px var(--color-primary-dark);
+  }
+
+  .citas-filtradas .columnas {
     display: flex;
-    justify-content: center; /* Centra las columnas */
-    gap: 20px; /* Espacio entre las columnas */
-    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .columna {
+    flex: 1;
+    min-width: 300px;
+    border-right: 20px var(--color-primary-dark);
+  }
+
+  .title-citas {
+    font-size: 1.5rem;
+    color: var(--color-black);
+    font-family: var(--font-title);
+    margin-bottom: 1rem;
+  }
+
+  .tabla-citas {
+    font-family: var(--font--main);
     width: 100%;
-    max-width: 1200px;  /* Limita el ancho máximo del contenedor */
-}
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
 
-.columna {
-    flex: 1; /* Hace que las columnas se estiren para ocupar el mismo espacio */
-    padding: 20px;
-    box-sizing: border-box;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+  .head-table {
+    background-color: var(--color-flora);
+    color: white;
+  }
 
-/* Estilo adicional para el texto y el borde */
-.columna p {
+  .tr-table {
+    border-bottom: 2px solid var(--color-tan);
+  }
+
+  .th-table {
+    background-color: var(--color-flora);
+    padding: 0.75rem 1rem;
+  }
+
+  .td-table {
+    text-align: left;
+    font-size: large;
     font-weight: bold;
-    margin-bottom: 10px;
-}
+  }
 
-.columna ul {
-    list-style-type: none;
+  .tbody-table tr:hover {
+    background-color: var(--accent-color);
+    margin-bottom: 5px;
+  }
+
+  .toggle-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .toggle-btn {
+    background-color: white;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .toggle-btn:hover {
+    background-color: var(--color-primary-light);
+    color: white;
+  }
+
+  .toggle-btn.active {
+    background-color: var(--color-success);
+    color: white;
+  }
+
+  .pacientes {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    border: 20px var(--color-primary-dark);
+  }
+
+  .columna-pacientes {
+    flex: 1;
+    min-width: 250px;
+    background-color: white;
+    border: 2px solid var(--color-primary-dark);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .pacientes-paragraph {
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
+  }
+
+  .lista-pacientes {
+    list-style: none;
     padding: 0;
-}
+    margin: 0;
+  }
 
-.columna li {
-    margin-bottom: 10px;
-}
+  .link-pacientes a {
+    color: var(--primary-dark);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0;
+    transition: color 0.3s;
+  }
 
-/* Fondo alternativo para pacientes */
-.pacientes .columna {
-    background-color: #f7f7f7;
-}
-
-/* Media query para pantallas más pequeñas */
-@media (max-width: 768px) {
-    .citas-filtradas, .pacientes {
-        flex-direction: column; /* Las columnas se apilan en pantallas pequeñas */
-        justify-content: flex-start; /* No centra las columnas en pantallas pequeñas */
-    }
-
-    .columna {
-        max-width: 100%; /* Hace que las columnas ocupen todo el ancho en pantallas pequeñas */
-        margin-bottom: 20px; /* Espacio entre las columnas cuando están apiladas */
-    }
-}
+  .link-pacientes a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }

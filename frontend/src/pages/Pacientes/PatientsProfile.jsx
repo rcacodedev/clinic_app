@@ -96,7 +96,8 @@ function PatientProfile() {
 
   return (
     <div className="patient-profile-container">
-      <h1 className="profile-title">Perfil del Paciente</h1>
+      <h1 className="profile-title">Perfil de {patient.nombre} {patient.primer_apellido}</h1>
+      <h4 className="title-section">Datos del Paciente</h4>
       <div className="patient-details">
         <div className="patient-field"><strong>Nombre:</strong><span>{patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</span></div>
         <div className="patient-field"><strong>Email:</strong><span>{patient.email}</span></div>
