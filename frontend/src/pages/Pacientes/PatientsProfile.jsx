@@ -96,8 +96,7 @@ function PatientProfile() {
 
   return (
     <div className="patient-profile-container">
-      <h1 className="profile-title">Perfil de {patient.nombre} {patient.primer_apellido}</h1>
-      <h4 className="title-section">Datos del Paciente</h4>
+      <h4 className="title-section">Datos del Paciente {patient.nombre} {patient.primer_apellido}</h4>
       <div className="patient-details">
         <div className="patient-field"><strong>Nombre:</strong><span>{patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</span></div>
         <div className="patient-field"><strong>Email:</strong><span>{patient.email}</span></div>
@@ -123,8 +122,11 @@ function PatientProfile() {
         <div className="patient-field patient-notes"><strong>Notas:</strong><span>{patient.notas}</span></div>
       </div>
 
-      <Boton  texto="Editar Perfil" onClick={() => setIsEditModalOpen(true)} />
-      <Boton  texto="Eliminar Perfil" onClick={() => setIsDeleteModalOpen(true)} tipo="peligro"/>
+      <div className="botones">
+        <Boton texto="Editar Perfil" onClick={() => setIsEditModalOpen(true)} />
+        <Boton texto="Eliminar Perfil" onClick={() => setIsDeleteModalOpen(true)} tipo="peligro"/>
+      </div>
+
 
       {/* Modal para editar el paciente */}
       <CustomModal isOpen={isEditModalOpen} onRequestClose={() => setIsEditModalOpen(false)} title="Editar Perfil del Paciente">

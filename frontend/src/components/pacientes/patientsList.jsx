@@ -148,7 +148,7 @@ const handleAddPathology = () => {
 
   return (
     <div className="patient-list-container">
-      <h1 className="title">Lista de Pacientes</h1>
+      <h1 className="title-section">Lista de Pacientes</h1>
 
       {/* Campo de búsqueda */}
 

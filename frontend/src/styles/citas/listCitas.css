@@ -32,7 +32,7 @@ th, td {
 }
 
 th {
-    background-color: #9725c4;
+    background-color: var(--color-flora);
     color: white;
     font-weight: bold;
     text-transform: uppercase;
@@ -45,7 +45,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-    background-color: rgba(223, 102, 253, 0.363);
+    background-color: var(--color-vanilla);
 }
 
 /* Celda de mensaje cuando no hay citas */
@@ -75,7 +75,7 @@ td[colspan="5"] {
 }
 
 .pagination button:not(:disabled) {
-    background-color: #6307af;
+    background-color: var(--color-flora);
     color: white;
 }
 
@@ -84,7 +84,7 @@ td[colspan="5"] {
 }
 
 .pagination button.active {
-    background-color: #9228a7;
+    background-color: var(--color-tan);
 }
 
 /* Deshabilitar botones */
@@ -114,5 +114,25 @@ td[colspan="5"] {
 }
 
 .toggle-btn:hover {
-    background-color: #bbb;  /* Color cuando pasa el mouse */
+    background-color: var(--color-tan);  /* Color cuando pasa el mouse */
 }
+
+.fecha-selector select {
+    appearance: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 1rem;
+    color: var(--color-vanilla);
+    margin-right: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .fecha-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+  }

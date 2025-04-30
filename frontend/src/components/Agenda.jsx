@@ -114,11 +114,11 @@ const Agenda = ({
 
     return (
         <div className="agenda-container">
-          <h1>Agenda de Citas</h1>
+          <h1 className='title-section'>Agenda de Citas</h1>
           <div className="agenda-controls">
-                <Boton onClick={() => changeMonth(-1)} texto="Mes Anterior" />
+                <Boton onClick={() => changeMonth(-1)} texto="🠔" />
                 <h2>{currentMonth}</h2>
-                <Boton onClick={() => changeMonth(1)} texto="Mes Siguiente" />
+                <Boton onClick={() => changeMonth(1)} texto="🠖" />
           </div>
           <div className="agenda-controls">
             <Boton onClick={() => changeWeek(-1)} texto="Semana Anterior" />
@@ -165,8 +165,8 @@ const Agenda = ({
                               openModal(citaQueInicia);
                             }}
                           >
-                            <strong>{citaQueInicia.patient_name} {citaQueInicia.patient_primer_apellido}</strong>
-                            <p>{citaQueInicia.descripcion}</p>
+                            <strong className='nombre-paciente'>{citaQueInicia.patient_name} {citaQueInicia.patient_primer_apellido}</strong>
+                            <p className='descripcion-cita'>{citaQueInicia.descripcion}</p>
                           </div>
                         </td>
                       );

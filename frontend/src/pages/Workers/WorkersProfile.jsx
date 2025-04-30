@@ -120,12 +120,12 @@ const WorkerProfile = () => {
   return (
     <div className="worker-profile-container">
       <div className="worker-header">
-        <h1>Perfil de {worker.user.first_name} {worker.user.last_name}</h1>
+        <h1 className='title-section'>Perfil de {worker.user.first_name} {worker.user.last_name}</h1>
         <div className='photo-container'>
           <img src={worker.user.userInfo.photo} alt="Foto del empleado" className='profile-photo'/>
         </div>
       </div>
-      <h2>Datos del Empleado</h2>
+      <h2 className='title-section'>Datos del Empleado</h2>
       <div className="worker-info">
         <div className="worker-field"><strong>Username:</strong> <span>{worker.user.username}</span></div>
         <div className="worker-field"><strong>Email:</strong> <span>{worker.user.email}</span></div>
@@ -172,7 +172,7 @@ const WorkerProfile = () => {
         worker={worker}
         onConfirmDelete={handleDeleteWorker}
       />
-      <h2>Agenda de {worker.user.first_name} {worker.user.last_name}</h2>
+
       <div className="worker-agenda">
         <CrearCita refreshCitas={loadAppointments} workerId={id} />
         <Agenda

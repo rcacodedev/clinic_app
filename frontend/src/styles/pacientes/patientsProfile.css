@@ -303,3 +303,9 @@ input:checked + .slider:before {
 .edit-form textarea:focus {
   border-color: #3498db;
 }
+
+.botones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

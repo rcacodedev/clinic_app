@@ -122,70 +122,78 @@ const ListCitas = ({ citas, userId }) => {
         }
     };
 
+    const handleToggleBoton = (campo) => {
+        setFechaSeleccionada(prev => ({
+          ...prev,
+          [campo]: !prev[campo]
+        }));
+      };
+
+
     return (
         <div className="list-citas">
-            <h2>Citas Finalizadas</h2>
+            <h2 className='title-section'>Historial de citas</h2>
 
             {/* Selector de Mes y Año */}
             <div className="fecha-selector">
-                <select name="dia" onChange={handleFechaChange} value={fechaSeleccionada.dia}>
-                    <option value="0">Todos</option>
-                    {Array.from({ length: new Date(fechaSeleccionada.anio, fechaSeleccionada.mes + 1, 0).getDate() }, (_, i) => i + 1).map((dia) => (
-                        <option key={dia} value={dia}>{dia}</option>
-                    ))}
-                </select>
-                <select name="mes" onChange={handleFechaChange} value={fechaSeleccionada.mes}>
-                    <option value="-1">Todos</option> {/* Agregar opción "Todos" */}
-                    {meses.map((mes, index) => (
-                        <option key={index} value={index}>{mes}</option>
-                    ))}
-                </select>
-                <select name="anio" onChange={handleFechaChange} value={fechaSeleccionada.anio}>
-                    {anios.map((anio) => (
-                        <option key={anio} value={anio}>{anio}</option>
-                    ))}
-                </select>
-            </div>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Días</h4>
+                    <select name="dia" onChange={handleFechaChange} value={fechaSeleccionada.dia}>
+                       <option value="0">Todos</option>
+                        {Array.from({ length: new Date(fechaSeleccionada.anio, fechaSeleccionada.mes + 1, 0).getDate() }, (_, i) => i + 1).map((dia) => (
+                            <option key={dia} value={dia}>{dia}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Meses</h4>
+                    <select name="mes" onChange={handleFechaChange} value={fechaSeleccionada.mes}>
+                        <option value="-1">Todos</option> {/* Agregar opción "Todos" */}
+                        {meses.map((mes, index) => (
+                            <option key={index} value={index}>{mes}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className='filtro'>
+                    <h4 className='filter-section'>Años</h4>
+                    <select name="anio" onChange={handleFechaChange} value={fechaSeleccionada.anio}>
+                        {anios.map((anio) => (
+                            <option key={anio} value={anio}>{anio}</option>
+                        ))}
+                    </select>
+                </div>
 
-            <div className="filtros">
-                <label>
-                    <input
-                        type="checkbox"
-                        name="cotizada"
-                        checked={fechaSeleccionada.cotizada}
-                        onChange={handleFiltroChange}
-                    />
+                <div className="toggle-buttons">
+                  <button
+                    type="button"
+                    className={`toggle-btn ${fechaSeleccionada.cotizada ? 'active' : ''}`}
+                    onClick={() => handleToggleBoton("cotizada")}
+                  >
                     Cotizada
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="efectivo"
-                        checked={fechaSeleccionada.efectivo}
-                        onChange={handleFiltroChange}
-                    />
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-btn ${fechaSeleccionada.efectivo ? 'active' : ''}`}
+                    onClick={() => handleToggleBoton("efectivo")}
+                  >
                     Efectivo
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="bizum"
-                        checked={fechaSeleccionada.bizum}
-                        onChange={handleFiltroChange}
-                    />
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-btn ${fechaSeleccionada.bizum ? 'active' : ''}`}
+                    onClick={() => handleToggleBoton("bizum")}
+                  >
                     Bizum
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="pagado"
-                        checked={fechaSeleccionada.pagado}
-                        onChange={handleFiltroChange}
-                    />
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-btn ${fechaSeleccionada.pagado ? 'active' : ''}`}
+                    onClick={() => handleToggleBoton("pagado")}
+                  >
                     Pagado
-                </label>
+                  </button>
+                </div>
             </div>
-
             <table className='list-citas-table'>
                 <thead>
                     <tr>

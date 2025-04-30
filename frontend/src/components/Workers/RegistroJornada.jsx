@@ -132,16 +132,16 @@ const WorkerPDFUpload = ({ workerId }) => {
 
     return (
         <div className="container-registrojornada">
-            <h1>Registro de Jornada</h1>
+            <h1 className="title-section">Registro de Jornada</h1>
 
             <div className="subir-jornada">
-                <h3>Subir PDF de Registro de Jornada</h3>
+                <h3 className="title-section">Subir PDF de Registro de Jornada</h3>
                 <input type="file" accept="application/pdf" onChange={handleFileChange} />
-                <Boton texto="Subir PDF" onClick={handleUpload} tipo="guardar" />
+                <Boton texto="Subir PDF" onClick={handleUpload}  />
             </div>
 
             <div className="lista-registro-admin">
-                <h3>Tus Registros de jornada subidos</h3>
+                <h3 className="title-section">Tus Registros de jornada subidos</h3>
                 {adminPdfs.length > 0 ? (
                 <div className="descargar-jornada">
                     {adminPdfs.map((pdf, index) => (

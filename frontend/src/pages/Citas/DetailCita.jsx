@@ -127,7 +127,7 @@ function DetailCita() {
 
     return (
         <div className="container-detail-cita">
-            <h1 className="title-detail-cita">Detalle de la Cita</h1>
+            <h1 className="title-section">Detalle de la Cita</h1>
             {isCitaValid ? (
                 <div className="cita-info">
                     <div className="cita-field">

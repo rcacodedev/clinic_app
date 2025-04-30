@@ -119,7 +119,7 @@ const WorkersPage = () => {
 
   return (
     <div className="workers-container">
-      <h1>Gestionar Empleados</h1>
+      <h1 className='title-section'>Gestionar Empleados</h1>
       <Boton texto="Agregar Empleado" onClick={handleOpenModal} />
 
       <CustomModal isOpen={isModalOpen} onRequestClose={handleCloseModal} title="Agregar Empleado">
