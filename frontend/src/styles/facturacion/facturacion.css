@@ -1,0 +1,9 @@
+.container-facturacion {
+    background-color: whitesmoke;
+    padding: 2rem;
+    border-radius: 1rem;
+    max-width: 1200px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    margin-left: 240px;
+    max-width: 88%;
+}

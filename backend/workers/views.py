@@ -229,11 +229,14 @@ class GetPDFs(APIView):
                 "current_page": paginator.page.number if admin_pdfs_paginated or worker_pdfs_paginated else 1
             }, status=status.HTTP_200_OK)
 
+
 class DeletePDF(APIView):
     """Vista para eliminar pdf"""
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, pdf_id, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
+        pdf_id = kwargs.get("pdf_id")  # <-- aquí lo tomas correctamente desde kwargs
+
         # Obtener el registro del PDF
         pdf_registro = get_object_or_404(PDFRegistro, id=pdf_id)
 
@@ -246,17 +249,15 @@ class DeletePDF(APIView):
 
         # Eliminar el archivo físico del sistema
         if pdf_registro.file:
-            file_path = pdf_registro.file.path  # Obtener la ruta absoluta del archivo
-            if os.path.exists(file_path):  # Verificar si el archivo existe
-                os.remove(file_path)  # Eliminar el archivo del sistema
+            file_path = pdf_registro.file.path
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
         # Eliminar el registro de la base de datos
         pdf_registro.delete()
 
         return Response(
-            {
-                "message": "PDF eliminado correctamente."
-            },
+            {"message": "PDF eliminado correctamente."},
             status=status.HTTP_200_OK
         )
 

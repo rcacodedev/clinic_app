@@ -24,7 +24,7 @@ class Worker(models.Model):
 
 class PDFRegistro(models.Model):
     worker = models.ForeignKey(Worker, related_name='pdf_registros', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='media/registro_jornada/', blank=True, null=True)
+    file = models.FileField(upload_to='registro_jornada/', blank=True, null=True)
     created_by = models.ForeignKey(User, related_name='pdf_registros', on_delete=models.CASCADE)
     is_admin_upload = models.BooleanField(default=False)
 

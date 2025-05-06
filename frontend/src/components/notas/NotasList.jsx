@@ -18,16 +18,15 @@ const NotasList = () => {
     const [notificationVisibleUpdate, setNotificationVisibleUpdate] = useState(false)
 
     // Función para cargar las notas
-    const loadNotes = async (page) => {
+    const loadNotes = async (page, order = 'is_important') => {
         try {
-            const data = await fetchNotes(page);
+            const data = await fetchNotes(page, order);
             setNotas(data.results);
-            setTotalPages(data.total_pages)
+            setTotalPages(data.total_pages);
         } catch (error) {
-            console.error('Error al obtener las notas', error)
+            console.error('Error al obtener las notas', error);
         }
     };
-
     // Carga las notas
     useEffect (() => {
         loadNotes(currentPage)
@@ -43,15 +42,18 @@ const NotasList = () => {
     // Guardar nota
     const handleSaveNote = async (newNote) => {
         try {
-            await createNote(newNote);
-            setNotas((prevNotas) => [...prevNotas]);
-            loadNotes();
+            const savedNote = await createNote(newNote);
+            setNotas((prevNotas) => [...prevNotas, savedNote]);  // Agregar la nueva nota al estado
             setIsModalOpenCreate(false)
-            setNotificationVisibleCrear(true)
+            setNotificationVisibleCrear(true);
         } catch (error) {
-            console.error("Error al crear nota", error)
+            console.error("Error al crear nota", error);
+            setNotificationVisibleCrear(false);
+            // Mostrar error
+            alert("Hubo un problema al crear la nota. Intenta nuevamente.");
         }
     };
+
 
     // Eliminar nota
     const handleDeleteNota = async (id) => {
@@ -66,9 +68,12 @@ const NotasList = () => {
 
     // Abrir el modal con la nota seleccionada
     const handleOpenEditModal = (note) => {
-        setSelectedNote(note);
-        setIsModalOpenEdit(true);
+        if (note) {
+            setSelectedNote(note);
+            setIsModalOpenEdit(true);
+        }
     };
+
 
     // Actualizar notas
     const handleUpdateNota = async (updatedNote) => {
@@ -88,15 +93,15 @@ const NotasList = () => {
             <div className="list-notas-container">
               {notas.map((note) => (
                 <div
-                  key={note.id}
-                  className="note-item"
-                  style={{ backgroundColor: note.color }} // Color de fondo dinámico
+                    key={note.id}
+                    className="note-item"
+                    style={{ backgroundColor: note.color }} // Usando el color directamente
                 >
                   <h3 className="note-title">{note.titulo}</h3>
                   <p className="note-contenido">{note.contenido}</p>
                   <div className="botones-notas">
-                    <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} />
-                    <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro" />
+                    <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} aria-label="Editar nota" />
+                    <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro" aria-label="Eliminar nota" />
                   </div>
                 </div>
               ))}

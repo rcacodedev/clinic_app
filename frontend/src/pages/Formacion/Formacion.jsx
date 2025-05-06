@@ -68,7 +68,7 @@ const Formacion = () => {
 
     return (
         <div className="container-formacion">
-            <h1 className="title-formacion">Mi Formación</h1>
+            <h1 className="title-section">Agenda de Formación</h1>
             <div className="formacion-boton-container">
                 <Boton texto="Añadir Formación" onClick={handleCreateModal} tipo="primario"/>
             </div>
@@ -124,7 +124,6 @@ const Formacion = () => {
                 type="success"
             />
             <div className="container-agenda">
-                <h1 className="title-agenda-formacion">Agenda de Formación</h1>
                 <AgendaFormacion formaciones={formacion} fetchFormaciones={fetchFormaciones} />
             </div>
         </div>

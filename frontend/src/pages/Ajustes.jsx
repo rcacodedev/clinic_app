@@ -102,30 +102,23 @@ const Ajustes = () => {
     }));
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setNewPhoto(file);
-    }
-  };
 
-  const handlePhotoUpload = async () => {
-    if (!newPhoto) {
-      setError("No se ha seleccionado ninguna foto.");
-      return;
-    }
-
-    try {
-      const response = await updatePhoto(newPhoto);
-      setUserInfo((prevUserInfo) => ({
-        ...prevUserInfo,
-        photo: response.photo, // Suponiendo que la respuesta contiene la URL de la foto actualizada
-      }));
-      setNewPhoto(null); // Limpiar el estado de la foto seleccionada
-      loadUserInfo();
-    } catch (err) {
-      setError("Error al subir la foto.");
-      console.error(err);
+      try {
+        const response = await updatePhoto(file);
+        setUserInfo((prevUserInfo) => ({
+          ...prevUserInfo,
+          photo: response.photo, // Asegúrate que la API devuelve esto
+        }));
+        setNewPhoto(null);
+        loadUserInfo(); // Opcional: recarga toda la info
+      } catch (err) {
+        setError("Error al subir la foto.");
+        console.error(err);
+      }
     }
   };
 
@@ -145,11 +138,11 @@ const Ajustes = () => {
   return (
     <div className="ajustes-container">
       <div className="info-user">
-        <h1>Perfil de {userInfo.user.first_name} {userInfo.user.last_name}</h1>
+        <h1 className="title-section">Perfil de {userInfo.user.first_name} {userInfo.user.last_name}</h1>
         {/* Foto de perfil */}
         <div className="photo-container">
           <img
-            src={userInfo.photo} // Asegúrate de que haya una foto o usa una por defecto
+            src={userInfo.photo || "/media/foto_perfil/default_photo.jpg"} // Asegúrate de que haya una foto o usa una por defecto
             alt="Foto de perfil"
             className="profile-photo"
             onClick={() => document.getElementById("photoInput").click()} // Al hacer clic en la foto, abre el selector de archivos
@@ -160,11 +153,10 @@ const Ajustes = () => {
             style={{ display: "none" }} // Ocultamos el input de tipo file
             onChange={handlePhotoChange}
           />
-          <Boton onClick={handlePhotoUpload} texto="Subir Foto" />
         </div>
       </div>
-      <div className="update-user-info">
-        <h2>Actualizar Información de Usuario</h2>
+
+      <h2 className="title-section">Actualizar Información de Usuario</h2>
         <form onSubmit={handleUserInfoSubmit} className="user-form">
           {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country", "whatsapp_business_number", "twilio_whatsapp_service_sid", "twilio_integration_verified"]
             .filter((key) => key !== "user" && key !== 'photo') // Filtramos el campo "user" para que nunca se muestre
@@ -173,15 +165,44 @@ const Ajustes = () => {
                 <label htmlFor={key}>{key.replace("_", " ").toUpperCase()}</label>
                 {isEditing ? (
                   <div>
-                    <input
-                      type="text"
-                      id={key}
-                      name={key}
-                      value={userInfo[key]}
-                      onChange={handleUserInfoChange}
-                      placeholder={`Ingresa tu ${key.replace("_", " ")}`}
-                    />
-                    {/* Aquí agregamos las instrucciones solo cuando el campo sea correspondiente */}
+                    {key === 'twilio_whatsapp_service_sid' ? (
+                      <div style={{ position: "relative" }}>
+                        <input
+                          type={isTwilioVisible ? "text" : "password"}
+                          id={key}
+                          name={key}
+                          value={userInfo[key]}
+                          onChange={handleUserInfoChange}
+                          placeholder="SID de Twilio"
+                          style={{ paddingRight: "2.5rem" }}
+                        />
+                        <span
+                          onClick={() => setIsTwilioVisible(!isTwilioVisible)}
+                          style={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            cursor: "pointer",
+                            fontSize: "1.2rem",
+                            userSelect: "none"
+                          }}
+                          title={isTwilioVisible ? "Ocultar SID" : "Mostrar SID"}
+                        >
+                          {isTwilioVisible ? "🙈" : "👁️"}
+                        </span>
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        id={key}
+                        name={key}
+                        value={userInfo[key]}
+                        onChange={handleUserInfoChange}
+                        placeholder={`Ingresa tu ${key.replace("_", " ")}`}
+                      />
+                    )}
+                    {/* Instrucciones específicas */}
                     {key === 'phone' && (
                       <small className="input-help-text">Introduce un nº de un teléfono móvil.</small>
                     )}
@@ -193,27 +214,6 @@ const Ajustes = () => {
                     )}
                     {key === 'whatsapp_business_number' && (
                       <small className="input-help-text">Añadir el teléfono registrado en Twilio (usar antes +34)</small>
-                    )}
-                    {key === 'twilio_whatsapp_service_sid' && (
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => setIsTwilioVisible(!isTwilioVisible)}
-                          className="ver-sid-button"
-                        >
-                          {isTwilioVisible ? "Ocultar SID" : "Ver SID"}
-                        </button>
-                        {isTwilioVisible && (
-                          <input
-                            type="password"
-                            id={key}
-                            name={key}
-                            value={userInfo[key]}
-                            onChange={handleUserInfoChange}
-                            placeholder="SID de Twilio"
-                          />
-                        )}
-                      </div>
                     )}
                   </div>
                 ) : (
@@ -227,7 +227,6 @@ const Ajustes = () => {
             type="button"
             className="submit-button"
             onClick={(e) => {
-              // Aquí pasamos el evento correctamente
               if (isEditing) {
                 handleUserInfoSubmit(e);
               } else {
@@ -238,10 +237,11 @@ const Ajustes = () => {
             {isEditing ? "Guardar Cambios" : "Actualizar Información"}
           </button>
         </form>
-      </div>
 
-      <div className="change-password">
-        <h2>Cambio de Contraseña</h2>
+
+
+
+        <h2 className="title-section">Cambio de Contraseña</h2>
         <form onSubmit={handlePasswordChange} className="password-form">
           <div className="form-group">
             <label htmlFor="currentPassword">Contraseña Actual</label>
@@ -285,8 +285,8 @@ const Ajustes = () => {
             Cambiar Contraseña
           </button>
         </form>
-      </div>
     </div>
+
   );
 };
 

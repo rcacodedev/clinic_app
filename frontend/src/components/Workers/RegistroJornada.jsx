@@ -62,27 +62,22 @@ const WorkerPDFUpload = ({ workerId }) => {
         fetchPDFsAdmins();
     }, [workerId, currentPageWorker, currentPageAdmin]);
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const handleUpload = async () => {
-        if (!selectedFile) {
-            alert("Por favor selecciona un archivo PDF.");
-            return;
-        }
+        setSelectedFile(file);
 
         try {
-            const response = await uploadPDF(workerId, selectedFile);
+            const response = await uploadPDF(workerId, file);
             alert("PDF subido con éxito");
 
-            // Guardamos la URL y la fecha actual
             const newPdf = {
                 url: response.data.file_url,
-                date: new Date() // Tomamos la fecha actual
+                date: new Date()
             };
 
-            setWorkerPdfs([...workerPdfs, newPdf]);
+            setWorkerPdfs(prev => [...prev, newPdf]);
             setIsNotificationVisible(true);
             setSelectedFile(null);
             fetchPDFsWorkers();
@@ -137,7 +132,6 @@ const WorkerPDFUpload = ({ workerId }) => {
             <div className="subir-jornada">
                 <h3 className="title-section">Subir PDF de Registro de Jornada</h3>
                 <input type="file" accept="application/pdf" onChange={handleFileChange} />
-                <Boton texto="Subir PDF" onClick={handleUpload}  />
             </div>
 
             <div className="lista-registro-admin">
@@ -187,6 +181,7 @@ const WorkerPDFUpload = ({ workerId }) => {
                 message="Registro de Jornada enviado correctamente"
                 isVisible={isNotificationVisible}
                 onClose={() => setIsNotificationVisible(false)}
+                type="success"
                 />
         </div>
     );

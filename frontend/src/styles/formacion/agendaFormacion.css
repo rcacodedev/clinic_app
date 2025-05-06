@@ -46,14 +46,18 @@
     grid-template-columns: repeat(7, 1fr);
     font-weight: bold;
     text-align: center;
-    background-color: #ddd;
+    background-color: var(--color-flora);
     padding: 5px 0;
     border-radius: 5px;
+    margin-bottom: 10px;
+    color: whitesmoke;
 }
 
 .weekday {
     padding: 5px;
     text-transform: capitalize;
+    border-right: 2px solid var(--color-vanilla);
+    font-weight: bold;
 }
 
 /* Estilo de cada día en el calendario */
@@ -80,7 +84,7 @@
 }
 
 .formacion-item {
-    background: #e2b3f8;
+    background: var(--color-vanilla);
     color: rgb(0, 0, 0);
     padding: 5px;
     border-radius: 3px;

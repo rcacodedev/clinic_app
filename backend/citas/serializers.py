@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Citas
+from .models import Citas, ConfiguracionPrecioCita
 from patients.models import Patient
 
 class CitasSerializer(serializers.ModelSerializer):
@@ -68,3 +68,10 @@ class CitasSerializer(serializers.ModelSerializer):
             validated_data['worker'] = None
 
         return super().create(validated_data)
+
+class ConfiguracionPrecioCitaSerializer(serializers.ModelSerializer):
+    precio_global = serializers.DecimalField(max_digits=10, decimal_places=2, default=25)
+
+    class Meta:
+        model = ConfiguracionPrecioCita
+        fields = ["precio_global"]

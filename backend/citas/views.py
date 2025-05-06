@@ -7,9 +7,9 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Citas
+from .models import Citas, ConfiguracionPrecioCita
 from workers.models import Worker
-from .serializers import CitasSerializer
+from .serializers import CitasSerializer, ConfiguracionPrecioCitaSerializer
 from userinfo.models import UserInfo
 from twilio.rest import Client
 
@@ -59,18 +59,24 @@ class CitasListCreateAPIView(ListCreateAPIView):
         return queryset.distinct().filter(Q(worker__user=user) | Q(user=user))
 
     def perform_create(self, serializer):
-        """Guardar citas asociadas al usuario actual."""
+        """Guardar citas asociadas al usuario actual y usar el precio global si no se especifica uno."""
         user = self.request.user
 
-        # Asegurarse de que el worker es el mismo que el usuario
-        if user.is_authenticated:
-            # Obtener el objeto Worker relacionado con el usuario
-            try:
-                worker = Worker.objects.get(user=user)
-            except Worker.DoesNotExist:
-                worker = None  # Si el usuario no es un trabajador, no asignar un worker
+        # Obtener precio global desde configuración
+        from .models import ConfiguracionPrecioCita  # importa aquí o en la cabecera
+        config = ConfiguracionPrecioCita.objects.first()
+        precio_global = config.precio_global if config else 25  # valor por defecto si no hay config
 
-            # Si el worker es un trabajador, asignar ese worker a la cita
+        # Obtener el objeto Worker relacionado con el usuario
+        try:
+            worker = Worker.objects.get(user=user)
+        except Worker.DoesNotExist:
+            worker = None
+
+        # Si el frontend no manda un precio, usar el precio global
+        if 'precio' not in serializer.validated_data:
+            serializer.save(user=user, worker=worker, precio=precio_global)
+        else:
             serializer.save(user=user, worker=worker)
 
 class CitasDetailAPIView(RetrieveUpdateDestroyAPIView):
@@ -138,3 +144,11 @@ class EnviarRecordatorioWhatsAppAPIView(APIView):
                 })
 
         return Response({"mensajes_enviados": mensajes_enviados}, status=200)
+
+class ConfiguracionPrecioGlobal(RetrieveUpdateDestroyAPIView):
+    queryset = ConfiguracionPrecioCita.objects.all()
+    serializer_class = ConfiguracionPrecioCitaSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return ConfiguracionPrecioCita.objects.first()

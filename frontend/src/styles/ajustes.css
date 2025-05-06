@@ -3,63 +3,45 @@
 }
 
 .ajustes-container {
-    max-width: 600px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-family: Arial, sans-serif;
   }
 
-h1 {
-  text-align: center;
-  color: #333;
-}
-h2 {
-  text-align: center;
-  color: #555;
-  margin-bottom: 20px;
-}
 .password-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
+
 label {
   font-weight: bold;
   margin-bottom: 5px;
 }
 input {
   padding: 10px;
-  border: 1px solid #970c0c;
+  border: 1px solid var(--color-tan);
   border-radius: 5px;
   font-size: 16px;
+  width: 100%;
 }
+
 input:focus {
-  border-color: #007bff;
+  border-color: var(--color-tan);
   outline: none;
 }
 
-.submit-button {
-  padding: 10px;
-  background-color: #a23fff;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.submit-button:hover {
-  background-color: #8337ca;
-}
-
 button.submit-button {
-  background-color: #a23fff !important; /* Aquí aseguras que tu color se aplique */
+  background-color: var(--color-flora) !important; /* Aquí aseguras que tu color se aplique */
   color: white !important;
 }
 
@@ -76,23 +58,13 @@ button.submit-button {
 
 /* Contenedor del formulario */
 .update-user-info {
-  background-color: #f4f7fc;
-  padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 20px auto;
-  font-family: 'Arial', sans-serif;
+  max-width: 1200px;
   width: 100%;
-}
-
-/* Título del formulario */
-.update-user-info h2 {
-  text-align: center;
-  font-size: 24px;
-  color: #333;
   margin-bottom: 20px;
 }
+
 
 /* Contenedor de cada grupo de formulario */
 .form-group {
@@ -104,7 +76,7 @@ button.submit-button {
 .form-group label {
   display: block;
   font-size: 14px;
-  color: #b392d8;
+  color: var(--color-black);
   margin-bottom: 8px;
   font-weight: bold;
 }
@@ -117,6 +89,7 @@ button.submit-button {
   background-color: #eaeaea;
   padding: 8px;
   border-radius: 5px;
+  margin-bottom: 20px;
 }
 
 /* Estilo de la foto de perfil */
@@ -143,9 +116,5 @@ button.submit-button {
   font-style: italic;
   display: inline-block;
   width: 100%;
-}
-
-.input-help-text:hover {
-  color: #782da3;
 }
 

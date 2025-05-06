@@ -74,6 +74,30 @@ const sendWhatsapp = async (citas_ids) => {
   }
 };
 
+// Configurar Precio global citas
+// Obtener el precio global de las citas
+export const obtenerPrecioGlobal = async () => {
+  try {
+    const response = await api.get(`${API_URL}configurar-precioglobal/`);
+    return response.data.precio_global;
+  } catch (error) {
+    console.error("Error al obtener el precio global:", error);
+    throw error;
+  }
+};
+
+// Actualizar el precio global de las citas
+export const actualizarPrecioGlobal = async (nuevoPrecio) => {
+  try {
+    const response = await api.put(`${API_URL}configurar-precioglobal/`, {
+      precio_global: nuevoPrecio,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar el precio global:", error);
+    throw error;
+  }
+};
 export default {
   getCitas,
   getCitaDetail,
@@ -81,4 +105,6 @@ export default {
   updateCita,
   deleteCita,
   sendWhatsapp,
+  obtenerPrecioGlobal,
+  actualizarPrecioGlobal,
 }

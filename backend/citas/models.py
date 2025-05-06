@@ -11,7 +11,7 @@ class Citas(models.Model):
     finalizar = models.TimeField()
     descripcion = models.TextField(blank=True, null=True)
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE, related_name='appointments', null=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=25)
     cotizada = models.BooleanField(default=False)
     efectivo = models.BooleanField(default=True)
     bizum = models.BooleanField(default=False)
@@ -19,3 +19,9 @@ class Citas(models.Model):
 
     def __str__(self):
         return f"Cita de {self.patient.nombre} {self.patient.primer_apellido} el {self.fecha} a las {self.comenzar}"
+
+class ConfiguracionPrecioCita(models.Model):
+    precio_global = models.DecimalField(max_digits=10, decimal_places=2, default=25)
+
+    def __str__(self):
+        return f"Precio Global de las citas: {self.precio_global}"
