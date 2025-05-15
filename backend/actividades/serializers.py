@@ -22,9 +22,15 @@ class UserSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)  # Usuario que crea la actividad
     patients = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), many=True)
-    monitor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)
+    monitor = UserSerializer(read_only=True)  # Aquí serializas el monitor completo
+    monitor_id = serializers.PrimaryKeyRelatedField(
+        source='monitor',  # Relaciona el campo con el monitor
+        queryset=User.objects.all(),
+        write_only=True,  # Solo para escritura
+        required=False,
+        allow_null=True  # Permite que no se asigne monitor
+    )
 
-    # Campos adicionales que ahora vas a incluir
     recurrence_days = serializers.ListField(
         child=serializers.ChoiceField(choices=[(day, day) for day in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']])
     )
@@ -34,7 +40,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ['id', 'name', 'description', 'start_date', 'start_time', 'end_time', 'recurrence_days', 'user', 'patients', 'monitor', 'precio']
+        fields = ['id', 'name', 'description', 'start_date', 'start_time', 'end_time', 'recurrence_days', 'user', 'patients', 'monitor', 'precio', 'monitor_id']
 
     def create(self, validated_data):
         patients_data = validated_data.pop('patients')
@@ -50,15 +56,12 @@ class ActivitySerializer(serializers.ModelSerializer):
             instance.patients.set(patients_data)
         instance.save()
         return instance
-
-
 class CreateActivitySerializer(serializers.ModelSerializer):
-    monitor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    monitor = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, allow_null=True)  # Monitor opcional
 
     class Meta:
         model = Activity
         fields = ['id','name', 'description','start_date', 'monitor']
-
 
     def create(self, validated_data):
         return Activity.objects.create(**validated_data)

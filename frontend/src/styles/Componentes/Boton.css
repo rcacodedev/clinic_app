@@ -16,12 +16,12 @@
 
   /* Variantes de color */
   .boton-primario {
-    background-color: var(--color-flora) !important;
+    background-color: var(--color-vanilla) !important;
     color: #fff;
   }
 
   .boton-primario:hover {
-    background-color: rgb(58, 19, 66) !important;
+    background-color: var(--color-tan) !important;
   }
 
   .boton-peligro {

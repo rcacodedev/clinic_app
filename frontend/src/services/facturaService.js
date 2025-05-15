@@ -50,6 +50,10 @@ export const getFacturasByPatient = async (pacienteID) => {
         const response = await api.get(url, getAuthHeaders());
         return response.data;
     } catch (error) {
+        // Si el backend responde con un mensaje específico, no lo trates como error
+        if (error.response && error.response.data.message === "No hay facturas para este paciente") {
+            return []; // Devuelve una lista vacía sin lanzar error
+        }
         handleApiError(error, "Error al obtener las facturas del paciente");
         return { results: [], total_pages: 1 };
     }

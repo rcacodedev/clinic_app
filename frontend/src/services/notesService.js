@@ -16,9 +16,19 @@ const fetchData = async (url) => {
 }
 
 // Obtener todas las notas
-export const fetchNotes = async (page = 1, order = '-is_important,-reminder_date,-created_at') => {
+export const fetchNotes = async (page = 1, order = '-is_important,-reminder_date,-created_at', filters = {}) => {
     try {
-        const response = await api.get(`${URL_BACKEND}?page=${page}&order=${encodeURIComponent(order)}`, getAuthHeaders());
+        const params = new URLSearchParams({ page, order });
+
+        if (filters.is_important !== undefined) {
+            params.append('is_important', filters.is_important);
+        }
+
+        if (filters.reminder_date) {
+            params.append('reminder_date', filters.reminder_date);
+        }
+
+        const response = await api.get(`${URL_BACKEND}?${params.toString()}`, getAuthHeaders());
         return response.data;
     } catch (error) {
         handleApiError(error, 'Error al obtener las notas');

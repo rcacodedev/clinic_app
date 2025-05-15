@@ -179,8 +179,6 @@ class FacturasPorPacienteView(generics.ListAPIView):
             return Response({"error": "Se requiere un ID de paciente"}, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"message": "No hay facturas para este paciente"}, status=status.HTTP_404_NOT_FOUND)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -198,3 +196,4 @@ class ConfiguracionFacturaView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return ConfiguracionFactura.objects.first()
+

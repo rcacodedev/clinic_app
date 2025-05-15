@@ -45,7 +45,6 @@ const EditarNotaModal = ({ isOpen, onClose, onSave, note }) => {
 
     // No mostrar el modal si no está abierto
     if (!isOpen) return null;
-    console.log('Modal abierto para editar', note); // Verifica que el modal se esté abriendo con los datos correctos
 
     return (
         <CustomModal

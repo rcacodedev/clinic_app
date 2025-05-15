@@ -169,7 +169,7 @@ const ListCitas = ({ citas, userId }) => {
                     className={`toggle-btn ${fechaSeleccionada.cotizada ? 'active' : ''}`}
                     onClick={() => handleToggleBoton("cotizada")}
                   >
-                    Cotizada
+                    📋
                   </button>
                   <button
                     type="button"
@@ -220,7 +220,7 @@ const ListCitas = ({ citas, userId }) => {
                                             className={`toggle-btn ${cita.cotizada ? 'active' : ''}`}
                                             onClick={() => handleToggleChange(cita.id, 'cotizada')}
                                         >
-                                            Cotizada
+                                            📋
                                         </button>
 
                                         <button

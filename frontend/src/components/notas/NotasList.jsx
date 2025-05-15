@@ -16,11 +16,15 @@ const NotasList = () => {
     const [notificationVisibleCrear, setNotificationVisibleCrear] = useState(false)
     const [notificationVisibleDelete, setNotificationVisibleDelete] = useState(false)
     const [notificationVisibleUpdate, setNotificationVisibleUpdate] = useState(false)
+    const [filters, setFilters] = useState({
+        is_important: true,  // true, false o undefined
+        reminder_date: '',        // formato 'YYYY-MM-DD'
+    });
 
     // Función para cargar las notas
-    const loadNotes = async (page, order = 'is_important') => {
+    const loadNotes = async (page, order = '-is_important,-reminder_date,-created_at') => {
         try {
-            const data = await fetchNotes(page, order);
+            const data = await fetchNotes(page, order, filters);
             setNotas(data.results);
             setTotalPages(data.total_pages);
         } catch (error) {
@@ -30,7 +34,7 @@ const NotasList = () => {
     // Carga las notas
     useEffect (() => {
         loadNotes(currentPage)
-    }, [currentPage])
+    }, [currentPage, filters])
 
     // Manejo de paginación
     const handlePageChange = (newPage) => {
@@ -86,10 +90,25 @@ const NotasList = () => {
         }
     }
 
+    const aplicarFiltros = (nuevosFiltros) => {
+        setCurrentPage(1); // Resetea la paginación a la primera página
+        setFilters(nuevosFiltros);
+    };
+
     return (
         <div className="container-notas">
             <h2 className="title-section">Mis notas</h2>
-            <Boton texto="Añadir nota" onClick={() => setIsModalOpenCreate(true)} />
+            <div className="botones-notas">
+                <Boton texto="Añadir nota" onClick={() => setIsModalOpenCreate(true)} />
+                <div className="filtros-notas">
+                    <Boton texto="Todas" onClick={() => aplicarFiltros({ is_important: undefined, reminder_date: '' })} tipo="primario" />
+                    <Boton texto="Importantes" onClick={() => aplicarFiltros({ is_important: true, reminder_date: '' })} tipo="primario" />
+                    <Boton texto="Con recordatorio hoy" onClick={() => {
+                        const today = new Date().toISOString().split('T')[0];
+                        aplicarFiltros({ is_important: undefined, reminder_date: today });
+                    }} tipo="primario" />
+                </div>
+            </div>
             <div className="list-notas-container">
               {notas.map((note) => (
                 <div
@@ -99,7 +118,7 @@ const NotasList = () => {
                 >
                   <h3 className="note-title">{note.titulo}</h3>
                   <p className="note-contenido">{note.contenido}</p>
-                  <div className="botones-notas">
+                  <div className="botones-notas-inside">
                     <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} aria-label="Editar nota" />
                     <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro" aria-label="Eliminar nota" />
                   </div>

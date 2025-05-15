@@ -22,7 +22,7 @@ const CrearNotaModal = ({ isOpen, onClose, onSave }) => {
         const formattedReminderDate = reminderDate ? new Date(reminderDate).toISOString().split("T")[0] : null;
         console.log("Fecha de recordatorio enviada:", formattedReminderDate);
 
-        const nuevaNota = { titulo, contenido, reminder_date: formattedReminderDate, color, isImportant };
+        const nuevaNota = { titulo, contenido, reminder_date: formattedReminderDate, color, is_important: isImportant };
         console.log("Datos enviados al backend:", nuevaNota);
 
         onSave(nuevaNota);

@@ -48,23 +48,24 @@ const Activity = () => {
     };
 
     const handleCreateActivity = async (activityData) => {
-        console.log('Datos de la actividad a crear:', activityData);
         try {
             const newActivity = await createActivity(activityData);
             alert('¡Actividad creada correctamente!');
             updateActivities(newActivity);  // Actualiza la lista
             setIsModalOpen(false);         // Cierra el modal
+            console.log(newActivity)
         } catch (error) {
             console.error('Error al crear la actividad:', error.response ? error.response.data : error);
             alert('Hubo un error al crear la actividad.');
         }
     };
 
+
     return (
         <>
             <div className="activity-container">
-                <h1>Gestión de Actividades</h1>
-                <Boton texto="Añadir Actividad" onClick={toggleModal}  className="boton-actividad" />
+                <h1 className='title-section'>Gestión de Actividades</h1>
+                <Boton texto="Añadir Actividad" onClick={toggleModal} />
 
                 {currentUserId && (
                     <CrearActividadModal
@@ -76,7 +77,6 @@ const Activity = () => {
                 )}
 
                 <div>
-                    <h1>Lista de Actividades</h1>
                     <ActivityList activities={activities} />
                 </div>
             </div>

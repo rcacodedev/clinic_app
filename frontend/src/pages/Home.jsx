@@ -181,7 +181,7 @@ function Home() {
                                                     className={`toggle-btn ${cita.cotizada ? 'active' : ''}`}
                                                     onClick={() => handleToggleChange(cita.id, 'cotizada', setCitasHoy, citasHoy)}
                                                 >
-                                                    Cotizada
+                                                    📋
                                                 </button>
                                                 <button
                                                     className={`toggle-btn ${cita.efectivo ? 'active' : ''}`}

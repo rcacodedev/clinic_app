@@ -11,11 +11,17 @@ const ActivityList = ({ activities }) => { // Recibe activities como prop
                 <div className="actividades-cards">
                     {activities.map((actividad) => (
                         <div className="actividad-card" key={actividad.id}>
-                            <Link to={`/api/actividades/${actividad.id}`}>
-                                <h3>{actividad.name}</h3>
-                                <p>{actividad.description}</p>
-                                <p>{actividad.start_date}</p>
-                            </Link>
+                        <Link to={`/api/actividades/${actividad.id}`}>
+                          <h3 className='title-card'>{actividad.name}</h3>
+                          <p className='description-card'>{actividad.description}</p>
+                          <p className='hora-card'>Hora de comienzo: {actividad.start_time}</p>
+                          {/* Ahora accedes correctamente al nombre del monitor */}
+                          {actividad.monitor ? (
+                            <p className='monitor-card'>Monitor: {actividad.monitor.first_name} {actividad.monitor.last_name}</p>
+                          ) : (
+                            <p>No asignado monitor</p>
+                          )}
+                        </Link>
                         </div>
                     ))}
                 </div>

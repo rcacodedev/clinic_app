@@ -33,7 +33,7 @@ const CustomModal = ({
       style={modalStyle}
       shouldReturnFocusAfterClose={true}
     >
-      {title && <h2 className="modal-title">{title}</h2>}
+      {title && <h2 className="title-section">{title}</h2>}
       <div className="modal-body">{children}</div>
       <div className="modal-buttons">
         {actions.map((action, index) => (

@@ -1,200 +1,197 @@
-/* actividadesProfile.css */
+:root {
+  --primary-color: #4CAF50;
+  --danger-color: #f44336;
+  --light-bg: #f9f9f9;
+  --input-border: #ccc;
+  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --radius: 8px;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-/* Contenedor principal */
 .actividad-profile {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: 'Arial', sans-serif;
-    background-color: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: var(--font-main);
+  color: #333;
 }
 
-/* Títulos */
-.actividad-profile h2 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 20px;
-    font-weight: 600;
+.title-section {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #222;
 }
 
-/* Sección de información de la actividad */
 .actividad-info {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  background-color: var(--light-bg);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+  border: 1px solid #eee;
+  display: grid;
+  gap: 1.5rem;
 }
 
-/* Estilos de los campos editables */
-.actividad-info .editable-field {
-    margin-bottom: 20px;
+.actividad-info .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.editable-field label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #555;
+.actividad-info label {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
 }
 
-.editable-field input,
-.editable-field select,
-.editable-field textarea {
-    width: 100%;
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    background-color: #fff;
-    transition: border-color 0.3s ease;
+.actividad-info input,
+.actividad-info textarea,
+.actividad-info select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  background-color: #fff;
 }
 
-.editable-field input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
+.actividad-info textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
-.editable-field input:focus,
-.editable-field select:focus,
-.editable-field textarea:focus {
-    border-color: #4CAF50;
+/* Separador visual entre grupos */
+.actividad-info .section-divider {
+  height: 1px;
+  background-color: #ddd;
+  margin: 1rem 0;
 }
 
-.editable-field button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.editable-field button:hover {
-    background-color: #45a049;
+.form-actions button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-/* Sección de asignación de pacientes */
+.form-actions button:last-child {
+  background-color: #f44336;
+}
+
+.form-actions button:hover {
+  opacity: 0.9;
+}
+
 .pacientes-section {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    margin-top: 20px;
+  margin-top: 2rem;
 }
 
-.pacientes-section h3 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 15px;
-    font-weight: 600;
+.pacientes-section input[type="text"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
 }
 
-/* Caja de búsqueda */
-.pacientes-section .search-box {
-    margin-bottom: 15px;
+.columns {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-.pacientes-section .search-box input {
-    width: 100%;
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    background-color: #fff;
-    transition: border-color 0.3s ease;
+.left-column,
+.right-column {
+  flex: 1 1 45%;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+  border: 1px solid #eaeaea;
 }
 
-.pacientes-section .search-box input:focus {
-    border-color: #4CAF50;
+.left-column h4,
+.right-column h4 {
+  margin-bottom: 1rem;
+  color: #333;
 }
 
-/* Diseño de columnas para pacientes disponibles y asignados */
-.pacientes-section .columns {
-    display: flex;
-    justify-content: space-between;
-    gap: 30px;
+.left-column ul,
+.right-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* Columna de pacientes */
-.pacientes-section .left-column,
-.pacientes-section .right-column {
-    flex: 1;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.left-column li,
+.right-column li {
+  margin-bottom: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  background-color: #fefefe;
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.pacientes-section .left-column ul,
-.pacientes-section .right-column ul {
-    list-style-type: none;
-    padding: 0;
+.left-column button,
+.right-column button {
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.pacientes-section .left-column li,
-.pacientes-section .right-column li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 6px;
+.right-column button {
+  background-color: var(--danger-color);
 }
 
-.pacientes-section .left-column button,
-.pacientes-section .right-column button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
+.left-column button:hover,
+.right-column button:hover {
+  opacity: 0.9;
 }
 
-.pacientes-section .left-column button:hover,
-.pacientes-section .right-column button:hover {
-    background-color: #45a049;
+.dias-semana-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
 }
 
-.pacientes-section .left-column li:hover,
-.pacientes-section .right-column li:hover {
-    background-color: #f1f1f1;
+.dias-semana-toggle button {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--input-border);
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-/* Responsividad */
-@media (max-width: 768px) {
-    .actividad-info {
-        padding: 15px;
-    }
-
-    .pacientes-section .columns {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .pacientes-section .left-column,
-    .pacientes-section .right-column {
-        padding: 10px;
-    }
+.dias-semana-toggle button.selected {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
 }
 
-@media (max-width: 480px) {
-    .actividad-profile {
-        padding: 15px;
-    }
-
-    .actividad-profile h2 {
-        font-size: 1.5rem;
-    }
-
-    .editable-field button {
-        width: 100%;
-        font-size: 1rem;
-    }
+.dias-semana-toggle button:hover {
+  background-color: #e0e0e0;
 }

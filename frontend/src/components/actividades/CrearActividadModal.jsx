@@ -30,8 +30,6 @@ const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
               // Decodificamos el token para obtener los datos del usuario
               const decodedUser = decodeJWT(token);
 
-              console.log('Usuario decodificado:', decodedUser)
-
               if (!decodedUser) {
                   console.error("No se pudo decodificar el token");
                   return;
@@ -43,7 +41,6 @@ const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
                   id: decodedUser.user_id,
                   name: decodedUser.first_name && decodedUser.last_name ? `${decodedUser.first_name} ${decodedUser.last_name}` : "Usuario Desconocido",
               };
-              console.log('Usuario creador:', currentUser)
 
               // Ahora hacemos la llamada a la API para obtener los trabajadores
               const response = await fetchWorkers();  // Suponiendo que fetchWorkers es la función para obtener la lista de trabajadores
@@ -56,7 +53,7 @@ const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
 
               // Formateamos la lista de trabajadores
               const formattedWorkers = response.results.map(worker => ({
-                  id: worker.id,
+                  id: worker.user.id,
                   name: `${worker.user.first_name} ${worker.user.last_name}`,
               }));
 
@@ -111,7 +108,6 @@ const CrearActividadModal = ({ isOpen, onClose, onCreate, currentUserId }) => {
                 ...activityData,
                 start_date: formattedStartDate,  // Enviar la fecha en formato ISO
             };
-            console.log("Datos enviados", dataToSend)
             await onCreate(dataToSend);
             onClose();
         } catch (error) {

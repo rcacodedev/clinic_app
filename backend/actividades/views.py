@@ -1,48 +1,40 @@
-from rest_framework import generics, permissions, serializers
+from rest_framework import generics, permissions
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from .models import Activity
-from workers.models import Worker
 from .serializers import ActivitySerializer, CreateActivitySerializer
 from .permissions import IsAdminGroup
+from rest_framework.exceptions import NotFound
 
 class ActivityListCreateView(generics.ListCreateAPIView):
     queryset = Activity.objects.all()
-    serializer_class = CreateActivitySerializer
     permission_classes = [IsAdminGroup]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateActivitySerializer
+        return ActivitySerializer  # Este devuelve el monitor como objeto
 
     def perform_create(self, serializer):
         monitor_id = self.request.data.get('monitor', None)
         monitor = None
 
         if monitor_id:
-            try:
-                monitor = User.objects.get(id=monitor_id)
-            except User.DoesNotExist:
-                raise serializers.ValidationError("El monitor seleccionado no es válido.")
+            monitor = get_object_or_404(User, id=monitor_id)
 
-        # Si se seleccionó un monitor, asegurarse de que sea un `Worker` del `User` actual, o el `User` mismo
-        if monitor and not (monitor == self.request.user or Worker.objects.filter(user=monitor).exists()):
-            raise serializers.ValidationError("El monitor seleccionado debe ser un 'Worker' creado por ti, o el propio 'User'.")
-
-        # Guardamos la actividad con el monitor (si se seleccionó)
         serializer.save(user=self.request.user, monitor=monitor)
 
 class ActivityRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    # GET: Obtener detalles de una actividad específica.
-    # PUT/PATCH: Actualizar una actividad (solo Admin).
-    # DELETE: Eliminar una actividad (solo Admin).
-
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
-    permission_classes = [IsAdminGroup]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAdminGroup()]
+        return [permissions.IsAuthenticated()]
 
     def get_object(self):
-        # Aquí obtenemos la actividad normalmente
         activity = super().get_object()
-
-        # Si necesitas trabajar con el monitor, accedes directamente
-        monitor = activity.monitor
-        if monitor is None:
-            return Response({'detail': 'No monitor assigned.'}, status=404)
-
-        return activity  # Ya no necesitamos verificar si es un "Worker" o no.
+        if activity.monitor is None:
+            raise NotFound(detail='No se ha asignado un monitor a esta actividad.')
+        return activity

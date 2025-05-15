@@ -12,6 +12,9 @@
   margin-bottom: 10px;
 }
 
+
+
+
 button {
   padding: 8px 12px;
   background-color: #6200ea;
@@ -32,6 +35,8 @@ button:hover {
   table-layout: fixed; /* Evita expansión de celdas */
 }
 
+
+
 .agenda-header-month {
   text-align: center;
   font-size: 1.2rem;
@@ -51,7 +56,6 @@ button:hover {
   font-weight: bold;
   background-color: var(--color-tan);
   white-space: nowrap;
-
 }
 
 .agenda-today {
