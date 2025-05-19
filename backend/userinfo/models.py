@@ -11,7 +11,7 @@ class UserInfo(models.Model):
     city = models.CharField(max_length=200, blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
     segundo_apellido = models.CharField(max_length=200, blank=True)
-    photo = models.ImageField(upload_to='foto_perfil/', blank=True, null=True, default='default_photo.jpg')
+    photo = models.ImageField(upload_to='foto_perfil/', blank=True, null=True, default='static/img/default_photo.jpg')
     whatsapp_business_number = models.CharField(max_length=15, blank=True, null=True)
     twilio_whatsapp_service_sid = models.CharField(max_length=255, blank=True, null=True)
     twilio_integration_verified = models.BooleanField(default=False)

@@ -18,6 +18,7 @@ import FacturasPage from "./pages/Facturas/Facturacion"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
 import Documentacion from "./pages/Documentacion"
+import './index.css'
 
 function Logout() {
   localStorage.clear();

@@ -96,43 +96,103 @@ const NotasList = () => {
     };
 
     return (
-        <div className="container-notas">
-            <h2 className="title-section">Mis notas</h2>
-            <div className="botones-notas">
-                <Boton texto="Añadir nota" onClick={() => setIsModalOpenCreate(true)} />
-                <div className="filtros-notas">
-                    <Boton texto="Todas" onClick={() => aplicarFiltros({ is_important: undefined, reminder_date: '' })} tipo="primario" />
-                    <Boton texto="Importantes" onClick={() => aplicarFiltros({ is_important: true, reminder_date: '' })} tipo="primario" />
-                    <Boton texto="Con recordatorio hoy" onClick={() => {
-                        const today = new Date().toISOString().split('T')[0];
-                        aplicarFiltros({ is_important: undefined, reminder_date: today });
-                    }} tipo="primario" />
-                </div>
-            </div>
-            <div className="list-notas-container">
-              {notas.map((note) => (
-                <div
-                    key={note.id}
-                    className="note-item"
-                    style={{ backgroundColor: note.color }} // Usando el color directamente
+        <>
+            <div className="max-w-5xl mx-auto px-4 py-8">
+              {/* Título */}
+              <h2 className="text-3xl font-bold text-black mb-8 border-b-4 border-tan text-left">
+                Mis Notas
+              </h2>
+
+              {/* Botones superiores */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                {/* Añadir nota */}
+                <button
+                  className="bg-negro hover:bg-tan text-white font-semibold px-4 py-2 rounded shadow"
+                  onClick={() => setIsModalOpenCreate(true)}
                 >
-                  <h3 className="note-title">{note.titulo}</h3>
-                  <p className="note-contenido">{note.contenido}</p>
-                  <div className="botones-notas-inside">
-                    <Boton texto="Editar" onClick={() => handleOpenEditModal(note)} aria-label="Editar nota" />
-                    <Boton texto="Eliminar" onClick={() => handleDeleteNota(note.id)} tipo="peligro" aria-label="Eliminar nota" />
-                  </div>
+                  Añadir Nota
+                </button>
+
+                {/* Filtros */}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="bg-vanilla hover:bg-tan hover:text-white text-black font-medium px-3 py-2 rounded"
+                    onClick={() => aplicarFiltros({ is_important: undefined, reminder_date: '' })}
+                  >
+                    Todas
+                  </button>
+                  <button
+                    className="bg-vanilla hover:bg-tan hover:text-white text-black font-medium px-3 py-2 rounded"
+                    onClick={() => aplicarFiltros({ is_important: true, reminder_date: '' })}
+                  >
+                    Importantes
+                  </button>
+                  <button
+                    className="bg-vanilla hover:bg-tan hover:text-white text-black font-medium px-3 py-2 rounded"
+                    onClick={() => {
+                      const today = new Date().toISOString().split('T')[0];
+                      aplicarFiltros({ is_important: undefined, reminder_date: today });
+                    }}
+                  >
+                    Con recordatorio hoy
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              {/* Lista de notas */}
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {notas.map((note) => (
+                  <div
+                    key={note.id}
+                    className="rounded-lg shadow-md p-4 text-black"
+                    style={{ backgroundColor: note.color }}
+                  >
+                    <h3 className="text-xl text-black font-semibold mb-2">{note.titulo}</h3>
+                    <p className="text-base mb-4">{note.contenido}</p>
+                    <p className="text-base font-semibold">{note.reminder_date}</p>
+
+                    <div className="flex justify-end gap-2">
+                      <button
+                        className="bg-negro hover:bg-tan text-white font-semibold px-3 py-1 rounded"
+                        onClick={() => handleOpenEditModal(note)}
+                        aria-label="Editar nota"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="bg-red-700 hover:bg-red-800 text-white font-semibold px-3 py-1 rounded"
+                        onClick={() => handleDeleteNota(note.id)}
+                        aria-label="Eliminar nota"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Paginación */}
+              <div className="flex justify-center items-center gap-4 mt-10">
+                <button
+                  className="bg-negro hover:bg-tan text-white font-medium px-4 py-2 rounded disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Anterior
+                </button>
+                <span className="text-lg font-medium">{currentPage}</span>
+                <button
+                  className="bg-negro hover:bg-tan text-white font-medium px-4 py-2 rounded disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                </button>
+              </div>
             </div>
 
-            <div className="pagination">
-                <Boton texto="Anterior" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
-                <span>{currentPage}</span>
-                <Boton texto="Siguiente" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
-            </div>
 
-            {/* Modal de crear nota */}
+
             <CrearNotaModal
                 isOpen={isModalOpenCreate}
                 onClose={() => setIsModalOpenCreate(false)}
@@ -148,7 +208,8 @@ const NotasList = () => {
             <Notification message="Nota Creada correctamente" isVisible={notificationVisibleCrear} onClose={() => setNotificationVisibleCrear(false)} type="success"/>
             <Notification message="Nota Eliminada correctamente" isVisible={notificationVisibleDelete} onClose={() => setNotificationVisibleDelete(false)} type="error" />
             <Notification message="Nota Editada correctamente" isVisible={notificationVisibleUpdate} onClose={() => setNotificationVisibleUpdate(false)} type="success" />
-        </div>
+        </>
+
     );
 }
 
