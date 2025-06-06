@@ -14,4 +14,4 @@ class Formacion(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.titulo} - {self.user.username} ({self.fecha})"
+        return f"{self.titulo} - {self.user.username} ({self.fecha_inicio})"

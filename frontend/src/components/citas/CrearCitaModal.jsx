@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import citasService from "../../services/citasService";
-import patientService from "../../services/patientService";
+import { getPacientes,  } from "../../services/patientService";
 import Boton from "../Boton";
 import CustomModal from "../Modal";
-import '../../styles/citas/crearCitasModal.css'
+
 
 const initialFormState = {
   patient_name_input: "",
@@ -38,7 +38,7 @@ const CreateCitaModal = ({ showModal, onClose, refreshCitas, showDateTimeFields,
     if (name === "patient_name_input" && value.length >= 1) {
       setLoading(true);
       try {
-        const patientsData = await patientService.getPatients({
+        const patientsData = await getPacientes({
           searchTerm: value,
         });
         if (patientsData.results) {

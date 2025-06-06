@@ -9,7 +9,7 @@ import Agenda from '../../components/Agenda';
 import Boton from '../../components/Boton';
 import EditarCitaModal from '../../components/Workers/EditarCitaWorker';
 import WorkerPDFUpload from '../../components/Workers/RegistroJornada';
-import '../../styles/Workers/workerProfile.css';
+
 
 const WorkerProfile = () => {
   const { id } = useParams();

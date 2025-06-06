@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { uploadPDF, getPDF, deletePDF } from "../../services/workerService";
 import Boton from '../Boton'
-import "../../styles/Workers/registrojornada.css";
+
 import Notification from "../Notification";
 
 const WorkerPDFUpload = ({ workerId }) => {

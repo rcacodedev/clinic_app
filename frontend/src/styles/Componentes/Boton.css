@@ -16,7 +16,7 @@
 
   /* Variantes de color */
   .boton-primario {
-    background-color: var(--color-vanilla) !important;
+    background-color: var(--color-black) !important;
     color: #fff;
   }
 
@@ -53,12 +53,12 @@
 
   /* Estilo por defecto */
   .boton-default {
-    background-color: var(--color-flora) !important;
+    background-color: var(--color-black) !important;
     color: #fff;
   }
 
   .boton-default:hover {
-    background-color: #6e6b388f !important;
+    background-color: var(--color-tan) !important;
   }
 
   .boton-disabled {

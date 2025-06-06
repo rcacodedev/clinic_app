@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/Componentes/Boton.css'; // Importamos el archivo CSS
+
 
 const Boton = ({ texto, onClick, tipo = "default", disabled = false, ...props }) => {
   // Definimos las clases dinámicamente según el tipo y si está deshabilitado

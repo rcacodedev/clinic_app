@@ -5,12 +5,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db import IntegrityError
-from django.contrib.auth.models import Group
 from .models import Worker, PDFRegistro
 from .serializers import WorkerSerializer
-from citas.models import Citas  # Importar modelo de citas
-from citas.serializers import CitasSerializer # Importar serializer de citas
-from backend.permissions import IsAdmin  # Tu permiso personalizado para administradores
+from citas.models import Cita
+from citas.serializers import CitaSerializer
+from backend.permissions import IsAdminOrReadOnlyForWorkers
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -22,161 +21,245 @@ import os
 logger = logging.getLogger(__name__)
 
 class CustomPagination(PageNumberPagination):
-    page_size = 5  # Número de PDFs por página
+    page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 10
 
-# Vista para listar y crear trabajadores
+@api_view(['GET'])
+def get_worker_by_user(request, user_id):
+    try:
+        worker = Worker.objects.get(user__id=user_id)
+    except Worker.DoesNotExist:
+        return Response({'detail': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = WorkerSerializer(worker)
+    return Response(serializer.data)
+
+
+class WorkerIdFromUserId(APIView):
+    def get(self, request, user_id):
+        try:
+            worker = Worker.objects.get(user__id=user_id)
+        except Worker.DoesNotExist:
+            return Response({'detail': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'worker_id': worker.id})
+
 class WorkerListCreateView(ListCreateAPIView):
     queryset = Worker.objects.all()
     serializer_class = WorkerSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnlyForWorkers]
 
     def get_queryset(self):
         user = self.request.user
+        user_groups = set(user.groups.values_list("name", flat=True))
 
-        # Obtener los grupos del usuario
-        user_groups = user.groups.values_list("name", flat=True)
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
 
-        #Verificar si pertenece a "Admin + Fisioterapia" o "Admin + Psicología"
-        if "Admin" in user_groups and ("Fisioterapia" in user_groups or "Psicología" in user_groups):
-            return Worker.objects.all()
+        # Admin + Fisioterapia o Admin + Psicología ven todos los workers
+        if is_admin and (has_fisio or has_psico):
+            return Worker.objects.all().order_by('id')
 
-        # Si no pertenece a esos grupos, solo ve los trabajadores creados por el user
-        return Worker.objects.filter(created_by=user)
+        # Admin + otros grupos (que no sean Fisio ni Psico) ven solo sus workers
+        if is_admin and not (has_fisio or has_psico):
+            return Worker.objects.filter(created_by=user).order_by('id')
+
+        # Trabajadores normales ven solo su propio worker
+        return Worker.objects.filter(user=user).order_by('id')
 
     def perform_create(self, serializer):
         user = self.request.user
-
-        # Guardar el trabajador con el usuario que lo creó
         worker = serializer.save(created_by=user)
 
-        # Obtener los grupos de la solicitud
         groups = self.request.data.get('groups', [])
-
-        # Asignar otros grupos si se proporcionaron
         if groups:
             worker.groups.set(groups)
             worker.save()
 
-# Vista para obtener, actualizar y eliminar un trabajador
 class WorkerDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Worker.objects.all()
     serializer_class = WorkerSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Worker.objects.filter(created_by=self.request.user)
+        user = self.request.user
+        user_groups = set(user.groups.values_list("name", flat=True))
+
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
+
+        if is_admin and (has_fisio or has_psico):
+            # Admin + Fisio o Psico pueden acceder a todos
+            return Worker.objects.all().order_by('id')
+
+        if is_admin and not (has_fisio or has_psico):
+            # Admin otros grupos solo sus workers
+            return Worker.objects.filter(created_by=user).order_by('id')
+
+        # Worker normal solo ve su worker
+        return Worker.objects.filter(user=user).order_by('id')
 
     def perform_update(self, serializer):
         worker = self.get_object()
+        user = self.request.user
 
-        if worker.created_by != self.request.user:
+        if worker.created_by != user and not (user.is_staff and ("Fisioterapia" in user.groups.values_list("name", flat=True) or "Psicología" in user.groups.values_list("name", flat=True))):
             raise PermissionDenied("No tienes permiso para editar este trabajador.")
-
         serializer.save()
 
     def perform_destroy(self, instance):
-        # Verificar permisos antes de eliminar
-        if instance.created_by != self.request.user:
+        user = self.request.user
+        if instance.created_by != user and not (user.is_staff and ("Fisioterapia" in user.groups.values_list("name", flat=True) or "Psicología" in user.groups.values_list("name", flat=True))):
             raise PermissionDenied("No tienes permiso para eliminar este trabajador.")
 
-        # Eliminar el usuario relacionado con el trabajador
         try:
-            user = instance.user
-            user.delete()  # Esto eliminará el usuario asociado
+            user_rel = instance.user
+            user_rel.delete()
         except IntegrityError as e:
             logger.error(f"Error al eliminar el usuario: {e}")
 
         instance.delete()
 
-# Vista para listar citas de un trabajador
 class WorkerAppointmentsView(ListAPIView):
-    serializer_class = CitasSerializer
+    serializer_class = CitaSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        worker_id = self.kwargs.get('pk')
-        worker = Worker.objects.filter(id=worker_id).first()
-        if not worker:
-            raise PermissionDenied("No tienes permiso para ver las citas de este trabajador.")
-        return Citas.objects.filter(worker=worker)
+        user = self.request.user
+        worker_id = self.kwargs.get('worker_pk')
+        worker = get_object_or_404(Worker, id=worker_id)
 
-# Vista para crear una cita para un trabajador
+        user_groups = set(user.groups.values_list("name", flat=True))
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
+
+        # Admin + Fisio o Psico ven todas las citas de cualquier worker
+        if is_admin and (has_fisio or has_psico):
+            return Cita.objects.filter(worker=worker)
+
+        # Admin (otros grupos) que creó el worker ve todas sus citas
+        if is_admin and not (has_fisio or has_psico) and worker.created_by == user:
+            return Cita.objects.filter(worker=worker)
+
+        # Worker normal solo ve sus citas y las creadas por el user que creó el worker
+        if worker.user == user:
+            # Solo las citas que creó el user que creó el worker
+            return Cita.objects.filter(worker=worker, user=worker.created_by)
+
+        # Otros casos no tienen permiso
+        raise PermissionDenied("No tienes permiso para ver las citas de este trabajador.")
+
 class CreateWorkerAppointmentView(CreateAPIView):
-    serializer_class = CitasSerializer
+    serializer_class = CitaSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        worker_id = self.kwargs.get('pk')
-        worker = Worker.objects.get(id=worker_id)
+        user = self.request.user
+        worker_id = self.kwargs.get('worker_pk')
+        worker = get_object_or_404(Worker, id=worker_id)
 
-        if worker.created_by != self.request.user and not self.request.user.is_staff:
+        user_groups = set(user.groups.values_list("name", flat=True))
+        is_admin = "Admin" in user_groups
+
+        if worker.created_by != user and not is_admin:
             raise PermissionDenied("No tienes permiso para agregar citas a este trabajador.")
 
-        serializer.save(worker=worker, user=self.request.user)
+        serializer.save(worker=worker, user=user)
 
-# Vista para editar una cita (permitir a admin editar cualquier cita)
 class AppointmentDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Citas.objects.all()
-    serializer_class = CitasSerializer
+    serializer_class = CitaSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'pk'
 
     def get_queryset(self):
+        user = self.request.user
         worker_pk = self.kwargs.get('worker_pk')
+        worker = get_object_or_404(Worker, pk=worker_pk)
 
-        if self.request.user.is_staff:
-            # Admin puede acceder a todas las citas del trabajador
-            return Citas.objects.filter(worker__id=worker_pk)
-        else:
-            # Solo los creadores del trabajador pueden acceder a sus citas
-            return Citas.objects.filter(worker__id=worker_pk, worker__created_by=self.request.user)
+        user_groups = set(user.groups.values_list("name", flat=True))
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
+
+        if is_admin and (has_fisio or has_psico):
+            return Cita.objects.filter(worker=worker).order_by('fecha')
+
+        if is_admin and not (has_fisio or has_psico) and worker.created_by == user:
+            return Cita.objects.filter(worker=worker).order_by('fecha')
+
+        # Worker solo ve sus citas creadas por el creador del worker
+        if worker.user == user:
+            return Cita.objects.filter(worker=worker, user=worker.created_by).order_by('fecha')
+
+        raise PermissionDenied("No tienes permiso para ver o editar esta cita.")
 
     def perform_update(self, serializer):
+        user = self.request.user
         cita = self.get_object()
+        worker = cita.worker
 
-        # Si el usuario es admin, puede actualizar cualquier cita
-        if self.request.user.is_staff:
+        user_groups = set(user.groups.values_list("name", flat=True))
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
+
+        if is_admin and (has_fisio or has_psico):
             serializer.save()
-        # Si no es admin, solo puede editar las citas de los trabajadores que creó
-        elif cita.worker.created_by != self.request.user:
-            raise PermissionDenied("No tienes permiso para editar esta cita.")
-        else:
+            return
+
+        if is_admin and not (has_fisio or has_psico) and worker.created_by == user:
             serializer.save()
+            return
+
+        if worker.user == user and cita.user == worker.created_by:
+            serializer.save()
+            return
+
+        raise PermissionDenied("No tienes permiso para editar esta cita.")
 
     def perform_destroy(self, instance):
-        # Los administradores pueden eliminar cualquier cita
-        if self.request.user.is_staff:
-            instance.delete()
-        # Los creadores de los trabajadores solo pueden eliminar las citas de los trabajadores que crearon
-        elif instance.worker.created_by != self.request.user:
-            raise PermissionDenied("No tienes permiso para eliminar esta cita.")
-        else:
-            instance.delete()
+        user = self.request.user
+        worker = instance.worker
 
-# Vista para subir el archivo registro de jornada (para admin y trabajador)
+        user_groups = set(user.groups.values_list("name", flat=True))
+        is_admin = "Admin" in user_groups
+        has_fisio = "Fisioterapia" in user_groups
+        has_psico = "Psicología" in user_groups
+
+        if is_admin and (has_fisio or has_psico):
+            instance.delete()
+            return
+
+        if is_admin and not (has_fisio or has_psico) and worker.created_by == user:
+            instance.delete()
+            return
+
+        if worker.user == user and instance.user == worker.created_by:
+            instance.delete()
+            return
+
+        raise PermissionDenied("No tienes permiso para eliminar esta cita.")
+
 class UploadPDF(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk, *args, **kwargs):
-        worker = get_object_or_404(Worker, pk=pk)
-
-        # Verificamos si es admin o worker para saber cómo asignar el PDF
+    def post(self, request, worker_pk, *args, **kwargs):
+        worker = get_object_or_404(Worker, pk=worker_pk)
         is_admin = request.user.groups.filter(name='Admin').exists()
-
         file = request.FILES.get('file')
 
         if not file:
             return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Guardamos el archivo con FileSystemStorage
         fs = FileSystemStorage()
         filename = fs.save(file.name, file)
-        file_url = fs.url(filename)  # Esto te da la URL del archivo subido
+        file_url = fs.url(filename)
 
-        # Crear un nuevo registro de PDF
         pdf_registro = PDFRegistro.objects.create(
             worker=worker,
             file=file,
@@ -186,95 +269,54 @@ class UploadPDF(APIView):
 
         return Response({'message': 'PDF subido correctamente', 'file_url': file_url}, status=status.HTTP_200_OK)
 
-# Vista para obtener los PDFs de un trabajador
 class GetPDFs(APIView):
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
-    def get(self, request, pk, *args, **kwargs):
-        worker = get_object_or_404(Worker, pk=pk)
-
-        # Obtener todos los PDFs del trabajador
+    def get(self, request, worker_pk, *args, **kwargs):
+        worker = get_object_or_404(Worker, pk=worker_pk)
         pdf_registros = PDFRegistro.objects.filter(worker=worker)
 
-                # Si no hay PDFs, devolver una respuesta vacía en lugar de un error
-        if not pdf_registros.exists():
-            return Response({
-                "admin_pdfs": [],
-                "worker_pdfs": [],
-                "total_pages_admin": 1,
-                "total_pages_worker": 1,
-                "current_page": 1
-            }, status=status.HTTP_200_OK)  # 200 OK en vez de 404
+        admin_pdfs = pdf_registros.filter(is_admin_upload=True)
+        worker_pdfs = pdf_registros.filter(is_admin_upload=False)
 
-        if pdf_registros.exists():
-            # Filtrar PDFs por quién los subió
-            admin_pdfs = pdf_registros.filter(is_admin_upload=True)
-            worker_pdfs = pdf_registros.filter(is_admin_upload=False)
+        paginator_admin = self.pagination_class()
+        paginator_worker = self.pagination_class()
 
-            # Aplicar paginación a cada grupo
-            paginator = self.pagination_class()
+        admin_pdfs_paginated = paginator_admin.paginate_queryset(admin_pdfs, request)
+        worker_pdfs_paginated = paginator_worker.paginate_queryset(worker_pdfs, request)
 
-            # Crear listas de URLs de los PDFs
-            admin_pdfs_paginated = paginator.paginate_queryset(admin_pdfs, request)
-            admin_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in admin_pdfs_paginated]
-            worker_pdfs_paginated = paginator.paginate_queryset(worker_pdfs, request)
-            worker_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in worker_pdfs_paginated]
+        admin_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in admin_pdfs_paginated]
+        worker_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in worker_pdfs_paginated]
 
-            return Response({
-                "admin_pdfs": admin_pdf_urls,
-                "worker_pdfs": worker_pdf_urls,
-                "total_pages_admin": paginator.page.paginator.num_pages if admin_pdfs_paginated else 0,
-                "total_pages_worker": paginator.page.paginator.num_pages if worker_pdfs_paginated else 0,
-                "current_page": paginator.page.number if admin_pdfs_paginated or worker_pdfs_paginated else 1
-            }, status=status.HTTP_200_OK)
+        return Response({
+            "admin_pdfs": admin_pdf_urls,
+            "worker_pdfs": worker_pdf_urls,
+            "total_pages_admin": paginator_admin.page.paginator.num_pages if admin_pdfs_paginated else 0,
+            "total_pages_worker": paginator_worker.page.paginator.num_pages if worker_pdfs_paginated else 0,
+            "current_page_admin": paginator_admin.page.number if admin_pdfs_paginated else 1,
+            "current_page_worker": paginator_worker.page.number if worker_pdfs_paginated else 1,
+        }, status=status.HTTP_200_OK)
 
 
 class DeletePDF(APIView):
-    """Vista para eliminar pdf"""
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        pdf_id = kwargs.get("pdf_id")  # <-- aquí lo tomas correctamente desde kwargs
-
-        # Obtener el registro del PDF
+        pdf_id = kwargs.get("pdf_id")
         pdf_registro = get_object_or_404(PDFRegistro, id=pdf_id)
 
-        # Verificar si el usuario es el que subió el archivo
+        # Solo el creador puede borrar su PDF
         if pdf_registro.created_by != request.user:
             return Response(
                 {"error": "No tienes permiso para eliminar este archivo."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Eliminar el archivo físico del sistema
         if pdf_registro.file:
             file_path = pdf_registro.file.path
             if os.path.exists(file_path):
                 os.remove(file_path)
 
-        # Eliminar el registro de la base de datos
         pdf_registro.delete()
-
-        return Response(
-            {"message": "PDF eliminado correctamente."},
-            status=status.HTTP_200_OK
-        )
-
-class WorkerIdFromUserId(APIView):
-    """Vista para obtener el ID del worker"""
-    def get(self, request, user_id, format=None):
-        try:
-            # Obtener el Worker asociado al user_id
-            worker = Worker.objects.get(user_id=user_id)
-            return Response({'workerId': worker.id}, status=status.HTTP_200_OK)
-        except Worker.DoesNotExist:
-            return Response({'workerId': None}, status=status.HTTP_200_OK)
-@api_view(['GET'])
-def get_worker_by_user(request, user_id):
-    try:
-        # Obtener el Worker relacionado con el user_id
-        worker = Worker.objects.get(user__id=user_id)
-        return Response({"worker_id": worker.id}, status=status.HTTP_200_OK)
-    except Worker.DoesNotExist:
-        return Response({"detail": "Worker not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "PDF eliminado correctamente"}, status=status.HTTP_200_OK)

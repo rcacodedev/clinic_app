@@ -23,7 +23,12 @@ class UserInfoUpdateView(generics.RetrieveUpdateAPIView):
         return self.request.user.userInfo
 
     def patch(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs, partial=True)
+        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)  # fuerza validación
+        print("Datos validados por el serializer:", serializer.validated_data)
+
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 class UserInfoUpdatePhotoView(APIView):
     permission_classes = [IsAuthenticated]

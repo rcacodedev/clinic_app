@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import JsonResponse
@@ -6,27 +6,35 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from .models import Patient, PatientDocument
-from .serializers import PatientSerializer, PatientDocumentSerializer
+from .models import Paciente, PacienteDocumentacion
+from .serializers import PacienteSerializer, PacienteDocumentoSerializer
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+
+class PatientPagination(PageNumberPagination):
+    page_size = 8
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 # Listar y Crear Pacientes
 class PatientListCreateView(generics.ListCreateAPIView):
-    serializer_class = PatientSerializer
+    serializer_class = PacienteSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = PatientPagination
 
     def get_queryset(self):
         user = self.request.user  # Obtener al usuario que realiza la consulta
         search_term = self.request.query_params.get('search', None)
 
         # Inicializar queryset con todos los pacientes
-        queryset = Patient.objects.all()
+        queryset = Paciente.objects.all()
 
         # Filtrar pacientes por grupo(s) del usuario
         relevant_groups = user.groups.exclude(name='Admin')  # Excluimos el grupo admin
 
         if relevant_groups.exists():
             # Si el usuario pertenece a un grupo relevante, filtramos los pacientes por ese/estos grupos
-            queryset = queryset.filter(group__in=relevant_groups).distinct()
+            queryset = queryset.filter(grupo__in=relevant_groups).distinct()
         else:
             queryset = queryset.none()  # Si el usuario no tiene grupos relevantes, no mostramos pacientes
 
@@ -47,15 +55,15 @@ class PatientListCreateView(generics.ListCreateAPIView):
 
         if relevant_group:
             # Si el usuario pertenece a un grupo, guardamos el paciente con ese grupo
-            serializer.save(group=relevant_group)  # Asociamos el grupo al paciente
+            serializer.save(grupo=relevant_group)  # Asociamos el grupo al paciente
         else:
             # Si el usuario no tiene grupo, asociamos el paciente sin grupo (o con grupo None)
-            serializer.save(group=None)
+            serializer.save(grupo=None)
 
 # Obtener, Actualizar y Eliminar Pacientes
 class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
+    queryset = Paciente.objects.all()
+    serializer_class = PacienteSerializer
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
@@ -71,7 +79,7 @@ class UploadSignedPDFView(APIView):
 
     def post(self, request, pk, *args, **kwargs):
         # Obtener al paciente con el id 'pk' (si no existe, 404)
-        patient = get_object_or_404(Patient, pk=pk)
+        patient = get_object_or_404(Paciente, pk=pk)
 
         if not request.FILES:
             return JsonResponse({"error": "No se ha subido ningún archivo."}, status=400)
@@ -120,40 +128,40 @@ class UploadSignedPDFView(APIView):
                 saved_files[field_name] = file_url
 
         # Retornar la respuesta con las URLs de los PDFs guardados
-        return JsonResponse({
-            "message": "PDF(s) guardado(s) correctamente",
-            "pdf_urls": saved_files
-        })
+        return Response({"message": "PDF(s) guardado(s) correctamente", "pdf_urls": saved_files})
 
 # Subir documentos al paciente y listar
 class PatientDocumentListCreateView(generics.ListCreateAPIView):
-    queryset = PatientDocument.objects.all()
-    serializer_class = PatientDocumentSerializer
+    queryset = PacienteDocumentacion.objects.all()
+    serializer_class = PacienteDocumentoSerializer
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Filtra los documentos por paciente si se proporciona id"""
         patient_id = self.request.query_params.get('patient_id')
         if patient_id:
-            return PatientDocument.objects.filter(patient_id=patient_id)
-        return PatientDocument.objects.all()
+            return PacienteDocumentacion.objects.filter(paciente_id=patient_id)
+        return PacienteDocumentacion.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        patient_id = self.request.query_params.get('patient_id')
+        if not patient_id:
+            raise serializers.ValidationError({"patient_id": "Este campo es requerido."})
+        paciente = get_object_or_404(Paciente, pk=patient_id)
+        serializer.save(paciente=paciente)
+
 
 # Eliminar documento del paciente
 class PatientDocumentDeleteView(generics.DestroyAPIView):
-    queryset = PatientDocument.objects.all()
-    serializer_class = PatientDocumentSerializer
+    queryset = PacienteDocumentacion.objects.all()
+    serializer_class = PacienteDocumentoSerializer
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, *args, **kwargs):
-        document = get_object_or_404(PatientDocument, pk=pk)
+        document = get_object_or_404(PacienteDocumentacion, pk=pk)
 
-        if document.file:
-            document.file.delete(save=False)
+        if document.archivo:
+            document.archivo.delete(save=False)
 
         document.delete()
         return Response({"message": "Documento eliminado correctamente"}, status=status.HTTP_204_NO_CONTENT)

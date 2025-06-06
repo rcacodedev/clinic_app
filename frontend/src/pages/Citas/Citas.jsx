@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import citasService from '../../services/citasService';
-import patientService from '../../services/patientService'; // Servicio de pacientes
+import { getPacientes } from '../../services/patientService';
 import { getWorkerID } from '../../services/workerService';
 import { getToken, getUserIdFromToken, isAdmin } from '../../utils/auth';
 import Boton from '../../components/Boton';
@@ -114,7 +114,7 @@ const CitasPage = () => {
         if (name === 'patient_name_input' && value.length >= 1) {
             setLoading(true);
             try {
-                const patientsData = await patientService.getPatients({ searchTerm: value });
+                const patientsData = await getPacientes({ searchTerm: value });
                 if (patientsData.results) {
                     setPatients(patientsData.results);
                 }

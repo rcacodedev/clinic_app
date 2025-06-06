@@ -1,47 +1,39 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Worker, PDFRegistro
-from citas.models import Citas
-from patients.models import Patient
-from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
+from .models import Worker, PDFRegistro
 from userinfo.serializers import UserInfoSerializer
+from citas.serializers import CitaSerializer
 
+# Serializador de Usuario
 class UserSerializer(serializers.ModelSerializer):
-    confirm_password = serializers.CharField(write_only=True, required=True)  # Campo solo para validación
+    confirm_password = serializers.CharField(write_only=True, required=True)
     userInfo = UserInfoSerializer(required=False)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'confirm_password', 'userInfo']
         extra_kwargs = {
-            'password': {'write_only': True},  # Para que no se exponga la contraseña
+            'password': {'write_only': True},
         }
 
     def validate(self, attrs):
-        password = attrs.get('password')
-        confirm_password = attrs.get('confirm_password')
-
-        if password != confirm_password:
+        if attrs.get('password') != attrs.get('confirm_password'):
             raise ValidationError({"password": "Las contraseñas no coinciden."})
-
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('confirm_password')  # Eliminar confirm_password antes de crear el usuario
+        validated_data.pop('confirm_password')
         password = validated_data.pop('password')
         user = User.objects.create_user(**validated_data, password=password)
         return user
 
     def update(self, instance, validated_data):
-        userinfo_data = validated_data.pop('userinfo', None)  # Extraer datos de UserInfo
-
-        # Actualizar los campos del usuario
+        userinfo_data = validated_data.pop('userInfo', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Si hay datos para UserInfo, actualizarlos o crearlos
         if userinfo_data:
             userinfo, created = instance.userinfo.get_or_create(user=instance)
             for attr, value in userinfo_data.items():
@@ -50,40 +42,22 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
+# Serializador de Grupos
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ["id", "name"]  # Incluir nombre del grupo
+        fields = ["id", "name"]
 
-class AppointmentSerializer(serializers.ModelSerializer):
-    worker = serializers.PrimaryKeyRelatedField(queryset=Worker.objects.all(), source='worker.pk')  # Asociamos el trabajador con la cita
-    patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), source='patient.pk')
-
-    class Meta:
-        model = Citas
-        fields = ['id', 'worker', 'patient', 'fecha', 'comenzar', 'finalizar', 'descripcion', 'cotizada']
-
-    def create(self, validated_data):
-        # Extraer los datos de la cita validados
-        worker = validated_data.pop('worker')  # Trabajador que recibe la cita
-        patient = validated_data.pop('patient')  # Paciente asignado a la cita
-
-        # Crear la cita
-        cita = Citas.objects.create(worker=worker, patient=patient, **validated_data)
-
-        return cita
-
-
+# Serializador de PDFRegistro
 class PDFRegistroSerializer(serializers.ModelSerializer):
-    file = serializers.FileField()
-
     class Meta:
         model = PDFRegistro
-        fields = ['file', 'created_by', 'is_admin_upload']
+        fields = ['id', 'file', 'created_by', 'is_admin_upload']
 
+# Serializador de Worker
 class WorkerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    appointments = AppointmentSerializer(many=True, read_only=True)
+    appointments = CitaSerializer(many=True, read_only=True)
     groups = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), many=True)
     pdf_registros = PDFRegistroSerializer(many=True, read_only=True)
 
@@ -93,6 +67,8 @@ class WorkerSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'created_by',
+            'first_name',
+            'last_name',
             'appointments',
             'groups',
             'color',
@@ -104,51 +80,42 @@ class WorkerSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         groups_data = validated_data.pop('groups', [])
 
-        # Creamos el usuario asociado si no existe
+        # Crear usuario
         user_serializer = UserSerializer(data=user_data)
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        # Asignamos los grupos al usuario
-        if groups_data:
-            user.groups.set(groups_data)
-            user.save()
-
-        # Asignamos el trabajador
+        # Crear worker con usuario y creador
         validated_data['created_by'] = self.context['request'].user
-        validated_data['user'] = user
+        worker = Worker.objects.create(user=user, **validated_data)
 
-        worker = Worker.objects.create(**validated_data)
+        # Asignar grupos a Worker (no a User)
+        if groups_data:
+            worker.groups.set(groups_data)
         return worker
-
-    def validate(self, attrs):
-        # Verificación adicional de la dirección si el país es España
-        if attrs.get('country') == 'España' and not attrs.get('address'):
-            raise ValidationError({"address": "La dirección es obligatoria para trabajadores en España."})
-        return attrs
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
         groups_data = validated_data.pop('groups', None)
 
-        # Actualizamos los campos del Worker
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Actualizamos los grupos si se proporcionan
         if groups_data is not None:
             instance.groups.set(groups_data)
 
-        # Actualizar el usuario si se envían datos
         if user_data:
             user = instance.user
-            userinfo_data = user_data.pop('userinfo', None)  # Extraer datos de UserInfo
+            userinfo_data = user_data.pop('userinfo', None)
+
+            password = user_data.pop('password', None)
             for attr, value in user_data.items():
                 setattr(user, attr, value)
+            if password:
+                user.set_password(password)
             user.save()
 
-            # Si hay datos para UserInfo, actualizarlos o crearlos
             if userinfo_data:
                 userinfo, created = user.userinfo.get_or_create(user=user)
                 for attr, value in userinfo_data.items():

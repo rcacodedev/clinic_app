@@ -1,35 +1,78 @@
 from rest_framework import serializers
-from .models import Patient, PatientDocument
-from citas.serializers import CitasSerializer
+from .models import Paciente, PacienteDocumentacion
+from citas.serializers import CitaSerializer
 
-class PatientDocumentSerializer(serializers.ModelSerializer):
+class PacienteDocumentoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PatientDocument
-        fields = '__all__'
+        model = PacienteDocumentacion
+        fields = ['id', 'archivo', 'upload_at']
+        read_only_fields = ['id', 'upload_at']
 
-class PatientSerializer(serializers.ModelSerializer):
-    citas = CitasSerializer(many=True, read_only=True)
+
+class PacienteSerializer(serializers.ModelSerializer):
+    citas = CitaSerializer(many=True, read_only=True)
+    documents = PacienteDocumentoSerializer(source='documentos', many=True, read_only=True)
     created_at_formatted = serializers.SerializerMethodField()
-    pdf_urls = serializers.SerializerMethodField()  # Nuevo campo
-    group_name = serializers.SerializerMethodField()  # Campo para mostrar el nombre del grupo
-    documents = PatientDocumentSerializer(many=True, read_only=True)
+    pdf_urls = serializers.SerializerMethodField()
+    group_name = serializers.SerializerMethodField()
+    grupo = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
-        model = Patient
-        fields = '__all__'
-        read_only_fields = ('created_at', 'citas', 'pdf_firmado_general', 'pdf_firmado_menor', 'pdf_firmado_inyecciones')
+        model = Paciente
+        fields = [
+            'id',
+            'uuid',
+            'nombre',
+            'primer_apellido',
+            'segundo_apellido',
+            'email',
+            'phone',
+            'fecha_nacimiento',
+            'dni',
+            'address',
+            'city',
+            'code_postal',
+            'country',
+            'alergias',
+            'patologias',
+            'notas',
+            'grupo',
+            'group_name',
+            'created_at',
+            'created_at_formatted',
+            'pdf_firmado_general',
+            'pdf_firmado_menor',
+            'pdf_firmado_inyecciones',
+            'pdf_urls',
+            'documents',
+            'citas',
+        ]
+        read_only_fields = [
+            'id',
+            'uuid',
+            'created_at',
+            'created_at_formatted',
+            'pdf_urls',
+            'group_name',
+            'documents',
+            'citas',
+            'grupo',
+        ]
 
     def get_created_at_formatted(self, obj):
         return obj.created_at.strftime('%d/%m/%Y')
 
     def get_pdf_urls(self, obj):
-        """ Devuelve un diccionario con las URLs de los PDFs """
         return {
-            "pdf_firmado_general": obj.pdf_firmado_general.url if obj.pdf_firmado_general and hasattr(obj.pdf_firmado_general, 'url') else None,
-            "pdf_firmado_menor": obj.pdf_firmado_menor.url if obj.pdf_firmado_menor and hasattr(obj.pdf_firmado_menor, 'url') else None,
-            "pdf_firmado_inyecciones": obj.pdf_firmado_inyecciones.url if obj.pdf_firmado_inyecciones and hasattr(obj.pdf_firmado_inyecciones, 'url') else None
+            "pdf_firmado_general": self._get_file_url(obj.pdf_firmado_general),
+            "pdf_firmado_menor": self._get_file_url(obj.pdf_firmado_menor),
+            "pdf_firmado_inyecciones": self._get_file_url(obj.pdf_firmado_inyecciones),
         }
 
+    def _get_file_url(self, filefield):
+        if filefield and hasattr(filefield, 'url'):
+            return filefield.url
+        return None
+
     def get_group_name(self, obj):
-        """ Retorna el nombre del grupo del paciente, si tiene uno """
-        return obj.group.name if obj.group else None
+        return obj.grupo.name if obj.grupo else None

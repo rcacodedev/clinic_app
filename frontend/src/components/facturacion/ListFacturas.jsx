@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getFacturas, getFacturasPDF, deleteFactura } from '../../services/facturaService';
 import Boton from '../Boton';
 import Notification from '../Notification';
-import '../../styles/facturacion/listFacturas.css';
+
 
 const ListFacturas = () => {
     const [facturas, setFacturas] = useState([]);

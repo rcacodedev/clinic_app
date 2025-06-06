@@ -3,7 +3,7 @@ import Boton from '../Boton';
 import { Link } from 'react-router-dom';
 import citasService from '../../services/citasService';
 import { createFactura } from '../../services/facturaService';
-import '../../styles/citas/listCitas.css';
+
 
 const ListCitas = ({ citas, userId }) => {
     const [currentPage, setCurrentPage] = useState(1);

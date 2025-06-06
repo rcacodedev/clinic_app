@@ -1,13 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
-from citas.models import Citas
+from citas.models import Cita
 
 def get_default_user():
     default_user = User.objects.filter(is_superuser=True).first() or User.objects.first()
     return default_user.id if default_user else None
 
 class Factura(models.Model):
-    cita = models.OneToOneField(Citas, on_delete=models.CASCADE, related_name="factura")
+    cita = models.OneToOneField(Cita, on_delete=models.CASCADE, related_name="factura")
     numero_factura = models.IntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2, default=25)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -15,7 +15,9 @@ class Factura(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, default=get_default_user)
 
     def __str__(self):
-        return f"Factura {self.numero_factura} - {self.cita.patient.nombre}"
+        paciente = getattr(self.cita, 'paciente', None)
+        nombre_paciente = paciente.nombre if paciente else "Desconocido"
+        return f"Factura {self.numero_factura} - {nombre_paciente}"
 
 class ConfiguracionFactura(models.Model):
     numero_inicial = models.IntegerField()

@@ -110,7 +110,7 @@ export const uploadPDF = async (workerId, file) => {
   formData.append('file', file);
 
   try {
-    const response = await api.post(`${API_URL}${workerId}/upload-pdf/`, formData, {
+    const response = await api.post(`${API_URL}${workerId}/pdfs/upload/`, formData, {
       headers: { "Content-Type": "multipart/form-data"},
     });
     return response;
@@ -122,7 +122,7 @@ export const uploadPDF = async (workerId, file) => {
 // Obtener registros de jornada del Worker
 export const getPDF = async (workerId, page = 1) => {
   try {
-    const response = await api.get(`${API_URL}${workerId}/get-pdfs/?page=${page}`);
+    const response = await api.get(`${API_URL}${workerId}/pdfs/?page=${page}`);
     return response.data;
   } catch (error) {
     handleApiError(error, "Obtener todos los registros de jornada")
@@ -133,7 +133,7 @@ export const getPDF = async (workerId, page = 1) => {
 // Obtener workerId del userID
 export const getWorkerIdByUserId = async (userId) => {
   try {
-    const response = await api.get(`${API_URL}get-worker-id/${userId}`);
+    const response = await api.get(`${API_URL}user/${userId}`);
     return response.data.worker_id;
   } catch (error) {
     handleApiError(error, "Error al obtener el workerID")
@@ -143,7 +143,7 @@ export const getWorkerIdByUserId = async (userId) => {
 // Eliminar PDF
 export const deletePDF = async (pdfId) => {
   try {
-    await api.delete(`${API_URL}delete/${pdfId}/`, getAuthHeaders());
+    await api.delete(`${API_URL}pdfs/${pdfId}/delete/`, getAuthHeaders());
     alert("PDF eliminado correctamente")
   } catch (error) {
     handleApiError(error, "Error al eliminar PDF")
@@ -153,7 +153,7 @@ export const deletePDF = async (pdfId) => {
 // Obtener ID del worker
 export const getWorkerID = async (userId) => {
   try {
-    const response = await api.get(`${API_URL}worker-id/${userId}/`, getAuthHeaders())
+    const response = await api.get(`${API_URL}id-from-user/${userId}/`, getAuthHeaders())
     return response.data.workerId;
   } catch (error) {
     handleApiError(error, "Error al obtener el ID del worker")

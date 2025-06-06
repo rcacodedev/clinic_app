@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/Workers/workers.css';
+
 import CustomModal from '../../components/Modal';
 import Boton from '../../components/Boton';
 import Notificacion from '../../components/Notification'

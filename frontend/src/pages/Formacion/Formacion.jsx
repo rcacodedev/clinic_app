@@ -5,7 +5,7 @@ import AgendaFormacion from "../../components/formacion/agendaFormacion";
 import Boton from "../../components/Boton";
 import Notification from "../../components/Notification";
 import CustomModal from "../../components/Modal";
-import '../../styles/formacion/formacion.css'
+
 
 
 const initialFormacionData = {

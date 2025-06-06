@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { assignAppointmentToWorker } from '../../services/workerService';
-import patientService from '../../services/patientService'; // Servicio de pacientes
+import {getPacientes} from '../../services/patientService'; // Servicio de pacientes
 import Boton from '../Boton';
 import CrearCitaWorkerModal from './CrearCitaWorkerModal'; // Importamos el nuevo modal
 import Notification from '../Notification'
@@ -32,7 +32,7 @@ const CrearCita = ({ refreshCitas, workerId }) => {
         if (name === 'patient_name_input' && value.length >= 1) {
             setLoading(true);
             try {
-                const patientsData = await patientService.getPatients({ searchTerm: value });
+                const patientsData = await getPacientes({ searchTerm: value });
                 if (patientsData.results) {
                     setPatients(patientsData.results);
                 }

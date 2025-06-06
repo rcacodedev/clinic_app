@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import api from "../services/api"; // Reutilizamos tu configuración de Axios
-import { fetchUserInfo, updateUserInfo, updatePhoto } from "../services/userInfoService";
-import "../styles/ajustes.css";
-import Boton from "../components/Boton";
+import api from "../services/api";
+import {
+  fetchUserInfo,
+  updateUserInfo,
+  updatePhoto,
+} from "../services/userInfoService";
+import PasswordChangeForm from "../components/perfil/PasswordChangeForm";
+import EditarUserModal from "../components/perfil/EditarUserModal";
+import { toast } from "react-toastify";
 
 const Ajustes = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  // Estados para los datos de userInfo
   const [userInfo, setUserInfo] = useState({
-    user: { first_name: "", last_name: "" }, // Aseguramos que user tenga un valor inicial
+    nombre: "",
+    primer_apellido: "",
     segundo_apellido: "",
     address: "",
     phone: "",
@@ -21,272 +21,257 @@ const Ajustes = () => {
     postal_code: "",
     city: "",
     country: "",
-    photo: "", // Asegurándonos de tener un campo photo en el objeto userInfo
+    photo: "",
     whatsapp_business_number: "",
     twilio_whatsapp_service_sid: "",
-    twilio_integration_verified:"",
+    twilio_integration_verified: "",
+    twilio_account_sid: "",
+    twilio_auth_token: "",
   });
 
-  const [infoMessage, setInfoMessage] = useState("");
-  const [infoError, setInfoError] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // Estado para controlar si estamos en modo edición
-  const [newPhoto, setNewPhoto] = useState(null); // Estado para manejar la nueva foto seleccionada
-  const [isTwilioVisible, setIsTwilioVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUserInfo, setEditedUserInfo] = useState({});
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const loadUserInfo = async () => {
     try {
       const data = await fetchUserInfo();
-      setUserInfo(data); // Carga los datos en el estado
+      setUserInfo(data);
     } catch (err) {
       console.error("Error al cargar userInfo:", err);
     }
   };
-
-  // Cargar los datos de userInfo al montar el componente
+  // Carga de datos inicial
   useEffect(() => {
     loadUserInfo();
   }, []);
 
-  const handlePasswordChange = async (e) => {
+  // Copia los datos cuando empieza a editar
+  useEffect(() => {
+    if (isEditing) {
+      setEditedUserInfo({ ...userInfo });
+    }
+  }, [isEditing]);
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const updatedPhoto = await updatePhoto(file);
+      setUserInfo((prev) => ({ ...prev, photo: updatedPhoto }));
+    } catch (error) {
+      alert("Error al actualizar la foto.");
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const updatedUser = await updateUserInfo(editedUserInfo);
+
+      // Si updatedUser tiene un 'user' dentro, aplanamos:
+      const normalizedUserInfo = {
+        ...updatedUser,
+        ...updatedUser.user, // sobreescribe con lo de user si hace falta
+      };
+
+      // Luego borramos la propiedad user para evitar confusión
+      delete normalizedUserInfo.user;
+
+      setUserInfo(normalizedUserInfo);
+      setIsEditing(false);
+      toast.success("Información actualizada correctamente");
+      loadUserInfo();
+    } catch (error) {
+      console.error("Error al guardar los cambios:", error);
+      toast.error("Hubo un error al actualizar la información");
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
     setError("");
+    setMessage("");
 
     if (newPassword !== confirmPassword) {
-      setError("Las nuevas contraseñas no coinciden.");
+      setError("La nueva contraseña y la confirmación no coinciden");
       return;
     }
 
     try {
-      const response = await api.post("/api/change-password/", {
+      await api.put("/change-password/", {
         current_password: currentPassword,
         new_password: newPassword,
-        confirm_password: confirmPassword,
       });
-
-      setMessage(response.data.success);
+      setMessage("Contraseña cambiada correctamente");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err) {
-      setError(err.response?.data?.error || "Error al cambiar la contraseña.");
-    }
-  };
-
-  const handleUserInfoSubmit = async (e) => {
-    e.preventDefault(); // Necesitamos prevenir el comportamiento por defecto
-    setInfoMessage("");
-    setInfoError("");
-
-    try {
-      // Creamos una copia de userInfo excluyendo "photo"
-      const { photo, ...userInfoWithoutPhoto } = userInfo;
-
-      const updatedData = await updateUserInfo(userInfoWithoutPhoto);
-      setInfoMessage("Información actualizada con éxito.");
-      setUserInfo(updatedData); // Actualiza el estado con los datos del backend
-      setIsEditing(false); // Vuelve a desactivar el modo de edición
-    } catch (err) {
-      setInfoError("Error al actualizar la información.");
-      console.error(err);
-    }
-  };
-
-  const handleUserInfoChange = (e) => {
-    const { name, value } = e.target;
-
-    // Actualiza el objeto userInfo correctamente, manteniendo la estructura
-    setUserInfo((prevUserInfo) => ({
-      ...prevUserInfo,
-      [name]: value, // Esto actualizará el campo correcto dentro del objeto userInfo
-    }));
-  };
-
-  const handlePhotoChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewPhoto(file);
-
-      try {
-        const response = await updatePhoto(file);
-        setUserInfo((prevUserInfo) => ({
-          ...prevUserInfo,
-          photo: response.photo, // Asegúrate que la API devuelve esto
-        }));
-        setNewPhoto(null);
-        loadUserInfo(); // Opcional: recarga toda la info
-      } catch (err) {
-        setError("Error al subir la foto.");
-        console.error(err);
-      }
-    }
-  };
-
-  const renderUserInfo = (key) => {
-    const value = userInfo[key];
-
-    // Verificamos si el valor es un objeto o no
-    if (typeof value === "object" && value !== null) {
-      // Si es un objeto, mostramos algo que no rompa el renderizado (como un texto predeterminado)
-      return <span>Información no disponible</span>;
-    } else {
-      // Si no es un objeto, se muestra el valor directamente
-      return <p>{value}</p>;
+    } catch (error) {
+      setError("Error al cambiar la contraseña");
     }
   };
 
   return (
-    <div className="ajustes-container">
-      <div className="info-user">
-        <h1 className="title-section">Perfil de {userInfo.user.first_name} {userInfo.user.last_name}</h1>
-        {/* Foto de perfil */}
-        <div className="photo-container">
-          <img
-            src={userInfo.photo || "/media/foto_perfil/default_photo.jpg"} // Asegúrate de que haya una foto o usa una por defecto
-            alt="Foto de perfil"
-            className="profile-photo"
-            onClick={() => document.getElementById("photoInput").click()} // Al hacer clic en la foto, abre el selector de archivos
-          />
-          <input
-            type="file"
-            id="photoInput"
-            style={{ display: "none" }} // Ocultamos el input de tipo file
-            onChange={handlePhotoChange}
-          />
+    <div className="main-container">
+      <div className="title-container">
+        <h1 className="title">Configuración de la cuenta</h1>
+        <p className="title-description">
+          Datos necesarios del usuario para el uso de la aplicación. Cambio de
+          contraseña.
+        </p>
+      </div>
+
+      <h4 className="title-section">Datos personales del usuario</h4>
+      <div className="relative bg-white p-6 rounded-2xl shadow-lg mb-8">
+        <div className="absolute top-6 right-6 flex flex-col items-center">
+          <div
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shadow-md cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => document.getElementById("photoInput").click()}
+            title="Cambiar foto de perfil"
+          >
+            {userInfo.photo ? (
+              <img
+                src={userInfo.photo}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+            <input
+              type="file"
+              id="photoInput"
+              style={{ display: "none" }}
+              onChange={handlePhotoChange}
+            />
+          </div>
+          <span className="text-sm text-gray-500 mt-2">
+            Haz clic en la imagen para cambiar la foto
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { label: "Nombre", value: userInfo.nombre },
+            { label: "Primer Apellido", value: userInfo.primer_apellido },
+            { label: "Segundo Apellido", value: userInfo.segundo_apellido },
+            { label: "Fecha de Nacimiento", value: userInfo.fecha_nacimiento },
+            { label: "DNI", value: userInfo.dni },
+            { label: "Teléfono", value: userInfo.phone },
+            { label: "Dirección", value: userInfo.address },
+            { label: "Código Postal", value: userInfo.postal_code },
+            { label: "Ciudad", value: userInfo.city },
+            { label: "País", value: userInfo.country },
+          ].map((item, idx) => (
+            <div className="flex flex-col" key={idx}>
+              <span className="text-l text-gray-500 font-bold">
+                {item.label}
+              </span>
+              <span className="text-base font-medium text-gray-800">
+                {item.value || (
+                  <span className="text-gray-400">No disponible</span>
+                )}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
-      <h2 className="title-section">Actualizar Información de Usuario</h2>
-        <form onSubmit={handleUserInfoSubmit} className="user-form">
-          {["segundo_apellido", "phone", "address", "fecha_nacimiento", "dni", "postal_code", "city", "country", "whatsapp_business_number", "twilio_whatsapp_service_sid", "twilio_integration_verified"]
-            .filter((key) => key !== "user" && key !== 'photo') // Filtramos el campo "user" para que nunca se muestre
-            .map((key) => (
-              <div key={key} className="form-group">
-                <label htmlFor={key}>{key.replace("_", " ").toUpperCase()}</label>
-                {isEditing ? (
-                  <div>
-                    {key === 'twilio_whatsapp_service_sid' ? (
-                      <div style={{ position: "relative" }}>
-                        <input
-                          type={isTwilioVisible ? "text" : "password"}
-                          id={key}
-                          name={key}
-                          value={userInfo[key]}
-                          onChange={handleUserInfoChange}
-                          placeholder="SID de Twilio"
-                          style={{ paddingRight: "2.5rem" }}
-                        />
-                        <span
-                          onClick={() => setIsTwilioVisible(!isTwilioVisible)}
-                          style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            cursor: "pointer",
-                            fontSize: "1.2rem",
-                            userSelect: "none"
-                          }}
-                          title={isTwilioVisible ? "Ocultar SID" : "Mostrar SID"}
-                        >
-                          {isTwilioVisible ? "🙈" : "👁️"}
-                        </span>
-                      </div>
-                    ) : (
-                      <input
-                        type="text"
-                        id={key}
-                        name={key}
-                        value={userInfo[key]}
-                        onChange={handleUserInfoChange}
-                        placeholder={`Ingresa tu ${key.replace("_", " ")}`}
-                      />
-                    )}
-                    {/* Instrucciones específicas */}
-                    {key === 'phone' && (
-                      <small className="input-help-text">Introduce un nº de un teléfono móvil.</small>
-                    )}
-                    {key === 'fecha_nacimiento' && (
-                      <small className="input-help-text">Formato de fecha: 2000-12-01</small>
-                    )}
-                    {key === 'dni' && (
-                      <small className="input-help-text">Formato de DNI: 53564522W</small>
-                    )}
-                    {key === 'whatsapp_business_number' && (
-                      <small className="input-help-text">Añadir el teléfono registrado en Twilio (usar antes +34)</small>
-                    )}
-                  </div>
-                ) : (
-                  renderUserInfo(key) // Usamos la función renderUserInfo para manejar los casos de objetos
-                )}
-              </div>
-            ))}
-          {infoError && <p className="error-message">{infoError}</p>}
-          {infoMessage && <p className="success-message">{infoMessage}</p>}
-          <button
-            type="button"
-            className="submit-button"
-            onClick={(e) => {
-              if (isEditing) {
-                handleUserInfoSubmit(e);
-              } else {
-                setIsEditing(true); // Activar el modo de edición
-              }
-            }}
+      <hr className="my-6 border-t border-gray-300" />
+
+      <h4 className="title-section">Integración con WhatsApp Business</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-2xl shadow-lg mb-8">
+        {[
+          {
+            label: "Número de WhatsApp Business",
+            value: userInfo.whatsapp_business_number,
+          },
+          {
+            label: "Twilio Service SID",
+            value: userInfo.twilio_whatsapp_service_sid,
+          },
+          {
+            label: "Twilio Account SID",
+            value: userInfo.twilio_account_sid,
+          },
+          {
+            label: "Auth Token",
+            value: userInfo.twilio_auth_token,
+          },
+        ].map((item, idx) => (
+          <div className="flex flex-col" key={idx}>
+            <span className="text-l text-gray-500 font-bold">{item.label}</span>
+            <span className="text-base font-medium text-gray-800">
+              {item.value || (
+                <span className="text-gray-400">No disponible</span>
+              )}
+            </span>
+          </div>
+        ))}
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Verificado</span>
+          <span
+            className={`text-base font-semibold ${
+              userInfo.twilio_integration_verified
+                ? "text-green-600"
+                : "text-red-500"
+            }`}
           >
-            {isEditing ? "Guardar Cambios" : "Actualizar Información"}
-          </button>
-        </form>
+            {userInfo.twilio_integration_verified ? "Sí" : "No"}
+          </span>
+        </div>
+      </div>
 
+      <div className="mt-3">
+        <button onClick={() => setIsEditing(true)} className="btn-primary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="white"
+            viewBox="0 0 24 24"
+            className="w-5 h-5"
+          >
+            <path d="M21.707,4.475,19.525,2.293a1,1,0,0,0-1.414,0L9.384,11.021a.977.977,0,0,0-.241.39L8.052,14.684A1,1,0,0,0,9,16a.987.987,0,0,0,.316-.052l3.273-1.091a.977.977,0,0,0,.39-.241l8.728-8.727A1,1,0,0,0,21.707,4.475Z" />
+            <path d="M2,6A1,1,0,0,1,3,5h8a1,1,0,0,1,0,2H4V20H17V13a1,1,0,0,1,2,0v8a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1Z" />
+          </svg>
+        </button>
+      </div>
 
+      <EditarUserModal
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        userData={userInfo}
+        onSave={handleSave}
+        setEditedUserInfo={setEditedUserInfo}
+      />
 
+      <hr className="my-6 border-t border-gray-300" />
 
-        <h2 className="title-section">Cambio de Contraseña</h2>
-        <form onSubmit={handlePasswordChange} className="password-form">
-          <div className="form-group">
-            <label htmlFor="currentPassword">Contraseña Actual</label>
-            <input
-              type="password"
-              id="currentPassword"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Ingresa tu contraseña actual"
-              required
-            />
-            <small className="input-help-text">Ingresa la contraseña que usas actualmente.</small>
-          </div>
-          <div className="form-group">
-            <label htmlFor="newPassword">Nueva Contraseña</label>
-            <input
-              type="password"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Ingresa tu nueva contraseña"
-              required
-            />
-            <small className="input-help-text">Debe tener al menos 8 caracteres, incluyendo una mayúscula y un número.</small>
-          </div>
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirmar Nueva Contraseña</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirma tu nueva contraseña"
-              required
-            />
-            <small className="input-help-text">Debe coincidir con la nueva contraseña ingresada.</small>
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          {message && <p className="success-message">{message}</p>}
-          <button type="submit" className="submit-button">
-            Cambiar Contraseña
-          </button>
-        </form>
+      <PasswordChangeForm
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        setCurrentPassword={setCurrentPassword}
+        setNewPassword={setNewPassword}
+        setConfirmPassword={setConfirmPassword}
+        error={error}
+        message={message}
+        onSubmit={handlePasswordSubmit}
+      />
     </div>
-
   );
 };
 

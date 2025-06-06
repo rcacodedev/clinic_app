@@ -8,7 +8,7 @@ import Notification from "../components/Notification";
 import { createFactura } from "../services/facturaService";
 import { getToken, getUserIdFromToken } from "../utils/auth";
 import { fetchUserInfo } from "../services/userInfoService";
-import '../styles/home.css'
+
 
 
 function Home() {
@@ -82,15 +82,15 @@ function Home() {
 
             // Si se marca como "Cotizada", crear una factura
             // Si se marca cotizada, se crea la factura
-            if(!citas[field]) {
+            if (!citaSeleccionada[field]) {
                 const facturaData = {
-                    cita:citaId,
+                    cita: citaId,
                     numero_factura: null,
-                    total: citas.precio,
+                    total: citaSeleccionada.precio,
                     usuario: userId,
                 };
                 await createFactura(facturaData);
-                setNotificacionFactura(true)
+                setNotificacionFactura(true);
             }
         } catch (error) {
             console.error('Error al actualizar la cita', error);
@@ -154,8 +154,8 @@ function Home() {
             <NotasList/>
             <div className="citas-filtradas">
                 <div className="columnas">
-                    <div className="columna">
-                        <h2 className="title-section">Citas de Hoy</h2>
+                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg my-4">
+                        <h2 className="text-3xl font-bold text-black mb-8 border-b-4 border-tan text-left">Citas de Hoy</h2>
                         <table className="tabla-citas">
                             <thead className="head-table">
                                 <tr className="tr-table">
@@ -213,7 +213,7 @@ function Home() {
                     </div>
 
                     <div className="columna">
-                        <h2 className="title-section">Citas de Mañana</h2>
+                        <h2 className="text-3xl font-bold text-black mb-8 border-b-4 border-tan text-left">Citas de Mañana</h2>
                         <table className="tabla-citas">
                             <thead className="head-table">
                                 <tr className="tr-table">
@@ -275,7 +275,7 @@ function Home() {
 
             {/* Nueva columna con el paciente asignado a las citas de hoy */}
             <div className="pacientes">
-                <p className="title-section">Pacientes con cita hoy</p>
+                <p className="text-3xl font-bold text-black mb-8 border-b-4 border-tan text-left">Pacientes con cita hoy</p>
                 <div className="columna-pacientes">
 
                     <ul className="lista-pacientes">
@@ -293,7 +293,7 @@ function Home() {
                     </ul>
                 </div>
 
-                <p className="title-section">Pacientes con cita mañana</p>
+                <p className="text-3xl font-bold text-black mb-8 border-b-4 border-tan text-left">Pacientes con cita mañana</p>
                 <div className="columna-pacientes">
                     <ul className="lista-pacientes">
                         {citasTomorrow.length > 0 ? (
@@ -335,10 +335,13 @@ function Home() {
                 message="WhatsApp de citas enviados correctamente"
                 isVisible={notificacionWhatsApp}
                 onClose={() => setNotificacionWhatsApp(false)}
-                type="succes"
+                type="success"
                 />
         </div>
     );
 }
 
 export default Home;
+
+
+

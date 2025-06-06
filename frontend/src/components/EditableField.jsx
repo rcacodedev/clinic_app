@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EditarIcon from '../assets/editar.svg';
-import '../styles/editableField.css';
+
 
 const EditableField = ({ value, onSave, label, type = 'text', options = [] }) => {
     const [isEditing, setIsEditing] = useState(false);

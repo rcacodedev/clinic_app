@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import citasService from "../../services/citasService";
 import Boton from "../Boton";
 import CustomModal from "../Modal";
-import '../../styles/citas/crearCitasModal.css'
+
 
 const EditarCitaModal = ({ showModal, onClose, cita, refreshCitas, patients }) => {
     const [formData, setFormData] = useState({

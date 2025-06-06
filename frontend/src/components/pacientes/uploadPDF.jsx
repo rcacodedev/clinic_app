@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import patientService from "../../services/patientService";
-import { FaFilePdf } from 'react-icons/fa'; // Importar el icono de PDF
-import Boton from "../Boton";
-import Notification from "../Notification";
-import '../../styles/pacientes/uploadpdf.css'
+import {
+  uploadSignedPDFs,
+  getPacientesById,
+} from "../../services/patientService";
+import { FaFilePdf } from "react-icons/fa"; // Importar el icono de PDF
+import { toast } from "react-toastify";
 
 const UploadPDF = ({ patientId }) => {
   const [selectedFiles, setSelectedFiles] = useState({
@@ -15,21 +16,26 @@ const UploadPDF = ({ patientId }) => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [pdfUrls, setPdfUrls] = useState({});
-  const [patient, setPatient] = useState({ pdf_firmado_general: "", pdf_firmado_menor: "", pdf_firmado_inyecciones: "" });
-  const [isNotificationVisibleSubir, setIsNotificationVisibleSubir] = useState(false);
+  const [patient, setPatient] = useState({
+    pdf_firmado_general: "",
+    pdf_firmado_menor: "",
+    pdf_firmado_inyecciones: "",
+  });
+  const [isNotificationVisibleSubir, setIsNotificationVisibleSubir] =
+    useState(false);
 
   const loadPatientsData = async () => {
     try {
-        const response = await patientService.getPatientById(patientId)
-        setPatient(response)
+      const response = await getPacientesById(patientId);
+      setPatient(response);
     } catch (error) {
-        console.error("Error al obtener los datos del paciente:", error);
+      console.error("Error al obtener los datos del paciente:", error);
     }
   };
 
   useEffect(() => {
     loadPatientsData();
-  }, [patientId])
+  }, [patientId]);
 
   const handleFileChange = async (e) => {
     const { name, files } = e.target;
@@ -50,15 +56,15 @@ const UploadPDF = ({ patientId }) => {
     setUploading(true);
     try {
       // Llamar a la función de uploadSignedPDFs con el patientId y el archivo
-      const response = await patientService.uploadSignedPDFs(patientId, formData);
+      const response = await uploadSignedPDFs(patientId, formData);
 
       // Actualizar URLs de los PDFs subidos
       setPdfUrls(response.pdf_urls);
-      setIsNotificationVisibleSubir(true);
-      setMessage('Archivo subido correctamente.');
+      toast.success("Archivo subido con éxito");
       loadPatientsData();
     } catch (error) {
-      setMessage('Error al subir el archivo.', error);
+      console.error("Error al subir el archivo", error);
+      toast.error("Error al subir el archivo");
     } finally {
       setUploading(false);
     }
@@ -70,11 +76,24 @@ const UploadPDF = ({ patientId }) => {
 
       {/* Inputs de archivo para los tres tipos de PDFs */}
       <div className="input-proteccion-datos">
-        <label className="title-input">Protección de Datos</label>
-        <input type="file" name="pdf_firmado_general" accept="application/pdf" onChange={handleFileChange} />
+        <label className="label-protecciondatos mt-2" htmlFor="file_input">
+          Protección de Datos
+        </label>
+        <input
+          className="btn-datos-input mb-2"
+          id="file_input"
+          type="file"
+          name="pdf_firmado_general"
+          accept="application/pdf"
+          onChange={handleFileChange}
+        />
         {patient.pdf_firmado_general && (
           <p>
-            <a href={patient.pdf_firmado_general} target="_blank" rel="noopener noreferrer">
+            <a
+              href={patient.pdf_firmado_general}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaFilePdf /> Protección de datos
             </a>
           </p>
@@ -82,32 +101,56 @@ const UploadPDF = ({ patientId }) => {
       </div>
 
       <div>
-        <label className="title-input">Consentimiento Menor</label>
-        <input type="file" name="pdf_firmado_menor" accept="application/pdf" onChange={handleFileChange} />
+        <label className="label-protecciondatos mt-2" htmlFor="file_input">
+          Consentimiento Menor
+        </label>
+        <input
+          className="btn-datos-input mb-2"
+          id="file_input"
+          type="file"
+          name="pdf_firmado_menor"
+          accept="application/pdf"
+          onChange={handleFileChange}
+        />
         {patient.pdf_firmado_menor && (
-            <p>
-                <a href={patient.pdf_firmado_menor} target="_blank" rel="noopener noreferrer">
-                  <FaFilePdf /> Consentimiento menor
-                </a>
-            </p>
+          <p>
+            <a
+              href={patient.pdf_firmado_menor}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaFilePdf /> Consentimiento menor
+            </a>
+          </p>
         )}
       </div>
 
       <div>
-        <label className="title-input">Consentimiento Fisioterapia Invasiva</label>
-        <input type="file" name="pdf_firmado_inyecciones" accept="application/pdf" onChange={handleFileChange} />
+        <label className="label-protecciondatos mt-2" htmlFor="file_input">
+          Consentimiento Fisioterapia Invasiva
+        </label>
+        <input
+          className="btn-datos-input mb-2"
+          id="file_input"
+          type="file"
+          name="pdf_firmado_inyecciones"
+          accept="application/pdf"
+          onChange={handleFileChange}
+        />
         {patient.pdf_firmado_inyecciones && (
-            <p>
-            <a href={patient.pdf_firmado_inyecciones} target="_blank" rel="noopener noreferrer">
+          <p>
+            <a
+              href={patient.pdf_firmado_inyecciones}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <FaFilePdf /> Consentimiento Fisioterapia Invasiva
             </a>
           </p>
         )}
       </div>
 
-      <Notification message="Archivo subido correctamente." isVisible={isNotificationVisibleSubir} onClose={() => setIsNotificationVisibleSubir(false)} type="success"/>
-      {message && (<p>Hubo un error. {message}</p>)}
-
+      {message && <p>Hubo un error. {message}</p>}
     </div>
   );
 };

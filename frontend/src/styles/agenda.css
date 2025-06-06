@@ -13,21 +13,6 @@
 }
 
 
-
-
-button {
-  padding: 8px 12px;
-  background-color: #6200ea;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #3700b3;
-}
-
 /* Tabla */
 .agenda-table {
   width: 100%;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import patientService from "../../services/patientService";
+import { deletePaciente, getPacientes } from "../../services/patientService";
 import PatientList from "../../components/pacientes/patientsList";
 
 const Patients = () => {
@@ -10,7 +10,7 @@ const Patients = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const data = await patientService.getPatients();
+        const data = await getPacientes();
         setPatients(data.results); // Si tienes paginación
       } catch (error) {
         console.error("Error al cargar pacientes:", error);
@@ -25,7 +25,7 @@ const Patients = () => {
   // Eliminar paciente
   const handleDelete = async (id) => {
     try {
-      await patientService.deletePatient(id);
+      await deletePaciente(id);
       setPatients(patients.filter((patient) => patient.id !== id)); // Actualiza la lista
     } catch (error) {
       console.error("Error al eliminar paciente:", error);
@@ -38,7 +38,7 @@ const Patients = () => {
     // ya que la lista ya está siendo manejada por el estado de `Patients`
     const fetchPatients = async () => {
       try {
-        const data = await patientService.getPatients();
+        const data = await getPacientes();
         setPatients(data.results); // Actualiza la lista de pacientes
       } catch (error) {
         console.error("Error al cargar pacientes:", error);

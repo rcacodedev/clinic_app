@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import patientService from "../../services/patientService";
-import CustomModal from "../../components/Modal";
-import Boton from "../../components/Boton";
-import PatientAppointments from "../../components/pacientes/CitasPacientes";
-import Notification from "../../components/Notification";
+import {
+  getPacientesById,
+  deletePaciente,
+  updatePaciente,
+} from "../../services/patientService";
+
 import UploadPDF from "../../components/pacientes/uploadPDF";
 import PatientDocuments from "../../components/pacientes/patientsDocument";
 import ListFacturasPatients from "../../components/facturacion/ListFacturasPacientes";
-import "../../styles/pacientes/patientsProfile.css";
+import ConfirmModal from "../../components/ConfirmModal";
+import EditarPacienteModal from "../../components/pacientes/ModalEditarPaciente";
+import { toast } from "react-toastify";
+import PatientAppointments from "../../components/pacientes/CitasPacientes";
 
 function PatientProfile() {
   const { id } = useParams();
@@ -23,34 +27,53 @@ function PatientProfile() {
   const [refreshAppointments, setRefreshAppointments] = useState(false); // Para refrescar las citas
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const navigate = useNavigate();
+  const firstInputRef = useRef(null);
 
-  useEffect(() => {
-    const fetchPatientData = async () => {
-      try {
-        const data = await patientService.getPatientById(id);
-        setPatient(data);
-        setFormData(data);
-      } catch (error) {
-        console.error("Error al obtener los datos del paciente:", error);
-        setError("Error al cargar los datos del paciente");
-      } finally {
-        setLoading(false);
+  const fetchPatientData = async () => {
+    try {
+      const data = await getPacientesById(id);
+
+      // 🛠️ Normaliza patologias
+      let patologias = data.patologias;
+      if (typeof patologias === "string") {
+        try {
+          patologias = JSON.parse(patologias);
+        } catch {
+          patologias = [];
+        }
       }
-    };
+      if (!Array.isArray(patologias)) {
+        patologias = [];
+      }
 
+      const cleanData = { ...data, patologias };
+      setPatient(cleanData);
+      setFormData(cleanData);
+    } catch (error) {
+      console.error("Error al obtener los datos del paciente:", error);
+      toast.error("Error al obtener los datos del paciente");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchPatientData();
   }, [id, refreshAppointments]); // Refrescar cuando el ID del paciente o `refreshAppointments` cambian
 
   // Eliminar paciente
   const handleDelete = async () => {
     try {
-      await patientService.deletePatient(id);
-      alert("Paciente eliminado correctamente");
-      navigate("/api/pacientes");
+      await deletePaciente(id);
+      toast.success("Paciente eliminado correctamente");
+      navigate("/pacientes");
     } catch (error) {
       console.error("Error al eliminar el paciente:", error);
-      alert("Error al eliminar el paciente");
+      toast.error("Error al eliminar el paciente");
     }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   // Actualizar paciente
@@ -59,14 +82,34 @@ function PatientProfile() {
 
     try {
       setLoading(true);
-      await patientService.updatePatient(id, formData);
-      const updatedPatient = await patientService.getPatientById(id);
+
+      // Creamos un nuevo objeto sin los campos pdf
+      const patientData = {};
+
+      Object.keys(formData).forEach((key) => {
+        if (key !== "pdf_firmado_general" && key !== "pdf_firmado_menor") {
+          if (key === "patologias") {
+            patientData.patologias = JSON.stringify(formData.patologias || []);
+          } else {
+            patientData[key] = formData[key];
+          }
+        }
+      });
+
+      // Aquí haces PATCH (no PUT) para no sobrescribir campos no enviados
+      await updatePaciente(id, patientData);
+
+      const updatedPatient = await getPacientesById(id);
       setPatient(updatedPatient);
       setIsEditModalOpen(false);
-      setIsNotificationVisible(true);
+      fetchPatientData();
+      toast.success("Paciente actualizado correctamente");
     } catch (error) {
-      console.error("Error al actualizar el paciente:", error);
-      alert("Error al actualizar el paciente");
+      console.error(
+        "Error al actualizar el paciente:",
+        error.response?.data || error
+      );
+      toast.error("Error al actualizar el paciente");
     } finally {
       setLoading(false);
     }
@@ -95,116 +138,180 @@ function PatientProfile() {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="patient-profile-container">
-      <h4 className="title-section">Datos del Paciente {patient.nombre} {patient.primer_apellido}</h4>
-      <div className="patient-details">
-        <div className="patient-field"><strong>Nombre:</strong><span>{patient.nombre} {patient.primer_apellido} {patient.segundo_apellido}</span></div>
-        <div className="patient-field"><strong>Email:</strong><span>{patient.email}</span></div>
-        <div className="patient-field"><strong>Teléfono:</strong><span>{patient.phone}</span></div>
-        <div className="patient-field"><strong>Fecha de nacimiento:</strong><span>{new Date(patient.fecha_nacimiento).toLocaleDateString()}</span></div>
-        <div className="patient-field"><strong>DNI:</strong><span>{patient.dni}</span></div>
-        <div className="patient-field"><strong>Dirección:</strong><span>{patient.address}</span></div>
-        <div className="patient-field"><strong>Ciudad:</strong><span>{patient.city}</span></div>
-        <div className="patient-field"><strong>Código Postal:</strong><span>{patient.code_postal}</span></div>
-        <div className="patient-field"><strong>País:</strong><span>{patient.country}</span></div>
-        <div className="patient-field"><strong>Alergías:</strong><span>{patient.alergias ? "Sí" : "No"}</span></div>
-        <div className="patient-field"><strong>Patologías:</strong>
-          {Array.isArray(patient.patologias) && patient.patologias.length > 0 ? (
-            <ul className="no-bullets">
+    <div className="main-container">
+      <div className="title-container">
+        <h1 className="title">
+          Ficha Clínica de {patient.nombre} {patient.primer_apellido}
+        </h1>
+        <p className="title-description">
+          Toda la información sobre el paciente {patient.nombre}{" "}
+          {patient.primer_apellido}
+        </p>
+      </div>
+      <h4 className="title-section">
+        Datos personales de {patient.nombre} {patient.primer_apellido}
+      </h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-2xl shadow-lg mb-5">
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">
+            Nombre del Paciente
+          </span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.nombre} {patient.primer_apellido}{" "}
+            {patient.segundo_apellido}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Email</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.email}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Teléfono</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.phone}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">
+            Fecha de nacimiento
+          </span>
+          <span className="text-base font-medium text-gray-800">
+            {new Date(patient.fecha_nacimiento).toLocaleDateString()}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">DNI</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.dni}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Dirección</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.address}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Ciudad</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.city}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Código Postal</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.code_postal}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">País</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.country}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">¿Alergias?</span>
+          <span className="text-base font-medium text-gray-800">
+            {patient.alergias ? "Sí" : "No"}
+          </span>
+        </div>
+
+        <div className="md:col-span-2 flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Patologías</span>
+          {Array.isArray(patient.patologias) &&
+          patient.patologias.length > 0 ? (
+            <ul className="lista-patologias-ul">
               {patient.patologias.map((patologia, index) => (
                 <li key={index}>{patologia}</li>
               ))}
             </ul>
           ) : (
-            <span>No hay patologías registradas.</span>
+            <span className="text-base font-medium text-gray-800">
+              No hay patologías registradas.
+            </span>
           )}
         </div>
-        <div className="patient-field patient-notes"><strong>Notas:</strong><span>{patient.notas}</span></div>
+
+        <div className="md:col-span-2 flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Notas</span>
+          <div className="bg-gray-50 p-3 rounded-md border text-gray-700 whitespace-pre-wrap">
+            {patient.notas || "Sin notas registradas."}
+          </div>
+        </div>
       </div>
 
-      <div className="botones">
-        <Boton texto="Editar Perfil" onClick={() => setIsEditModalOpen(true)} />
-        <Boton texto="Eliminar Perfil" onClick={() => setIsDeleteModalOpen(true)} tipo="peligro"/>
+      <div className="mt-3">
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className="btn-primary"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="white"
+            viewBox="0 0 24 24"
+            className="w-5 h-5"
+          >
+            <path d="M21.707,4.475,19.525,2.293a1,1,0,0,0-1.414,0L9.384,11.021a.977.977,0,0,0-.241.39L8.052,14.684A1,1,0,0,0,9,16a.987.987,0,0,0,.316-.052l3.273-1.091a.977.977,0,0,0,.39-.241l8.728-8.727A1,1,0,0,0,21.707,4.475Z" />
+            <path d="M2,6A1,1,0,0,1,3,5h8a1,1,0,0,1,0,2H4V20H17V13a1,1,0,0,1,2,0v8a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1Z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setIsDeleteModalOpen(true)}
+          className="btn-eliminar"
+        >
+          <svg
+            viewBox="0 0 1024 1024"
+            fill="white"
+            className="w-5 h-5"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M32 241.6c-11.2 0-20-8.8-20-20s8.8-20 20-20l940 1.6c11.2 0 20 8.8 20 20s-8.8 20-20 20L32 241.6zM186.4 282.4c0-11.2 8.8-20 20-20s20 8.8 20 20v688.8l585.6-6.4V289.6c0-11.2 8.8-20 20-20s20 8.8 20 20v716.8l-666.4 7.2V282.4z" />
+            <path d="M682.4 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM367.2 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM524.8 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM655.2 213.6v-48.8c0-17.6-14.4-32-32-32H418.4c-18.4 0-32 14.4-32 32.8V208h-40v-42.4c0-40 32.8-72.8 72.8-72.8H624c40 0 72.8 32.8 72.8 72.8v48.8h-41.6z" />
+          </svg>
+        </button>
       </div>
 
-
-      {/* Modal para editar el paciente */}
-      <CustomModal isOpen={isEditModalOpen} onRequestClose={() => setIsEditModalOpen(false)} title="Editar Perfil del Paciente">
-        <form className="edit-form">
-          <label>Nombre</label>
-          <input type="text" name="nombre" value={formData.nombre || ''} onChange={e => setFormData({...formData, nombre: e.target.value})} />
-          <label>Primer Apellido</label>
-          <input type="text" name="primer_apellido" value={formData.primer_apellido || ''} onChange={e => setFormData({...formData, primer_apellido: e.target.value})} />
-          <label>Segundo Apellido</label>
-          <input type="text" name="segundo_apellido" value={formData.segundo_apellido || ''} onChange={e => setFormData({...formData, segundo_apellido: e.target.value})} />
-          <label>Email</label>
-          <input type="email" name="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} />
-          <label>Telefono</label>
-          <input type="text" name="phone" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} />
-          <label>Fecha de nacimiento</label>
-          <input type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento || ''} onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})} />
-          <label>DNI/NIF</label>
-          <input type="text" name="dni" value={formData.dni || ''} onChange={e => setFormData({...formData, dni: e.target.value})} />
-          <label>Dirección</label>
-          <input type="text" name="address" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} />
-          <label>Ciudad</label>
-          <input type="text" name="city" value={formData.city || ''} onChange={e => setFormData({...formData, city: e.target.value})} />
-          <label>Código Postal</label>
-          <input type="text" name="code_postal" value={formData.code_postal || ''} onChange={e => setFormData({...formData, code_postal: e.target.value})} />
-          <label>País</label>
-          <input type="text" name="country" value={formData.country || ''} onChange={e => setFormData({...formData, country: e.target.value})} />
-          <label>Patologías</label>
-          <div className="pathologies-container">
-            {formData.patologias && formData.patologias.length > 0 ? (
-              <ul>
-                {formData.patologias.map((pathology, index) => (
-                  <li key={index}>
-                    {pathology} <button type="button" onClick={() => handleRemovePathology(index)}>Eliminar</button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No se han añadido patologías aún.</p>
-            )}
-            <button type="button" onClick={handleAddPathology}>Añadir Patología</button>
-          </div>
-          <label>Alergías</label>
-          <div style={{display: "flex", alignItems:"center", gap:"10px"}}>
-            <span>{formData.alergias ? "Sí" : "No"}</span>
-            <label className="switch">
-              <input type="checkbox" checked={formData.alergias} onChange={() => setFormData({...formData, alergias: !formData.alergias})} />
-              <span className="slider"></span>
-            </label>
-          </div>
-          <label htmlFor="notas">Notas:</label>
-          <textarea
-            name="notas"
-            value={formData.notas || ""}
-            onChange={e => setFormData({...formData, notas: e.target.value})}
-            placeholder="Escribe notas sobre el paciente..."
-          />
-          <Boton texto="Guardar Cambios" onClick={handleSave} tipo="guardar" />
-        </form>
-      </CustomModal>
+      {isEditModalOpen && (
+        <EditarPacienteModal
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleSave}
+          formData={formData}
+          setFormData={setFormData}
+          handleAddPathology={handleAddPathology}
+          handleRemovePathology={handleRemovePathology}
+          onChange={handleInputChange}
+          isOpen={() => setIsEditModalOpen(true)}
+          firstInputRef={firstInputRef}
+        />
+      )}
 
       {/* Modal para confirmar la eliminación del paciente */}
-      <CustomModal isOpen={isDeleteModalOpen} onRequestClose={() => setIsDeleteModalOpen(false)} title="Confirmar Eliminación">
-        <p>¿Estás seguro de que quieres eliminar este perfil?</p>
-        <Boton texto="Eliminar" onClick={handleDelete} tipo="peligro" />
-        <Boton texto="Cancelar" onClick={() => setIsDeleteModalOpen(false)} />
-      </CustomModal>
-      <div className="proteccion-datos">
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        message="¿Estás seguro de que deseas eliminar este paciente?"
+      />
+      <div className="mt-5">
         <UploadPDF patientId={id} />
         <PatientDocuments patientId={id} />
       </div>
 
-
       {/* Componente de citas */}
-      <PatientAppointments patientId={id} refreshAppointments={refreshAppointments} />
-      <Notification
-        message="Perfil actualizado correctamente"
-        isVisible={isNotificationVisible}
-        onClose={() => setIsNotificationVisible(false)}
+      <PatientAppointments
+        patientId={id}
+        refreshAppointments={refreshAppointments}
       />
       <ListFacturasPatients patientId={id} />
     </div>

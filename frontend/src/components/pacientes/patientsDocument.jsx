@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import { fetchDocuments, uploadDocuments, deleteDocument } from "../../services/patientService";
+import {
+  fetchDocumentos,
+  uploadDocumentos,
+  deleteDocumento,
+} from "../../services/patientService";
 import { FaFilePdf, FaTrash } from "react-icons/fa";
-import Notification from "../Notification";
-import "../../styles/pacientes/documents.css";
+import ConfirmModal from "../ConfirmModal";
+import { toast } from "react-toastify";
 
 const PatientDocuments = ({ patientId }) => {
   const [documents, setDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const loadDocuments = async () => {
-    const docs = await fetchDocuments(patientId);
+    const docs = await fetchDocumentos(patientId);
     setDocuments(docs);
   };
 
@@ -29,45 +33,55 @@ const PatientDocuments = ({ patientId }) => {
     setMessage("");
 
     try {
-      await uploadDocuments(patientId, file);
-      setIsNotificationVisible(true);
+      await uploadDocumentos(patientId, file);
+      toast.success("El archivo se ha subido con éxito");
       loadDocuments(); // Recargar la lista
     } catch (error) {
-      setMessage("Error al subir el archivo.");
+      console.error("Error al subir el archivo", error);
+      toast.error("Error al subir el archivo");
     }
 
     setUploading(false);
   };
 
   const handleDelete = async (documentId) => {
-    const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este documento?");
-    if (!confirmDelete) return;
-
     try {
-      await deleteDocument(documentId);
+      await deleteDocumento(documentId);
+      toast.success("El archivo se eliminó correctamente");
       loadDocuments();
     } catch (error) {
-      setMessage("Error al eliminar el documento.");
+      console.error("Error al eliminar el archivo", error);
+      toast.error("Error al eliminar el archivo");
     }
   };
 
   return (
-    <div className="container-documents">
-      <h2 className="title-section">Documentos Clínicos del Paciente</h2>
+    <div className="mt-4">
+      <h2 className="title-section mb-4">Documentos Clínicos del Paciente</h2>
 
-      <div className="input-documents">
-        <input type="file" accept="application/pdf" onChange={handleFileChange} disabled={uploading} />
+      <div className="relative flex h-10 w-full min-w-[200px] max-w-md">
+        <input
+          className="btn-datos-input"
+          id="file_input"
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
       </div>
 
-      <ul className="documents-list">
+      <ul className="lista-patologias-ul">
         {documents.length > 0 ? (
           documents.map((doc) => (
-            <li key={doc.id} className="document-item">
-              <a href={doc.file} target="_blank" rel="noopener noreferrer">
-                <FaFilePdf /> {doc.file.split("/").pop()}
+            <li key={doc.id} className="patologia-elemento-li">
+              <a href={doc.archivo} target="_blank" rel="noopener noreferrer">
+                <FaFilePdf /> {doc.archivo.split("/").pop()}
               </a>
-              <button className="delete-btn" onClick={() => handleDelete(doc.id)}>
-                <FaTrash /> Eliminar
+              <button
+                className="btn-eliminar"
+                onClick={() => handleDelete(doc.id)}
+              >
+                <FaTrash />
               </button>
             </li>
           ))
@@ -76,10 +90,11 @@ const PatientDocuments = ({ patientId }) => {
         )}
       </ul>
 
-      <Notification
-        message="Archivo subido correctamente."
-        isVisible={isNotificationVisible}
-        onClose={() => setIsNotificationVisible(false)}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        message="¿Estás seguro de que deseas eliminar este paciente?"
       />
       {message && <p className="error-message">{message}</p>}
     </div>

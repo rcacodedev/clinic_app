@@ -4,7 +4,7 @@ import Boton from '../Boton'
 import CrearNotaModal from "./crearNotaModal";
 import EditarNotaModal from "./editarNotaModal";
 import Notification from "../Notification";
-import '../../styles/notas/notasList.css'
+
 
 const NotasList = () => {
     const [notas, setNotas] = useState([])

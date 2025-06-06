@@ -5,11 +5,18 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -48,24 +55,28 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-    def perform_create(self, serializer):
-        print("Solicitud recibida:", self.request)
-        user = serializer.save()  # Guardamos al usuario primero
-        group_name = self.request.data.get('group')  # Obtenemos el grupo de la solicitud
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
+        group_name = request.data.get('group')
         if group_name:
             try:
                 group = Group.objects.get(name=group_name)
                 user.groups.add(group)
             except Group.DoesNotExist:
-                raise ValidationError("El grupo no existe.")
+                return Response({"error": "El grupo no existe."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Crear y devolver el token con los grupos
-        access_token, refresh_token = get_tokens_for_user(user)
+        tokens = get_tokens_for_user(user)
+
+        headers = self.get_success_headers(serializer.data)
         return Response({
-            'access_token': access_token,
-            'refresh_token': refresh_token
-        })
+            'user': serializer.data,
+            'access_token': tokens['access'],
+            'refresh_token': tokens['refresh'],
+        }, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
@@ -76,19 +87,24 @@ class ChangePasswordView(APIView):
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
 
-        # Verificar la contraseña actual
         if not user.check_password(current_password):
             return Response({"error": "La contraseña actual es incorrecta."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verificar que las contraseñas nuevas coincidan
         if new_password != confirm_password:
             return Response({"error": "Las nuevas contraseñas no coinciden."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cambiar la contraseña
+        # Validar contraseña según reglas de Django
+        try:
+            validate_password(new_password, user=user)
+        except DjangoValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
         user.set_password(new_password)
         user.save()
 
         return Response({"success": "La contraseña se ha actualizado correctamente."}, status=status.HTTP_200_OK)
+
+
 
 class ListGroupsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -96,3 +112,55 @@ class ListGroupsView(APIView):
     def get(self, request):
         groups = Group.objects.all().values('id', 'name')
         return Response(groups)
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        try:
+            user = User.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            reset_link = f"{request.data.get('frontend_base_url')}/reset-password/{uid}/{token}"
+
+            # Renderizar el contenido HTML con contexto
+            html_content = render_to_string("emails/password_reset_email.html", {
+                "reset_link": reset_link,
+                "user": user,
+            })
+
+            subject = "Restablece tu contraseña"
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to = [email]
+
+            msg = EmailMultiAlternatives(subject, "", from_email, to)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
+            return Response({"success": "Correo enviado correctamente."}, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=400)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get("uid")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+            return Response({"error": "Token inválido."}, status=400)
+
+        if not default_token_generator.check_token(user, token):
+            return Response({"error": "Token inválido o expirado."}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"success": "Contraseña actualizada correctamente."}, status=200)

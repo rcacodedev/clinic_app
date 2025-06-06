@@ -78,7 +78,7 @@ const sendWhatsapp = async (citas_ids) => {
 // Obtener el precio global de las citas
 export const obtenerPrecioGlobal = async () => {
   try {
-    const response = await api.get(`${API_URL}configurar-precioglobal/`);
+    const response = await api.get(`${API_URL}configurar-precio/`);
     return response.data.precio_global;
   } catch (error) {
     console.error("Error al obtener el precio global:", error);
@@ -89,7 +89,7 @@ export const obtenerPrecioGlobal = async () => {
 // Actualizar el precio global de las citas
 export const actualizarPrecioGlobal = async (nuevoPrecio) => {
   try {
-    const response = await api.put(`${API_URL}configurar-precioglobal/`, {
+    const response = await api.put(`${API_URL}configurar-precio/`, {
       precio_global: nuevoPrecio,
     });
     return response.data;

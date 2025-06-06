@@ -1,7 +1,7 @@
 import React from 'react';
 import CustomModal from './Modal';
 import Boton from './Boton';
-import '../styles/agenda.css';
+
 
 const Agenda = ({
     citas,

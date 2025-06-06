@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CustomModal from '../Modal'; // Asegúrate de importar correctamente tu componente CustomModal
 import Boton from '../Boton'; // Componente de botón
-import '../../styles/Workers/crearcitaworkers.css'
+
 
 const CrearCitaWorkerModal = ({ showModal, onClose, onSave, cita, handleChange, patients, loading, error, onPatientSelect }) => {
     const [newCita, setNewCita] = useState(cita);

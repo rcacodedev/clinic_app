@@ -1,73 +1,43 @@
 from rest_framework import serializers
-from .models import Citas, ConfiguracionPrecioCita
-from patients.models import Patient
+from .models import Cita, ConfiguracionPrecioCita
+from patients.models import Paciente
+from django.contrib.auth.models import Group
 
-class CitasSerializer(serializers.ModelSerializer):
-    # Campos adicionales para nombres completos de los pacientes
-    patient_name = serializers.StringRelatedField(source='patient.nombre', read_only=True)
-    patient_primer_apellido = serializers.StringRelatedField(source='patient.primer_apellido', read_only=True)
-    patient_segundo_apellido = serializers.StringRelatedField(source='patient.segundo_apellido', read_only=True)
-    user_id = serializers.IntegerField(source='user.id', read_only=True)
-    patient_phone = serializers.StringRelatedField(source='patient.phone', read_only=True)
-
-    # Campo para la creación de citas basado en el nombre completo del paciente
-    patient_name_input = serializers.CharField(write_only=True, required=False)
+class CitaSerializer(serializers.ModelSerializer):
+    paciente_id = serializers.IntegerField(write_only=True)  # ID recibido del frontend
+    paciente = serializers.StringRelatedField(read_only=True)  # Para mostrar el nombre
 
     class Meta:
-        model = Citas
-        fields = ['id', 'patient', 'patient_name', 'patient_primer_apellido', 'patient_segundo_apellido', 'patient_phone', 'fecha', 'comenzar', 'finalizar', 'descripcion', 'user_id', 'worker', 'patient_name_input', 'cotizada', 'bizum', 'efectivo', 'pagado', 'precio']
-        extra_kwargs = {
-            'patient': {'required': False}
-        }
+        model = Cita
+        fields = '__all__'  # o lista explícita si prefieres
 
-    def validate_patient_name_input(self, value):
-        """Validar y procesar el nombre completo del paciente."""
-        name_parts = value.split()
-        if len(name_parts) < 2:
-            raise serializers.ValidationError("Se requiere un nombre y apellido completos.")
+    def validate_paciente_id(self, value):
+        request = self.context['request']
+        user_group = request.user.groups.first()
+
+        # Buscar al paciente con ese ID y del grupo del usuario
+        try:
+            paciente = Paciente.objects.get(id=value, grupo=user_group)
+        except Paciente.DoesNotExist:
+            raise serializers.ValidationError(
+                "El paciente no pertenece al mismo grupo que el usuario o no existe."
+            )
         return value
 
     def create(self, validated_data):
-        """Crear una cita asociando el paciente por nombre completo."""
-        patient_name_input = validated_data.pop('patient_name_input', None)
-        print('Datos validados recibidos:', validated_data)
-        if patient_name_input:
-            print('Nombre del paciente input:', patient_name_input)
-            name_parts = patient_name_input.split()
-            first_name = name_parts[0]
-            last_name = name_parts[1]
-            second_last_name = name_parts[2] if len(name_parts) > 2 else ''
-
-            try:
-                if second_last_name:
-                    patient = Patient.objects.get(
-                        nombre__iexact=first_name,
-                        primer_apellido__iexact=last_name,
-                        segundo_apellido__iexact=second_last_name
-                    )
-                else:
-                    patient = Patient.objects.get(
-                        nombre__iexact=first_name,
-                        primer_apellido__iexact=last_name
-                    )
-                print('Paciente encontrado:', patient)
-            except Patient.DoesNotExist:
-                raise serializers.ValidationError("Paciente no encontrado")
-            validated_data['patient'] = patient
-        else:
-            raise serializers.ValidationError("El campo 'patient_name_input' es obligatorio.")
-
-
-        # Asignar el usuario autenticado al campo 'user' automáticamente
-        validated_data['user'] = self.context['request'].user
-        print('Datos finales validados:', validated_data)
-
-        # Si no se proporciona un trabajador, el campo 'worker' puede ser nulo.
-        worker = validated_data.get('worker', None)
-        if not worker:
-            validated_data['worker'] = None
-
+        paciente_id = validated_data.pop('paciente_id')
+        user_group = self.context['request'].user.groups.first()
+        paciente = Paciente.objects.get(id=paciente_id, grupo=user_group)
+        validated_data['paciente'] = paciente
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        paciente_id = validated_data.pop('paciente_id', None)
+        if paciente_id:
+            user_group = self.context['request'].user.groups.first()
+            paciente = Paciente.objects.get(id=paciente_id, grupo=user_group)
+            validated_data['paciente'] = paciente
+        return super().update(instance, validated_data)
 
 class ConfiguracionPrecioCitaSerializer(serializers.ModelSerializer):
     precio_global = serializers.DecimalField(max_digits=10, decimal_places=2, default=25)

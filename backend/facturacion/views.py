@@ -5,13 +5,15 @@ from rest_framework.pagination import PageNumberPagination
 from django.http import FileResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import now, timedelta
+from rest_framework.exceptions import ValidationError
+from django.utils.timezone import now
+from datetime import timedelta
 import os
 
 from .models import Factura, ConfiguracionFactura
-from citas.models import Citas
+from citas.models import Cita
 from .serializers import FacturaSerializer, ConfiguracionFacturaSerializer
-from .utils import generar_pdf_factura
+from .utils import generar_pdf_factura, generar_pdf_factura_irpf
 
 class FacturaPagination(PageNumberPagination):
     page_size = 10  # Cantidad de facturas por página
@@ -55,69 +57,89 @@ class FacturaViewSet(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         cita_id = request.data.get("cita")
+        if not cita_id:
+            raise ValidationError({"error": "Se debe proporcionar el ID de la cita."})
 
-        # Validar que la cita existe y está cotizada
+        cita = get_object_or_404(Cita, id=cita_id)
+
+        # Intentamos obtener la cita (no filtramos por cotizada porque ahora puede ser irpf también)
         try:
-            cita = Citas.objects.get(id=cita_id, cotizada=True)
-        except Citas.DoesNotExist:
-            return Response({"error": "La cita no existe o no está cotizada"}, status=status.HTTP_400_BAD_REQUEST)
+            cita = Cita.objects.get(id=cita_id)
+        except Cita.DoesNotExist:
+            return Response({"error": "La cita no existe"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Obtener el usuario autenticado
+        # Validar que al menos cotizada o irpf esté marcado, si no, no tiene sentido crear factura
+        if not (cita.cotizada or cita.irpf):
+            return Response({"error": "La cita no está marcada como cotizada ni con IRPF"}, status=status.HTTP_400_BAD_REQUEST)
+
         usuario_actual = request.user
 
-        # Verificar si el usuario actual pertenece al grupo "fisioterapia"
         if usuario_actual.groups.filter(name="Fisioterapia").exists():
-            # Buscar el usuario que está en ambos grupos: "admin" y "fisioterapia"
             usuario_admin_fisio = User.objects.filter(groups__name="Admin").filter(groups__name="Fisioterapia").first()
             if not usuario_admin_fisio:
                 return Response({"error": "No se encontró ningún usuario Admin en Fisioterapia"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Obtener los datos de facturación del usuario administrador de fisioterapia
             try:
                 datos_facturacion = usuario_admin_fisio.userInfo
             except User.DoesNotExist:
                 return Response({"error": "El usuario administrador de fisioterapia no tiene información registrada"},
                                 status=status.HTTP_400_BAD_REQUEST)
-
-            usuario_facturacion = usuario_admin_fisio  # Facturar con el admin de fisioterapia
+            usuario_facturacion = usuario_admin_fisio
         else:
-            # Para los demás usuarios, usar sus propios datos
             try:
                 datos_facturacion = usuario_actual.userInfo
             except User.DoesNotExist:
                 return Response({"error": "No tienes información de facturación registrada"},
                                 status=status.HTTP_400_BAD_REQUEST)
+            usuario_facturacion = usuario_actual
 
-            usuario_facturacion = usuario_actual  # Facturar con el usuario actual
-
-        # Obtener el número inicial desde ConfiguracionFactura
         config = ConfiguracionFactura.objects.first()
-        numero_inicial = config.numero_inicial if config else "1"  # Como ahora es CharField, lo tratamos como string
+        numero_inicial = config.numero_inicial if config else "1"
 
-        # Obtener el último número de factura registrado
         ultima_factura = Factura.objects.order_by("-numero_factura").first()
-
         if ultima_factura:
             try:
-                nuevo_numero_factura = str(int(ultima_factura.numero_factura) + 1)  # Convertir a int y luego a str
+                nuevo_numero_factura = str(int(ultima_factura.numero_factura) + 1)
             except ValueError:
                 return Response({"error": "El último número de factura no es numérico."}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            nuevo_numero_factura = numero_inicial  # Usar el número inicial como string
+            nuevo_numero_factura = numero_inicial
 
-        # Crear la factura con los datos del usuario correcto
-        factura = Factura.objects.create(
-            cita=cita,
-            numero_factura=nuevo_numero_factura,
-            total=cita.precio,
-            usuario=usuario_facturacion  # Guardar el usuario que corresponde
-        )
+        facturas_creadas = []
 
-        # Generar y asignar el PDF con los datos correctos
-        factura.pdf = generar_pdf_factura(factura, datos_facturacion)
-        factura.save()
+        # Factura para cotizada
+        if cita.cotizada:
+            factura = Factura.objects.create(
+                cita=cita,
+                numero_factura=nuevo_numero_factura,
+                total=cita.precio,
+                usuario=usuario_facturacion
+            )
+            factura.pdf = generar_pdf_factura(factura, datos_facturacion)
+            factura.save()
+            facturas_creadas.append(factura)
 
-        return Response(FacturaSerializer(factura).data, status=status.HTTP_201_CREATED)
+        # Factura para irpf
+        if cita.irpf:
+            try:
+                nuevo_numero_factura_irpf = str(int(nuevo_numero_factura) + 1)
+            except ValueError:
+                nuevo_numero_factura_irpf = str(int(numero_inicial) + 1)
+
+            # Aquí puedes modificar el total si quieres aplicar retención o algo
+            total_irpf = cita.precio  # O ajusta el total según reglas de IRPF
+
+            factura_irpf = Factura.objects.create(
+                cita=cita,
+                numero_factura=nuevo_numero_factura_irpf,
+                total=total_irpf,
+                usuario=usuario_facturacion
+            )
+            factura_irpf.pdf = generar_pdf_factura_irpf(factura_irpf, datos_facturacion)
+            factura_irpf.save()
+            facturas_creadas.append(factura_irpf)
+
+        serializer = FacturaSerializer(facturas_creadas, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # Obtener y eliminar Factura en PDF
 class FacturaPDFView(generics.RetrieveDestroyAPIView):
@@ -157,7 +179,7 @@ class FacturasPorPacienteView(generics.ListAPIView):
         if not paciente_id:
             return Factura.objects.none()
 
-        queryset = Factura.objects.filter(cita__patient_id=paciente_id).order_by("-fecha_creacion")
+        queryset = Factura.objects.filter(cita__paciente_id=paciente_id).order_by("-fecha_creacion")
 
         # Filtros
         mes = self.request.query_params.get("mes", None)

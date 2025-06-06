@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import citasService from "../../services/citasService";
 import { createFactura } from "../../services/facturaService";
 import Notification from '../../components/Notification'
-import "../../styles/citas/citasDetail.css";
+
 
 function DetailCita() {
     const { id } = useParams();

@@ -11,20 +11,21 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 class UserInfoSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(required=False)
 
     class Meta:
         model = UserInfo
-        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo', 'whatsapp_business_number', 'twilio_whatsapp_service_sid', 'twilio_integration_verified']
+        fields = ['user', 'address', 'phone', 'fecha_nacimiento', 'nombre', 'primer_apellido', 'dni', 'postal_code', 'city', 'country', 'segundo_apellido', 'photo', 'whatsapp_business_number', 'twilio_whatsapp_service_sid', 'twilio_integration_verified']
+
 
     def update(self, instance, validated_data):
-        # Extraer datos de 'user'
+        validated_data.pop('photo', None)  # 👈 Ignora si viene 'photo'
+
         user_data = validated_data.pop('user', {})
         for field, value in user_data.items():
             setattr(instance.user, field, value)
         instance.user.save()
 
-        # Actualizar los campos de userInfo
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()

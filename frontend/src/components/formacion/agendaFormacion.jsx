@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { updateFormacion, deleteFormacion } from "../../services/formacionService";
+import { FaUser, FaMapMarkerAlt, FaBook, FaClock, FaRegEdit } from "react-icons/fa"
 import Boton from "../Boton";
 import CustomModal from "../Modal";
 import Notification from "../Notification";
-import '../../styles/formacion/agendaFormacion.css'
+
 
 const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
     const today = new Date()
@@ -144,95 +145,194 @@ const AgendaFormacion = ({ formaciones, fetchFormaciones }) => {
     }
 
     return (
-        <div className="agenda-container">
-            <div className="calendar-header">
-                <Boton texto="Año Anterior" onClick={() => setYear(year - 1)}  />
-                <Boton texto="Mes Anterior" onClick={() => setMonth(month - 1)} disabled={month === 0 ? true : false} />
-                <h2>{new Date(year, month).toLocaleString("es-ES", { month: "long", year: "numeric"})}</h2>
-                <Boton texto="Mes Siguiente" onClick={() => setMonth(month + 1)} disabled={month === 11 ? true : false} />
-                <Boton texto="Año Siguiente" onClick={() => setYear(year + 1)} />
-            </div>
+            <div className="max-w-6xl mx-auto p-4">
+                <div className="flex flex-wrap justify-center items-center gap-2 mb-4">
+                  <Boton texto="Año Anterior" onClick={() => setYear(year - 1)} />
+                  <Boton texto="Mes Anterior" onClick={() => setMonth(month - 1)} disabled={month === 0} />
+                  <h2 className="text-xl font-semibold text-center w-full sm:w-auto">
+                    {new Date(year, month).toLocaleString("es-ES", { month: "long", year: "numeric" })}
+                  </h2>
+                  <Boton texto="Mes Siguiente" onClick={() => setMonth(month + 1)} disabled={month === 11} />
+                  <Boton texto="Año Siguiente" onClick={() => setYear(year + 1)} />
+                </div>
 
-            <div className="weekdays">
-                {diasSemana.map((dia, index) => (
-                    <div key={index} className="weekday">
-                        {dia}
+                <div className="grid grid-cols-7 text-center font-medium mb-2">
+                  {diasSemana.map((dia, index) => (
+                    <div key={index} className="py-2 border-b">
+                      {dia}
                     </div>
-                ))}
-            </div>
+                  ))}
+                </div>
 
-            <div className="calendar-grid">
-                {days.map((dayObj, index) => (
-                    <div key={index} className={`calendar-day ${dayObj ? "" : "empty"}`}>
-                        {dayObj && (
-                            <>
-                                <span className="day-number">{dayObj.date.getDate()}</span>
-                                {dayObj.formaciones.length > 0 && (
-                                    <div className="formaciones-list">
-                                        {dayObj.formaciones.map((formacion, i) => (
-                                            <div key={i} className="formacion-item" onClick={() => handleOpenModal(formacion)}>
-                                                <strong>{formacion.titulo}</strong>
-                                                <p>{formacion.lugar}</p>
-                                                <p>{formacion.hora}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            {modalOpen && (
-                <CustomModal
-                    isOpen={modalOpen}
-                    onRequestClose={handleCloseModal}
-                    title="Editar o Eliminar Formación"
-                    actions={[
-                        {text: "Guardar Cambios", onClick: handleUpdate, className: "guardar"},
-                        {text: "Eliminar", onClick: handleDeleteClick, className: "peligro"},
-                    ]}
+                <div className="grid grid-cols-7 gap-2">
+                  {days.map((dayObj, index) => (
+                    <div
+                      key={index}
+                      className={`min-h-[120px] border rounded-lg p-2 flex flex-col justify-start ${
+                        dayObj ? "bg-white" : "bg-gray-100"
+                      }`}
                     >
-                    <div className="modal-content">
-                        <label>Título:</label>
-                        <input type="text" value={formacionData.titulo} onChange={(e) => setFormacionData({...formacionData, titulo: e.target.value})} />
-                        <label>Profesional:</label>
-                        <input type="text" value={formacionData.profesional} onChange={(e) => setFormacionData({...formacionData, profesional: e.target.value})} />
-                        <label>Lugar:</label>
-                        <input type="text" value={formacionData.lugar} onChange={(e) => setFormacionData({...formacionData, lugar: e.target.value})} />
-                        <label>Temática:</label>
-                        <input type="text" value={formacionData.tematica} onChange={(e) => setFormacionData({...formacionData, tematica: e.target.value})} />
-                        <label>Fecha de Inicio:</label>
-                        <input type="date" value={formacionData.fecha_inicio} onChange={(e) => setFormacionData({...formacionData, fecha_inicio: e.target.value})} />
-                        <label>Fecha de Finalización:</label>
-                        <input type="date" value={formacionData.fecha_fin} onChange={(e) => setFormacionData({...formacionData, fecha_fin: e.target.value})} />
-                        <label>Hora:</label>
-                        <input type="time" value={formacionData.hora} onChange={(e) => setFormacionData({...formacionData, hora: e.target.value})} />
-                    </div>
-                </CustomModal>
-            )}
+                      {dayObj && (
+                        <>
+                          <span className="text-sm font-semibold text-gray-700">{dayObj.date.getDate()}</span>
 
-            {confirmDeleteOpen && (
-                <CustomModal
-                    isOpen={confirmDeleteOpen}
-                    onRequestClose={() => setConfirmDeleteOpen(false)}
-                    title="Confirmar Eliminación de Formación"
-                    actions={[
-                        { text: "Eliminar", onClick: handleDelete, className: "peligro"},
-                    ]}
-                    >
-                        <p>¿Estás seguro de que quieres eliminar esta formación? Esta acción no se puede deshacer.</p>
+                          {dayObj.formaciones.length > 0 && (
+                            <div className="mt-2 flex flex-col gap-2">
+                              {dayObj.formaciones.map((formacion, i) => (
+                                <div
+                                  key={i}
+                                  onClick={() => handleOpenModal(formacion)}
+                                  className="w-full bg-blue-100 hover:bg-blue-200 cursor-pointer p-2 rounded-lg shadow transition duration-200"
+                                >
+                                  <p className="font-semibold text-sm text-blue-900 truncate">{formacion.titulo}</p>
+                                  <p className="text-xs text-gray-700">{formacion.lugar}</p>
+                                  <p className="text-xs text-gray-600">{formacion.hora}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+
+                {modalOpen && (
+                    <CustomModal
+                          isOpen={modalOpen}
+                          onRequestClose={handleCloseModal}
+                          title="Editar o Eliminar Formación"
+                          actions={[
+                            {
+                              text: "Guardar Cambios",
+                              onClick: handleUpdate,
+                              className:
+                                "inline-block bg-green-600 text-white px-4 py-2 rounded shadow font-semibold hover:bg-green-700 z-10 border border-green-700"
+                            },
+                            {
+                              text: "Eliminar",
+                              onClick: handleDeleteClick,
+                              className:
+                                "inline-block bg-red-600 text-white px-4 py-2 rounded shadow font-semibold hover:bg-red-700 z-10 border border-red-700"
+                            },
+                          ]}
+                        >
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block font-medium mb-1">Título:</label>
+                            <div className="relative">
+                              <FaRegEdit className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                              <input
+                                type="text"
+                                value={formacionData.titulo}
+                                onChange={(e) => setFormacionData({ ...formacionData, titulo: e.target.value })}
+                                className="w-full pl-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Profesional:</label>
+                            <div className="relative">
+                              <FaUser className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                              <input
+                                type="text"
+                                value={formacionData.profesional}
+                                onChange={(e) => setFormacionData({ ...formacionData, profesional: e.target.value })}
+                                className="w-full pl-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Lugar:</label>
+                            <div className="relative">
+                              <FaMapMarkerAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                              <input
+                                type="text"
+                                value={formacionData.lugar}
+                                onChange={(e) => setFormacionData({ ...formacionData, lugar: e.target.value })}
+                                className="w-full pl-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Temática:</label>
+                            <div className="relative">
+                              <FaBook className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                              <input
+                                type="text"
+                                value={formacionData.tematica}
+                                onChange={(e) => setFormacionData({ ...formacionData, tematica: e.target.value })}
+                                className="w-full pl-2 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Fecha de Inicio:</label>
+                            <div className="relative">
+                              <input
+                                type="date"
+                                value={formacionData.fecha_inicio}
+                                onChange={(e) => setFormacionData({ ...formacionData, fecha_inicio: e.target.value })}
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Fecha de Finalización:</label>
+                            <div className="relative">
+
+                              <input
+                                type="date"
+                                value={formacionData.fecha_fin}
+                                onChange={(e) => setFormacionData({ ...formacionData, fecha_fin: e.target.value })}
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block font-medium mb-1">Hora:</label>
+                            <div className="relative">
+                              <FaClock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                              <input
+                                type="time"
+                                step="60"  // Solo minutos (sin segundos)
+                                value={formacionData.hora}
+                                onChange={(e) => setFormacionData({ ...formacionData, hora: e.target.value })}
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
                     </CustomModal>
-            )}
-            <Notification
-                message="Formación eliminada correctamente."
-                isVisible={notificationVisibleEliminar}
-                onClose={() => setNotificationVisibleEliminar(false)}
-                type="error"
-                />
-        </div>
-    );
+                )}
+
+                {confirmDeleteOpen && (
+                    <CustomModal
+                        isOpen={confirmDeleteOpen}
+                        onRequestClose={() => setConfirmDeleteOpen(false)}
+                        title="Confirmar Eliminación de Formación"
+                        actions={[
+                            { text: "Eliminar", onClick: handleDelete, className: "peligro"},
+                        ]}
+                        >
+                            <p>¿Estás seguro de que quieres eliminar esta formación? Esta acción no se puede deshacer.</p>
+                        </CustomModal>
+                )}
+                <Notification
+                    message="Formación eliminada correctamente."
+                    isVisible={notificationVisibleEliminar}
+                    onClose={() => setNotificationVisibleEliminar(false)}
+                    type="error"
+                    />
+            </div>
+        );
 };
 
 export default AgendaFormacion;
