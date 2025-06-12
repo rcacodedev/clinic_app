@@ -7,8 +7,6 @@ const PasswordChangeForm = ({
   setCurrentPassword,
   setNewPassword,
   setConfirmPassword,
-  error,
-  message,
   onSubmit,
 }) => {
   return (
@@ -62,8 +60,6 @@ const PasswordChangeForm = ({
                 )}
               </div>
             ))}
-            {error && <p className="text-red-600 text-sm">{error}</p>}
-            {message && <p className="text-green-600 text-sm">{message}</p>}
             <button
               type="submit"
               className="bg-negro hover:bg-tan text-white font-semibold px-6 py-2 rounded shadow"

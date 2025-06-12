@@ -76,7 +76,7 @@ function App() {
             }
           />
           <Route
-            path="api/citas/"
+            path="/citas/"
             element={
               <ProtectedRoute>
                 <CitasPage />
@@ -84,7 +84,7 @@ function App() {
             }
           />
           <Route
-            path="api/citas/:id"
+            path="/citas/:id"
             element={
               <ProtectedRoute>
                 <DetailCita />
@@ -92,7 +92,7 @@ function App() {
             }
           />
           <Route
-            path="api/workers/"
+            path="/workers/"
             element={
               <ProtectedRoute>
                 <Workers />
@@ -100,7 +100,7 @@ function App() {
             }
           />
           <Route
-            path="api/workers/:id"
+            path="/workers/:id"
             element={
               <ProtectedRoute>
                 <WorkersProfile />
@@ -124,7 +124,7 @@ function App() {
             }
           />
           <Route
-            path="api/formacion/"
+            path="/formacion/"
             element={
               <ProtectedRoute>
                 <Formacion />
@@ -132,7 +132,7 @@ function App() {
             }
           />
           <Route
-            path="api/formacion/:id"
+            path="/formacion/:id"
             element={
               <ProtectedRoute>
                 <FormacionDetail />
@@ -140,7 +140,7 @@ function App() {
             }
           />
           <Route
-            path="api/facturacion/"
+            path="/facturacion/"
             element={
               <ProtectedRoute>
                 <FacturasPage />
@@ -148,7 +148,7 @@ function App() {
             }
           />
           <Route
-            path="api/ajustes"
+            path="/ajustes"
             element={
               <ProtectedRoute>
                 <Ajustes />
@@ -156,7 +156,7 @@ function App() {
             }
           />
           <Route
-            path="api/documentacion"
+            path="/documentacion"
             element={
               <ProtectedRoute>
                 <Documentacion />

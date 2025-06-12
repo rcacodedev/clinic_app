@@ -1,107 +1,166 @@
 // components/EditarUserModal.jsx
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-const EditarUserModal = ({ isOpen, onClose, userData, onSave }) => {
-  const [formData, setFormData] = useState(userData || {});
-
-  useEffect(() => {
-    if (userData) {
-      setFormData(userData); // ← CORRECTO
-    }
-  }, [userData]);
-
+const EditarUserModal = ({
+  isOpen,
+  onClose,
+  userInfo,
+  onSave,
+  onChange,
+  firstInputRef,
+}) => {
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const renderInput = (
+    label,
+    name,
+    type = "text",
+    required = false,
+    tabIndex
+  ) => (
+    <div>
+      <label htmlFor={name} className="modal-label">
+        {label}
+      </label>
+      <input
+        type={type}
+        id={name}
+        name={name}
+        value={userInfo[name] || ""}
+        onChange={onChange}
+        placeholder={label}
+        tabIndex={tabIndex}
+        className="modal-input"
+        required={required}
+        autoComplete="off"
+      />
+    </div>
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData); // opcional: guardar en backend
-    onClose(); // cierra el modal
+    onSave(userInfo);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-8 rounded-xl w-full max-w-3xl shadow-lg overflow-auto max-h-[90vh]">
-        <h2 className="text-xl font-bold mb-4">Editar Usuario</h2>
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          {[
-            "nombre",
-            "primer_apellido",
-            "segundo_apellido",
-            "fecha_nacimiento",
-            "dni",
-            "phone",
-            "address",
-            "postal_code",
-            "city",
-            "country",
-            "whatsapp_business_number",
-            "twilio_whatsapp_service_sid",
-            "twilio_account_sid",
-            "twilio_auth_token",
-          ].map((field) => (
-            <div className="flex flex-col" key={field}>
-              <label className="text-sm text-gray-600 capitalize">
-                {field.replace(/_/g, " ")}
-              </label>
-              <input
-                type={field === "fecha_nacimiento" ? "date" : "text"}
-                name={field}
-                value={formData[field] || ""}
-                onChange={handleChange}
-                className="border border-gray-300 rounded px-3 py-2"
-              />
-            </div>
-          ))}
+    <div className="modal-container">
+      <div className="modal-content">
+        <h2 className="modal-title">Editar Usuario</h2>
 
-          {/* Campo para el booleano de verificación */}
-          <div className="flex flex-col col-span-2">
-            <label className="text-sm text-gray-600">
-              ¿Integración Verificada?
-            </label>
-            <select
-              name="twilio_integration_verified"
-              value={formData.twilio_integration_verified ? "true" : "false"}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  twilio_integration_verified: e.target.value === "true",
-                }))
-              }
-              className="border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
-          </div>
+        <div className="modal-pacientes-container">
+          <div className="w-full p-4">
+            <form onSubmit={handleSubmit} className="grid gap-y-4" noValidate>
+              {/* Sección: Datos del Usuario */}
+              <div className="w-full">
+                <h6 className="modal-section-title">1. Datos del Usuario</h6>
+                <p className="text-gray-600 text-sm mb-2 mt-2">
+                  Introduce la información básica del usuario, como su nombre,
+                  apellidos y datos de contacto.
+                </p>
+                <hr className="mb-4 mt-2" />
+              </div>
 
-          {/* Botones */}
-          <div className="col-span-2 flex justify-end mt-6 gap-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Guardar
-            </button>
+              <div className="modal-content-pacientes">
+                {/* Nombre con ref */}
+                <div>
+                  <label htmlFor="nombre" className="modal-label">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value={userInfo.nombre || ""}
+                    onChange={onChange}
+                    placeholder="Nombre del usuario"
+                    ref={firstInputRef}
+                    tabIndex="1"
+                    className="modal-input"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+
+                {renderInput(
+                  "Primer Apellido",
+                  "primer_apellido",
+                  "text",
+                  true,
+                  2
+                )}
+                {renderInput(
+                  "Segundo Apellido",
+                  "segundo_apellido",
+                  "text",
+                  false,
+                  3
+                )}
+                {renderInput("Teléfono", "phone", "text", false, 4)}
+                {renderInput(
+                  "Fecha de Nacimiento",
+                  "fecha_nacimiento",
+                  "date",
+                  false,
+                  5
+                )}
+                {renderInput("DNI/NIF", "dni", "text", false, 6)}
+                {renderInput("Dirección", "address", "text", false, 7)}
+                {renderInput("Ciudad", "city", "text", false, 8)}
+                {renderInput("Código Postal", "postal_code", "text", false, 9)}
+                {renderInput("País", "country", "text", false, 10)}
+              </div>
+
+              {/* Sección: WhatsApp Business */}
+              <div className="w-full">
+                <h6 className="modal-section-title">
+                  2. Integración con WhatsApp Business
+                </h6>
+                <p className="text-gray-600 text-sm mb-2 mt-2">
+                  Información necesaria para el envío automático de citas a
+                  través de WhatsApp.
+                </p>
+                <hr className="mb-4 mt-2" />
+              </div>
+              <div className="modal-content-pacientes">
+                {renderInput(
+                  "Número de WhatsApp Business",
+                  "whatsapp_business_number",
+                  "text",
+                  false,
+                  11
+                )}
+                {renderInput(
+                  "Service SID de WhatsApp",
+                  "twilio_whatsapp_service_sid",
+                  "text",
+                  false,
+                  12
+                )}
+                {renderInput(
+                  "Account SID de Twilio",
+                  "twilio_account_sid",
+                  "text",
+                  false,
+                  13
+                )}
+              </div>
+
+              {/* Botones */}
+              <div className="btn-close-container">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-close-modal"
+                >
+                  Cerrar
+                </button>
+                <button type="submit" className="btn-save-modal">
+                  Guardar
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

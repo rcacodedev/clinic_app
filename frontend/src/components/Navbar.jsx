@@ -110,7 +110,7 @@ const Navbar = () => {
             </li>
             <li>
               <Link
-                to="/api/citas"
+                to="/citas"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
@@ -131,7 +131,7 @@ const Navbar = () => {
             {isAdmin && (
               <li>
                 <Link
-                  to="/api/workers"
+                  to="/workers"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
                 >
                   <svg
@@ -154,7 +154,7 @@ const Navbar = () => {
             {!isAdmin && (
               <li>
                 <Link
-                  to="/api/documentacion"
+                  to="/documentacion"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
                 >
                   <svg
@@ -173,7 +173,7 @@ const Navbar = () => {
             )}
             <li>
               <Link
-                to="/api/facturacion"
+                to="/facturacion"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
@@ -194,7 +194,7 @@ const Navbar = () => {
             </li>
             <li>
               <Link
-                to="/api/formacion"
+                to="/formacion"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
@@ -236,7 +236,7 @@ const Navbar = () => {
             </li>
             <li>
               <Link
-                to="/api/ajustes"
+                to="/ajustes"
                 className="flex items-center p-2 mt-64 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 {userPhoto?.photo ? (

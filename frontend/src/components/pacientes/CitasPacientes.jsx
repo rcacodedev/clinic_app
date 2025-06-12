@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import citasService from "../../services/citasService";
+import { getCitas } from "../../services/citasService";
 import { useNavigate } from "react-router-dom";
 
 function PatientAppointments({ patientId, refreshAppointments }) {
@@ -49,7 +49,7 @@ function PatientAppointments({ patientId, refreshAppointments }) {
     setError(null);
 
     try {
-      const data = await citasService.getCitas();
+      const data = await getCitas();
       const citasPaciente = data.filter(
         (cita) => String(cita.patient) === String(patientId)
       );

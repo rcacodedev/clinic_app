@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db import IntegrityError
 from .models import Worker, PDFRegistro
-from .serializers import WorkerSerializer
+from .serializers import WorkerSerializer, PDFRegistroSerializer
 from citas.models import Cita
 from citas.serializers import CitaSerializer
 from backend.permissions import IsAdminOrReadOnlyForWorkers
@@ -286,12 +286,12 @@ class GetPDFs(APIView):
         admin_pdfs_paginated = paginator_admin.paginate_queryset(admin_pdfs, request)
         worker_pdfs_paginated = paginator_worker.paginate_queryset(worker_pdfs, request)
 
-        admin_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in admin_pdfs_paginated]
-        worker_pdf_urls = [request.build_absolute_uri(pdf.file.url) for pdf in worker_pdfs_paginated]
+        admin_serializer = PDFRegistroSerializer(admin_pdfs_paginated, many=True, context={'request': request})
+        worker_serializer = PDFRegistroSerializer(worker_pdfs_paginated, many=True, context={'request': request})
 
         return Response({
-            "admin_pdfs": admin_pdf_urls,
-            "worker_pdfs": worker_pdf_urls,
+            "admin_pdfs": admin_serializer.data,
+            "worker_pdfs": worker_serializer.data,
             "total_pages_admin": paginator_admin.page.paginator.num_pages if admin_pdfs_paginated else 0,
             "total_pages_worker": paginator_worker.page.paginator.num_pages if worker_pdfs_paginated else 0,
             "current_page_admin": paginator_admin.page.number if admin_pdfs_paginated else 1,

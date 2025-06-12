@@ -50,9 +50,17 @@ class GroupSerializer(serializers.ModelSerializer):
 
 # Serializador de PDFRegistro
 class PDFRegistroSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    date = serializers.DateTimeField(source='created_at', format="%Y-%m-%dT%H:%M:%S")
+
+
     class Meta:
         model = PDFRegistro
-        fields = ['id', 'file', 'created_by', 'is_admin_upload']
+        fields = ['id', 'url', 'date']
+
+    def get_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.file.url) if request else obj.file.url
 
 # Serializador de Worker
 class WorkerSerializer(serializers.ModelSerializer):

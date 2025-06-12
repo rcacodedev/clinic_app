@@ -1,139 +1,133 @@
-import React, { useState, useEffect } from "react";
-import citasService from "../../services/citasService";
-import { getPacientes,  } from "../../services/patientService";
-import Boton from "../Boton";
-import CustomModal from "../Modal";
+import React, { useEffect, useState } from "react";
+import Select from "react-select";
+import { getPacientes } from "../../services/patientService"; // Ajusta según tu estructura
 
-
-const initialFormState = {
-  patient_name_input: "",
-  fecha: "",
-  comenzar: "",
-  finalizar: "",
-  descripcion: "",
-};
-
-const CreateCitaModal = ({ showModal, onClose, refreshCitas, showDateTimeFields, cita }) => {
-  const [formData, setFormData] = useState(initialFormState);
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(false);
+const CrearCitaModal = ({
+  onClose,
+  onSubmit,
+  formData,
+  setFormData,
+  onChange,
+  firstInputRef,
+}) => {
+  const [pacientes, setPacientes] = useState([]);
+  const [selectedPaciente, setSelectedPaciente] = useState(null);
 
   useEffect(() => {
-    if (showModal) {
-      setFormData({...initialFormState,
-        fecha: cita?.fecha || "",
-        comenzar: cita?.comenzar || "",
-    }); // Reinicia el formulario cuando se abre el modal
-      setPatients([]); // Limpia la lista de pacientes sugeridos
-    }
-  }, [showModal, cita]);
-
-  const handleChange = async (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-
-    if (name === "patient_name_input" && value.length >= 1) {
-      setLoading(true);
+    const fetchPacientes = async () => {
       try {
-        const patientsData = await getPacientes({
-          searchTerm: value,
-        });
-        if (patientsData.results) {
-          setPatients(patientsData.results);
-        }
+        const data = await getPacientes();
+        const opciones = (data.results || []).map((paciente) => ({
+          value: paciente.id,
+          label:
+            paciente.nombre +
+            " " +
+            paciente.primer_apellido +
+            " " +
+            paciente.segundo_apellido,
+        }));
+        setPacientes(opciones);
       } catch (error) {
-        console.error("Error al buscar pacientes:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error al cargar pacientes:", error);
       }
-    } else {
-      setPatients([]);
-    }
-  };
+    };
 
-  const handlePatientSelect = (patient) => {
-    const fullName = `${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`;
-    setFormData((prevState) => ({
-      ...prevState,
-      patient_name_input: fullName,
+    fetchPacientes();
+  }, []);
+
+  // Actualiza el paciente seleccionado en formData
+  const handlePacienteChange = (selectedOption) => {
+    setSelectedPaciente(selectedOption);
+    setFormData((prev) => ({
+      ...prev,
+      paciente_id: selectedOption ? selectedOption.value : "",
     }));
-    setPatients([]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await citasService.createCita(formData);
-      onClose();
-      refreshCitas();
-    } catch (error) {
-      console.error("Error al crear la cita", error);
-    }
+  // Maneja cambios en inputs de fecha, hora, descripción
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  console.log(pacientes);
 
   return (
-    <CustomModal
-      isOpen={showModal}
-      onRequestClose={onClose}
-      title="Crear Nueva Cita"
-      closeButtonText="Cerrar"
-    >
-      <form onSubmit={handleSubmit}>
-        <div className="input-container">
-          <input
-            type="text"
-            name="patient_name_input"
-            value={formData.patient_name_input}
-            onChange={handleChange}
-            placeholder="Nombre del paciente"
-            required
-          />
-          {patients.length > 0 && (
-            <ul className="suggestions-list">
-              {patients.map((patient) => (
-                <li key={patient.id} onClick={() => handlePatientSelect(patient)}>
-                  {`${patient.nombre} ${patient.primer_apellido} ${patient.segundo_apellido}`}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+    <div className="modal-container">
+      <div className="modal-content">
+        <h2 className="modal-title">Crear Nueva Cita</h2>
 
-        {loading && <p>Cargando pacientes...</p>}
-        <input
-          type="date"
-          name="fecha"
-          value={formData.fecha}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="time"
-          name="comenzar"
-          value={formData.comenzar}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="time"
-          name="finalizar"
-          value={formData.finalizar}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="descripcion"
-          value={formData.descripcion}
-          onChange={handleChange}
-          placeholder="Descripción"
-        />
-        <Boton texto="Guardar Cita" tipo="guardar" />
-      </form>
-    </CustomModal>
+        <div className="modal-pacientes-container">
+          <div className="w-full p-4">
+            <form onSubmit={onSubmit} className="modal-content">
+              <label className="modal-label mb-2">Seleccionar Paciente</label>
+              <Select
+                options={pacientes}
+                value={selectedPaciente}
+                onChange={handlePacienteChange}
+                placeholder="Buscar paciente..."
+                isClearable
+                ref={firstInputRef}
+              />
+
+              <label className="modal-label mb-2 mt-2">Fecha</label>
+              <input
+                type="date"
+                name="fecha"
+                value={formData.fecha}
+                onChange={handleInputChange}
+                className="modal-input"
+                required
+              />
+
+              <label className="modal-label mb-2 mt-2">Hora inicio</label>
+              <input
+                type="time"
+                name="comenzar"
+                value={formData.comenzar}
+                onChange={handleInputChange}
+                className="modal-input"
+                required
+              />
+
+              <label className="modal-label mb-2 mt-2">Hora fin</label>
+              <input
+                type="time"
+                name="finalizar"
+                value={formData.finalizar}
+                onChange={handleInputChange}
+                required
+                className="modal-input"
+              />
+
+              <label className="modal-label mt-2 mb-2">Descripción</label>
+              <textarea
+                name="descripcion"
+                value={formData.descripcion}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Descripción de la cita"
+                className="notas-textarea"
+              />
+
+              <div className="btn-close-container">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-close-modal"
+                >
+                  Cerrar
+                </button>
+                <button type="submit" className="btn-save-modal">
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default CreateCitaModal;
+export default CrearCitaModal;

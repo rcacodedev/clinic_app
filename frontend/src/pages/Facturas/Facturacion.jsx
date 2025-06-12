@@ -8,10 +8,10 @@ import ListFacturas from "../../components/facturacion/ListFacturas";
 import Boton from "../../components/Boton";
 import Notification from "../../components/Notification";
 import "../../styles/facturacion/facturacion.css";
+import { toast } from "react-toastify";
 
 const FacturasPage = () => {
   const [numeroInicialFactura, setNumeroInicialFactura] = useState("");
-  const [notificationNumeroInicial, setNotificationNumeroInicial] = useState(false);
 
   const [precioCita, setPrecioCita] = useState("");
   const [notificationPrecio, setNotificationPrecio] = useState(false);
@@ -24,6 +24,7 @@ const FacturasPage = () => {
         setPrecioCita(precio);
       } catch (error) {
         console.error("Error al obtener el precio global de la cita:", error);
+        toast.error("Hubo un error al obtener el precio global actual");
       }
     };
 
@@ -52,9 +53,10 @@ const FacturasPage = () => {
     try {
       await setNumeroFactura(numeroInicial);
       setNumeroInicialFactura("");
-      setNotificationNumeroInicial(true);
+      toast.success("Número nuevo de factura configurado correctamente");
     } catch (error) {
       console.error("Error al guardar la factura", error);
+      toast.error("Hubo un error al configurar el número de factura nuevo");
     }
   };
 
@@ -69,59 +71,59 @@ const FacturasPage = () => {
 
     try {
       await actualizarPrecioGlobal(precio);
-      setNotificationPrecio(true);
+      toast.success("Precio global de las citas actualizado correctamente");
     } catch (error) {
       console.error("Error al actualizar el precio de la cita:", error);
+      toast.error("Hubo un error al actualizar el precio global de las citas");
     }
   };
 
   return (
-    <div className="container-facturacion">
+    <div className="main-container">
+      <div className="title-container">
+        <h1 className="title">Facturación</h1>
+        <p className="title-description">
+          Listado de todas las facturas. Configuración global de precios.
+        </p>
+      </div>
+      <ListFacturas />
       <div className="configurar-numero-facturacion">
-        <h1 className="title-section">Configuraciones para la Facturación</h1>
+        <h3 className="title-section mt-5">
+          Configuraciones para la Facturación
+        </h3>
 
         {/* Configuración número de factura */}
         <form onSubmit={handleSubmit}>
-          <label>Número de Factura:</label>
+          <label className="modal-label">Número de Factura:</label>
           <input
             type="number"
             value={numeroInicialFactura}
             onChange={handleInputChange}
             placeholder="Ingrese el número inicial de su facturación"
             required
+            className="modal-input"
           />
-          <Boton onClick={handleSubmit} texto="Guardar" />
+          <button className="btn-toogle mt-5" onClick={handleSubmit}>
+            Guardar
+          </button>
         </form>
-        <Notification
-          message="Número de factura establecido correctamente"
-          isVisible={notificationNumeroInicial}
-          onClose={() => setNotificationNumeroInicial(false)}
-          type="success"
-        />
 
         {/* Configuración precio global de cita */}
         <form onSubmit={handlePrecioSubmit} style={{ marginTop: "2rem" }}>
-          <label>Precio Global de la Cita:</label>
+          <label className="modal-label">Precio Global de la Cita:</label>
           <input
             type="number"
             step="0.01"
             value={precioCita}
             onChange={(e) => setPrecioCita(e.target.value)}
             placeholder="Ej: 25.00"
+            className="modal-input"
             required
           />
-          <Boton onClick={handlePrecioSubmit} texto="Actualizar Precio" />
+          <button className="btn-toogle mt-5" onClick={handlePrecioSubmit}>
+            Nuevo Precio
+          </button>
         </form>
-        <Notification
-          message="Precio de cita actualizado correctamente"
-          isVisible={notificationPrecio}
-          onClose={() => setNotificationPrecio(false)}
-          type="success"
-        />
-      </div>
-
-      <div className="table-facturas">
-        <ListFacturas />
       </div>
     </div>
   );

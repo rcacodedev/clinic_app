@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import api from "../services/api";
 import {
   fetchUserInfo,
@@ -29,13 +29,11 @@ const Ajustes = () => {
     twilio_auth_token: "",
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedUserInfo, setEditedUserInfo] = useState({});
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const firstInputRef = useRef(null);
+  const [modalEditarUser, setModalEditarUser] = useState(false);
 
   const loadUserInfo = async () => {
     try {
@@ -50,54 +48,47 @@ const Ajustes = () => {
     loadUserInfo();
   }, []);
 
-  // Copia los datos cuando empieza a editar
-  useEffect(() => {
-    if (isEditing) {
-      setEditedUserInfo({ ...userInfo });
-    }
-  }, [isEditing]);
-
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
       const updatedPhoto = await updatePhoto(file);
       setUserInfo((prev) => ({ ...prev, photo: updatedPhoto }));
+      loadUserInfo();
+      toast.success("Foto actualizada correctamente");
     } catch (error) {
-      alert("Error al actualizar la foto.");
+      console.error("Error al actualizar foto", error);
+      toast("La foto no fue actualizada correctamente");
     }
   };
 
-  const handleSave = async () => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUserInfo({ ...userInfo, [name]: value });
+  };
+
+  const handleSave = async (updatedUserData) => {
+    if (!updatedUserData || typeof updatedUserData !== "object") {
+      console.error("Datos de usuario inválidos:", updatedUserData);
+      toast.error("No se pudieron guardar los cambios.");
+      return;
+    }
     try {
-      const updatedUser = await updateUserInfo(editedUserInfo);
-
-      // Si updatedUser tiene un 'user' dentro, aplanamos:
-      const normalizedUserInfo = {
-        ...updatedUser,
-        ...updatedUser.user, // sobreescribe con lo de user si hace falta
-      };
-
-      // Luego borramos la propiedad user para evitar confusión
-      delete normalizedUserInfo.user;
-
-      setUserInfo(normalizedUserInfo);
-      setIsEditing(false);
+      await updateUserInfo(updatedUserData);
+      setUserInfo(updatedUserData);
       toast.success("Información actualizada correctamente");
-      loadUserInfo();
+      setModalEditarUser(false);
     } catch (error) {
-      console.error("Error al guardar los cambios:", error);
-      toast.error("Hubo un error al actualizar la información");
+      console.error("Error al guardar cambios del usuario:", error);
+      toast.error("Hubo un error al guardar los cambios.");
     }
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
 
     if (newPassword !== confirmPassword) {
-      setError("La nueva contraseña y la confirmación no coinciden");
+      toast.error("La nueva contraseña y la confirmación no coinciden");
       return;
     }
 
@@ -106,12 +97,13 @@ const Ajustes = () => {
         current_password: currentPassword,
         new_password: newPassword,
       });
-      setMessage("Contraseña cambiada correctamente");
+      toast.success("Contraseña cambiada correctamente");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      setError("Error al cambiar la contraseña");
+      console.error("Error al cambiar la contraseña", error);
+      toast.error("Hubo un error al cambiar la contraseña");
     }
   };
 
@@ -237,7 +229,10 @@ const Ajustes = () => {
       </div>
 
       <div className="mt-3">
-        <button onClick={() => setIsEditing(true)} className="btn-primary">
+        <button
+          onClick={() => setModalEditarUser(true)}
+          className="btn-primary"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="white"
@@ -251,11 +246,13 @@ const Ajustes = () => {
       </div>
 
       <EditarUserModal
-        isOpen={isEditing}
-        onClose={() => setIsEditing(false)}
-        userData={userInfo}
+        isOpen={modalEditarUser}
+        onClose={() => setModalEditarUser()}
+        userInfo={userInfo}
+        onChange={handleInputChange}
+        setUserInfo={setUserInfo}
         onSave={handleSave}
-        setEditedUserInfo={setEditedUserInfo}
+        firstInputRef={firstInputRef}
       />
 
       <hr className="my-6 border-t border-gray-300" />
@@ -267,8 +264,6 @@ const Ajustes = () => {
         setCurrentPassword={setCurrentPassword}
         setNewPassword={setNewPassword}
         setConfirmPassword={setConfirmPassword}
-        error={error}
-        message={message}
         onSubmit={handlePasswordSubmit}
       />
     </div>

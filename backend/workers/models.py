@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.utils import timezone
 import os
 from datetime import datetime
 
@@ -36,6 +37,7 @@ class PDFRegistro(models.Model):
     file = models.FileField(upload_to=upload_to_registro, blank=True, null=True)
     created_by = models.ForeignKey(User, related_name='pdf_registros', on_delete=models.CASCADE)
     is_admin_upload = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.file.name.split('/')[-1]} - {'Admin' if self.is_admin_upload else 'Empleado'} - {self.worker.user.username}"

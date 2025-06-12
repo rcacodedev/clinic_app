@@ -10,6 +10,7 @@ from .models import Paciente, PacienteDocumentacion
 from .serializers import PacienteSerializer, PacienteDocumentoSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 
 class PatientPagination(PageNumberPagination):
     page_size = 8
@@ -50,15 +51,18 @@ class PatientListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Asociamos el paciente al grupo del usuario que lo crea (excluyendo "admin")
-        relevant_group = user.groups.exclude(name='Admin').first()  # Tomamos el primer grupo no "admin"
+        relevant_groups = user.groups.exclude(name='Admin')
 
-        if relevant_group:
-            # Si el usuario pertenece a un grupo, guardamos el paciente con ese grupo
-            serializer.save(grupo=relevant_group)  # Asociamos el grupo al paciente
-        else:
-            # Si el usuario no tiene grupo, asociamos el paciente sin grupo (o con grupo None)
-            serializer.save(grupo=None)
+        if not relevant_groups.exists():
+            raise ValidationError("El usuario no pertenece a ningún grupo válido para asignar paciente.")
+
+        # Si quieres asegurarte de que solo un grupo sea asignado, podrías:
+        if relevant_groups.count() > 1:
+            # Aquí podrías lanzar error o elegir un grupo específico basado en lógica de negocio
+            raise ValidationError("El usuario pertenece a múltiples grupos, no se puede asignar paciente automáticamente.")
+
+        relevant_group = relevant_groups.first()
+        serializer.save(grupo=relevant_group)
 
 # Obtener, Actualizar y Eliminar Pacientes
 class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):

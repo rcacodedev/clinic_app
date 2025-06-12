@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchWorkerDetails, deleteWorker, fetchWorkerAppointments } from '../../services/workerService';
-import { fetchGrupos } from '../../services/django';
-import EditarEmpleadoModal from '../../components/Workers/EditarEmpleadoModal';
-import EliminarEmpleadoModal from '../../components/Workers/EliminarEmpleadoModal';
-import CrearCita from '../../components/Workers/CrearCitaWorker';
-import Agenda from '../../components/Agenda';
-import Boton from '../../components/Boton';
-import EditarCitaModal from '../../components/Workers/EditarCitaWorker';
-import WorkerPDFUpload from '../../components/Workers/RegistroJornada';
-
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  fetchWorkerDetails,
+  deleteWorker,
+  fetchWorkerAppointments,
+} from "../../services/workerService";
+import { fetchGrupos } from "../../services/django";
+import EditarEmpleadoModal from "../../components/Workers/EditarEmpleadoModal";
+import EliminarEmpleadoModal from "../../components/Workers/EliminarEmpleadoModal";
+import WorkerPDFUpload from "../../components/Workers/RegistroJornada";
+import { toast } from "react-toastify";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const WorkerProfile = () => {
   const { id } = useParams();
@@ -21,19 +22,28 @@ const WorkerProfile = () => {
   const [appointments, setAppointments] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [currentWeek, setCurrentWeek] = useState([]);
-  const [isEditCitaModalOpen, setIsEditCitaModalOpen] = useState(false);
-  const [selectedCita, setSelectedCita] = useState(null); // Aquí inicializamos selectedCita
   const [groups, setGroups] = useState([]);
-  const [isCreateCitaModalOpen, setIsCreateCitaModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState(null);
+  const [modalEliminarWorker, setModalEliminarWorker] = useState(false);
+
+  const handleOpenModal = (worker) => {
+    setSelectedWorker(worker);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedWorker(null);
+  };
 
   useEffect(() => {
     const loadData = async () => {
       try {
         await Promise.all([loadWorker(), loadAppointments()]);
       } catch (err) {
-        console.error('Error al cargar datos:', err);
-        setError('Error al cargar los datos del trabajador');
+        console.error("Error al cargar datos:", err);
+        setError("Error al cargar los datos del trabajador");
       } finally {
         setLoading(false);
       }
@@ -41,10 +51,6 @@ const WorkerProfile = () => {
 
     loadData();
   }, [id]);
-
-  useEffect(() => {
-    initializeWeek();
-  }, []);
 
   const loadWorker = async () => {
     const data = await fetchWorkerDetails(id);
@@ -67,49 +73,17 @@ const WorkerProfile = () => {
     setAppointments(data);
   };
 
-  const initializeWeek = () => {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    const dayOfWeek = today.getDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    startOfWeek.setDate(today.getDate() + diff);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const week = Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      return day;
-    });
-
-    setCurrentWeek(week);
-  };
-
-  const changeWeek = (direction) => {
-    setCurrentWeek((prevWeek) =>
-      prevWeek.map((day) => new Date(day.getTime() + direction * 7 * 24 * 60 * 60 * 1000))
-    );
-  };
-
   const handleDeleteWorker = async () => {
     try {
       await deleteWorker(id);
-      alert('Empleado eliminado correctamente');
-      navigate('/api/workers');
+      toast.success("Empleado eliminado correctamente");
+      navigate("/workers");
     } catch (error) {
-      console.error('Error al eliminar el empleado:', error);
-      alert('No se pudo eliminar al empleado. Inténtelo de nuevo.');
-    }
-  };
-
-  const openModal = (cita = null) => {
-    if (cita && cita.id) {
-      // Si la cita tiene un ID, significa que ya existe -> Abrir modal de edición
-      setSelectedCita(cita);
-      setIsEditCitaModalOpen(true);
-    } else {
-      // Si la cita es nula o no tiene ID -> Abrir modal de creación
-      setSelectedCita(null); // Reiniciar la cita seleccionada si es nueva
-      setIsCreateCitaModalOpen(true);
+      console.error("Error al eliminar el empleado:", error);
+      toast.error("Hubo un error al eliminar al empleado");
+    } finally {
+      setModalEliminarWorker(false);
+      setSelectedWorker(null);
     }
   };
 
@@ -118,88 +92,181 @@ const WorkerProfile = () => {
   if (!worker) return <p>No se encontraron datos del empleado.</p>;
 
   return (
-    <div className="worker-profile-container">
-      <div className="worker-header">
-        <h1 className='title-section'>Perfil de {worker.user.first_name} {worker.user.last_name}</h1>
-        <div className='photo-container'>
-          <img src={worker.user.userInfo.photo} alt="Foto del empleado" className='profile-photo'/>
+    <div className="main-container">
+      <div className="title-container flex items-center gap-6">
+        <div className="photo-container shrink-0">
+          {worker.user.userInfo?.photo ? (
+            <img
+              src={worker.user.userInfo.photo}
+              alt="Foto perfil del empleado."
+              className="object-center object-cover rounded-full h-36 w-36 border-4 border-white"
+            />
+          ) : (
+            <svg
+              className="w-36 h-36 text-gray-400 rounded-full bg-gray-700 p-2 border-4 border-white"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+        </div>
+        <div>
+          <h1 className="title">
+            Perfil de {worker.user.first_name} {worker.user.last_name}
+          </h1>
+          <p className="title-description">
+            Datos personales del empleado. Citas del empleado. Documentación y
+            facturación.
+          </p>
         </div>
       </div>
-      <h2 className='title-section'>Datos del Empleado</h2>
-      <div className="worker-info">
-        <div className="worker-field"><strong>Username:</strong> <span>{worker.user.username}</span></div>
-        <div className="worker-field"><strong>Email:</strong> <span>{worker.user.email}</span></div>
-        <div className="worker-field"><strong>Teléfono:</strong> <span>{worker.user.userInfo.phone}</span></div>
-        <div className="worker-field"><strong>DNI:</strong> <span>{worker.user.userInfo.dni}</span></div>
-        <div className="worker-field"><strong>Dirección:</strong> <span>{worker.user.userInfo.address}</span></div>
-        <div className="worker-field"><strong>Código Postal:</strong> <span>{worker.user.userInfo.postal_code}</span></div>
-        <div className="worker-field"><strong>País:</strong> <span>{worker.user.userInfo.country}</span></div>
-        <div className="worker-field">
-          <strong>Departamento:</strong>
-          <span>
-            {groups.length > 0 ? groups.join(", ") : "No asignado"}
+      <h2 className="title-section mb-3">Datos del Empleado</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-2xl shadow-lg mb-5">
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">
+            Nombre del Empleado
+          </span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.nombre} {worker.user.userInfo.primer_apellido}{" "}
+            {worker.user.userInfo.segundo_apellido}
           </span>
         </div>
-        <div className="worker-field"><strong>Estado:</strong> <span>{worker.is_active ? 'Activo' : 'Inactivo'}</span></div>
-        <div className="worker-field">
-          <strong>Color del Empleado:</strong>
-          <div
-            style={{
-              width: '50px',
-              height: '20px',
-              backgroundColor: worker.color,
-              marginTop: '5px',
-              borderRadius: '5px'
-            }}
-          />
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Email</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.email}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Teléfono</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.phone}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">
+            Fecha de nacimiento
+          </span>
+          <span className="text-base font-medium text-gray-800">
+            {new Date(
+              worker.user.userInfo.fecha_nacimiento
+            ).toLocaleDateString()}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">DNI</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.dni}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Dirección</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.address}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Ciudad</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.city}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Código Postal</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.postal_code}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">País</span>
+          <span className="text-base font-medium text-gray-800">
+            {worker.user.userInfo.country}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Departamento</span>
+          <span className="text-base font-medium text-gray-800">
+            <span>{groups.length > 0 ? groups.join(", ") : "No asignado"}</span>
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-l text-gray-500 font-bold">Color</span>
+          <span className="text-base font-medium text-gray-800">
+            <div
+              style={{
+                width: "50px",
+                height: "20px",
+                backgroundColor: worker.color,
+                marginTop: "5px",
+                borderRadius: "5px",
+              }}
+            />
+          </span>
         </div>
       </div>
-      <div className="worker-actions">
-        <Boton onClick={() => setIsEditModalOpen(true)} texto="Editar"/>
-        <Boton onClick={() => setIsDeleteConfirmOpen(true)} texto="Eliminar" tipo='peligro' />
+
+      <div className="mt-3">
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className="btn-primary"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="white"
+            viewBox="0 0 24 24"
+            className="w-5 h-5"
+          >
+            <path d="M21.707,4.475,19.525,2.293a1,1,0,0,0-1.414,0L9.384,11.021a.977.977,0,0,0-.241.39L8.052,14.684A1,1,0,0,0,9,16a.987.987,0,0,0,.316-.052l3.273-1.091a.977.977,0,0,0,.39-.241l8.728-8.727A1,1,0,0,0,21.707,4.475Z" />
+            <path d="M2,6A1,1,0,0,1,3,5h8a1,1,0,0,1,0,2H4V20H17V13a1,1,0,0,1,2,0v8a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1Z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setIsDeleteConfirmOpen(true)}
+          className="btn-eliminar"
+        >
+          <svg
+            viewBox="0 0 1024 1024"
+            fill="white"
+            className="w-5 h-5"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M32 241.6c-11.2 0-20-8.8-20-20s8.8-20 20-20l940 1.6c11.2 0 20 8.8 20 20s-8.8 20-20 20L32 241.6zM186.4 282.4c0-11.2 8.8-20 20-20s20 8.8 20 20v688.8l585.6-6.4V289.6c0-11.2 8.8-20 20-20s20 8.8 20 20v716.8l-666.4 7.2V282.4z" />
+            <path d="M682.4 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM367.2 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM524.8 867.2c-11.2 0-20-8.8-20-20V372c0-11.2 8.8-20 20-20s20 8.8 20 20v475.2c0.8 11.2-8.8 20-20 20zM655.2 213.6v-48.8c0-17.6-14.4-32-32-32H418.4c-18.4 0-32 14.4-32 32.8V208h-40v-42.4c0-40 32.8-72.8 72.8-72.8H624c40 0 72.8 32.8 72.8 72.8v48.8h-41.6z" />
+          </svg>
+        </button>
       </div>
 
-      <EditarEmpleadoModal
-        isOpen={isEditModalOpen}
-        onRequestClose={() => setIsEditModalOpen(false)}
-        worker={worker}
-        onWorkerUpdated={setWorker}
-      />
-
-      <EliminarEmpleadoModal
-        isOpen={isDeleteConfirmOpen}
-        onRequestClose={() => setIsDeleteConfirmOpen(false)}
-        worker={worker}
-        onConfirmDelete={handleDeleteWorker}
-      />
-
-      <div className="worker-agenda">
-        <CrearCita refreshCitas={loadAppointments} workerId={id} />
-        <Agenda
-          citas={appointments}
-          currentWeek={currentWeek}
-          setCurrentWeek={setCurrentWeek}
-          changeWeek={changeWeek}
-          openModal={openModal} // Pasamos openModal a Agenda
-          selectedCita={selectedCita}
-          setSelectedCita={setSelectedCita} // Pasamos setSelectedCita a Agenda
-          workerColor={worker.color}
-          isWorkerView={true}
-          workerId={id}
+      {isModalOpen && (
+        <EditarEmpleadoModal
+          isOpen={handleOpenModal}
+          onRequestClose={handleCloseModal}
+          worker={worker}
+          onWorkerUpdated={setWorker}
         />
-      </div>
+      )}
 
-      <EditarCitaModal
-        showModal={isEditCitaModalOpen}
-        onClose={() => setIsEditCitaModalOpen(false)}
-        cita={selectedCita} // Pasamos selectedCita
-        refreshCitas={loadAppointments}
-        workerId={id}
-      />
-      <div className='Documentacion'>
+      <div className="Documentacion">
         <WorkerPDFUpload workerId={id} />
       </div>
-
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteWorker}
+        message="¿Estás seguro de que deseas eliminar este empleado?"
+      />
     </div>
   );
 };
