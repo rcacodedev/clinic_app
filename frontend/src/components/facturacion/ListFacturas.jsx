@@ -4,7 +4,9 @@ import {
   getFacturasPDF,
   deleteFactura,
 } from "../../services/facturaService";
-import Boton from "../Boton";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
 import { toast } from "react-toastify";
 
 const ListFacturas = () => {
@@ -131,6 +133,42 @@ const ListFacturas = () => {
     if (page < totalPages) setPage(page + 1);
   };
 
+  const handleDownloadZip = async () => {
+    if (facturasFiltradas.length === 0) {
+      toast.info("No hay facturas para descargar en este mes.");
+      return;
+    }
+
+    const zip = new JSZip();
+
+    // Iteramos sobre facturas filtradas y pedimos el PDF para cada una
+    await Promise.all(
+      facturasFiltradas.map(async (factura) => {
+        try {
+          const pdfBlob = await getFacturasPDF(factura.id);
+          // Añadir PDF al zip con un nombre adecuado
+          zip.file(`Factura_${factura.numero_factura}.pdf`, pdfBlob);
+        } catch (error) {
+          console.error(
+            `Error al obtener PDF de factura ${factura.numero_factura}`,
+            error
+          );
+        }
+      })
+    );
+
+    // Generar archivo ZIP como blob
+    const content = await zip.generateAsync({ type: "blob" });
+
+    // Guardar ZIP en el cliente
+    saveAs(
+      content,
+      `Facturas_${meses[parseInt(fechaSeleccionada.mes)]}_${
+        fechaSeleccionada.anio
+      }.zip`
+    );
+  };
+
   return (
     <div className="container-proteccion-datos">
       <h3 className="title-section mb-2">Lista de Facturas</h3>
@@ -203,6 +241,9 @@ const ListFacturas = () => {
           </select>
           <div className="flecha-filtro">▼</div>
         </div>
+        <button onClick={handleDownloadZip} className="btn-toogle mb-3">
+          Descargar ZIP
+        </button>
       </div>
 
       {loading && <p className="loading">Cargando facturas...</p>}

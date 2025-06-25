@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import { getPacientes } from "../../services/patientService"; // Ajusta según tu estructura
-
-const CrearCitaModal = ({
-  onClose,
-  onSubmit,
-  formData,
-  setFormData,
-  onChange,
-  firstInputRef,
-}) => {
+import { createCita } from "../../services/citasService";
+import { toast } from "react-toastify";
+const CrearCitaModal = ({ setCitas, formData, setFormData, firstInputRef }) => {
   const [pacientes, setPacientes] = useState([]);
   const [selectedPaciente, setSelectedPaciente] = useState(null);
+  const [modalCrearCita, setModalCrearCita] = useState(false);
 
   useEffect(() => {
     const fetchPacientes = async () => {
@@ -50,7 +45,21 @@ const CrearCitaModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  console.log(pacientes);
+  const handleAddCita = async (e) => {
+    e.preventDefault();
+    try {
+      const nuevaCita = await createCita(formData);
+      setCitas((prev) => [...prev, nuevaCita]);
+      setModalCrearCita(false);
+      toast.success("Se creó correctamente la cita");
+    } catch (error) {
+      console.error(
+        "Error al crear la cita",
+        error.response?.data || error.message
+      );
+      toast.error("Error al crear la cita");
+    }
+  };
 
   return (
     <div className="modal-container">
@@ -59,7 +68,7 @@ const CrearCitaModal = ({
 
         <div className="modal-pacientes-container">
           <div className="w-full p-4">
-            <form onSubmit={onSubmit} className="modal-content">
+            <form onSubmit={handleAddCita} className="modal-content">
               <label className="modal-label mb-2">Seleccionar Paciente</label>
               <Select
                 options={pacientes}
@@ -113,7 +122,7 @@ const CrearCitaModal = ({
               <div className="btn-close-container">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => setModalCrearCita(false)}
                   className="btn-close-modal"
                 >
                   Cerrar

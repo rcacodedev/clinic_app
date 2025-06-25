@@ -40,6 +40,17 @@ export const getCitaDetail = async (id) => {
   }
 };
 
+// Obtener todas las citas de un paciente por su ID
+export const fetchCitasPorPaciente = async (pacienteId) => {
+  try {
+    const response = await api.get(`${API_URL}pacientes/${pacienteId}/citas/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener las citas del paciente:", error);
+    throw error;
+  }
+};
+
 // Función para crear una nueva cita
 export const createCita = async (citaData) => {
   try {
@@ -77,9 +88,10 @@ export const deleteCita = async (id) => {
 // Función enviar whatsApp
 export const sendWhatsapp = async (citas_ids) => {
   try {
+    console.log("IDs de citas a enviar:", citas_ids); // Asegúrate de que esto sea correcto
     const response = await api.post(
       `${API_URL}enviar-whatsapp/`,
-      { citas_ids },
+      { citas_ids: citas_ids }, // Asegúrate de enviar un objeto con claves correctas
       getAuthHeaders()
     );
     console.log("Respuesta del backend:", response.data);

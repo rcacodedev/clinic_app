@@ -1,9 +1,9 @@
 const FormacionDetail = () => {
-    return (
-        <>
-            <h1>Detalle de formacion</h1>
-        </>
-    )
-}
+  return (
+    <div className="main-container">
+      <h1>Detalle de formacion</h1>
+    </div>
+  );
+};
 
-export default FormacionDetail
+export default FormacionDetail;

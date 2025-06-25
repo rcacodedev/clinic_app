@@ -275,7 +275,7 @@ const ListFacturasPatients = ({ patientId }) => {
                           className="btn-toogle"
                           onClick={() => handlePDF(factura.id)}
                         >
-                          Perfil
+                          PDF
                         </button>
                         <button
                           className="btn-toogle"

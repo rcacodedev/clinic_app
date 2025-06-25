@@ -137,6 +137,8 @@ function PatientProfile() {
   if (loading) return <div className="loading">Cargando...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  console.log(patient);
+
   return (
     <div className="main-container">
       <div className="title-container">

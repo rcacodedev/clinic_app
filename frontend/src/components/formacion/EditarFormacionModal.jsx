@@ -1,32 +1,29 @@
-import React, { useState } from "react";
-
-const CrearFormacionModal = ({
+const EditarFormacionModal = ({
   isOpen,
   onClose,
-  onSubmit,
-  onChange,
   formData,
   setFormData,
+  onSave,
+  onChange,
   firstInputRef,
 }) => {
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(e);
+    onSave(formData);
   };
 
   return (
     <div className="modal-container">
       <div className="modal-content">
-        <h2 className="modal-title">Crear Nueva Formación</h2>
+        <h2 className="modal-title">Editar Formación</h2>
         <div className="modal-pacientes-container">
           <div className="w-full p-4">
             <form onSubmit={handleSubmit} className="modal-content">
               <label className="modal-label mb-2">
                 Título:
                 <input
-                  ref={firstInputRef}
                   type="text"
                   name="titulo"
                   value={formData.titulo}
@@ -121,4 +118,4 @@ const CrearFormacionModal = ({
   );
 };
 
-export default CrearFormacionModal;
+export default EditarFormacionModal;

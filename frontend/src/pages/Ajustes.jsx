@@ -107,6 +107,8 @@ const Ajustes = () => {
     }
   };
 
+  console.log(userInfo);
+
   return (
     <div className="main-container">
       <div className="title-container">

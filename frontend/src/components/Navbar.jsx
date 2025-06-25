@@ -91,7 +91,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/pacientes"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   width="24"
@@ -111,7 +111,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/citas"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   width="24"
@@ -132,7 +132,7 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/workers"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                  className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +155,7 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/documentacion"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                  className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -174,7 +174,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/facturacion"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -195,7 +195,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/formacion"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   width="24"
@@ -215,7 +215,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/actividades"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   width="24"
@@ -237,7 +237,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/ajustes"
-                className="flex items-center p-2 mt-64 text-gray-900 rounded-lg dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 mt-64 text-white rounded-lg dark:text-white hover:bg-zinc-600 group"
               >
                 {userPhoto?.photo ? (
                   <div className="w-14 h-14 rounded-full bg-white p-0.5">
@@ -269,7 +269,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/logout"
-                className="flex items-center p-2 text-gray-900 rounded-lg  dark:text-white hover:bg-zinc-600 group"
+                className="flex items-center p-2 text-white rounded-lg  dark:text-white hover:bg-zinc-600 group"
               >
                 <svg
                   width="24"

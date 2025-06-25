@@ -191,6 +191,8 @@
   @apply bg-red-600 hover:bg-red-500 text-white text-sm py-2.5 px-5 mr-2 mb-2 rounded-xl shadow-md hover:scale-105 transition duration-300;
 }
 
+/* Filtros */
+
 .title-section {
   @apply text-2xl font-bold text-gray-800;
 }
@@ -213,4 +215,43 @@
 
 .flecha-filtro {
   @apply pointer-events-none absolute top-8 right-3 text-gray-500;
+}
+
+/* TABS */
+.tab-container {
+  @apply w-full h-full bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-4 transition-all duration-300;
+}
+
+.tab-content {
+  @apply flex flex-col h-full;
+}
+
+.tabs {
+  @apply flex border-b border-zinc-300 dark:border-zinc-700;
+}
+
+/* Calendar */
+
+.mes-container {
+  @apply w-full h-full bg-slate-100;
+}
+
+.button-container {
+  @apply flex items-center justify-between mb-5 bg-zinc-600;
+}
+
+.button-flecha-calendar {
+  @apply p-2 rounded hover:bg-tan focus:outline-none focus:ring-2 focus:ring-zinc-600;
+}
+
+.flecha-calendar {
+  @apply h-8 w-8 text-slate-100;
+}
+
+.texto-calendar {
+  @apply text-2xl font-bold text-white capitalize text-center drop-shadow;
+}
+
+.label-calendar-mes {
+  @apply grid grid-cols-7 text-center text-sm font-bold text-zinc-600 border-b-2 border-zinc-900 pb-2;
 }

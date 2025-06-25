@@ -10,6 +10,7 @@ from .serializers import CitaSerializer, ConfiguracionPrecioCitaSerializer
 from userinfo.models import UserInfo
 from twilio.rest import Client
 from django.utils.dateformat import format as dj_format
+from rest_framework import status
 import locale
 
 
@@ -103,6 +104,17 @@ def enviar_mensaje_whatsapp(client, from_number, to_number, mensaje):
     except Exception as e:
         return {"telefono": to_number, "error": str(e)}
 
+class CitasPorPacienteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, paciente_id):
+        """
+        Devuelve todas las citas asociadas a un paciente específico
+        """
+        citas = Cita.objects.filter(paciente_id=paciente_id).order_by('-fecha', '-comenzar')
+        serializer = CitaSerializer(citas, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class EnviarRecordatorioWhatsAppAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -119,13 +131,15 @@ class EnviarRecordatorioWhatsAppAPIView(APIView):
             return Response({"error": "Faltan credenciales de Twilio"}, status=400)
 
         citas_ids = request.data.get("citas_ids", [])
+        print(f"Citas IDs recibidos: {citas_ids}")
         if not isinstance(citas_ids, list):
             return Response({"error": "Se requiere una lista de IDs de citas"}, status=400)
 
         if not citas_ids:
             return Response({"error": "Se requiere al menos un ID de cita"}, status=400)
 
-        citas = Cita.objects.select_related("paciente").filter(id__in=citas_ids, worker__user=user)
+        citas = Cita.objects.select_related("paciente").filter(id__in=citas_ids, user=user)
+        print(f"Citas encontradas: {citas}")
         if not citas.exists():
             return Response({"message": "No hay citas encontradas con esos IDs"}, status=404)
 
@@ -139,6 +153,7 @@ class EnviarRecordatorioWhatsAppAPIView(APIView):
 
         for cita in citas:
             paciente = cita.paciente
+            print(f"Cita {cita.id} tiene worker: {cita.worker}")
             if not paciente.phone:
                 continue
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getCitas } from "../../services/citasService";
+import { fetchCitasPorPaciente } from "../../services/citasService";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function PatientAppointments({ patientId, refreshAppointments }) {
   const [appointments, setAppointments] = useState([]);
@@ -8,34 +9,46 @@ function PatientAppointments({ patientId, refreshAppointments }) {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+
+  const meses = [
+    { value: "01", label: "Enero" },
+    { value: "02", label: "Febrero" },
+    { value: "03", label: "Marzo" },
+    { value: "04", label: "Abril" },
+    { value: "05", label: "Mayo" },
+    { value: "06", label: "Junio" },
+    { value: "07", label: "Julio" },
+    { value: "08", label: "Agosto" },
+    { value: "09", label: "Septiembre" },
+    { value: "10", label: "Octubre" },
+    { value: "11", label: "Noviembre" },
+    { value: "12", label: "Diciembre" },
+  ];
+
+  // Años entre 2020 y el actual
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2019 }, (_, i) => 2020 + i);
 
   const navigate = useNavigate();
 
   // Función de formato de fecha y hora
   const formatDate = (dateString) => {
-    if (!dateString) return "Fecha inválida"; // Comprobar si la fecha es nula o vacía
+    if (!dateString) return "Fecha inválida";
 
-    // Si la entrada es solo una fecha (YYYY-MM-DD), formatearla adecuadamente
     if (dateString.length === 10) {
-      // Formato "YYYY-MM-DD"
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return "Fecha inválida"; // Para el caso de formatos incorrectos
-      }
-      return date.toLocaleDateString("es-ES"); // Solo la fecha
+      if (isNaN(date.getTime())) return "Fecha inválida";
+      return date.toLocaleDateString("es-ES");
     }
 
-    // Si la entrada es una hora (HH:mm:ss), devolverla como hora
     if (dateString.length === 8) {
-      // Formato "HH:mm:ss"
-      return dateString.substring(0, 5); // Regresamos la hora tal como está
+      return dateString.substring(0, 5);
     }
 
-    // Caso general para manejar fecha y hora
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return "Fecha inválida"; // Para el caso de formatos incorrectos
-    }
+    if (isNaN(date.getTime())) return "Fecha inválida";
 
     return date.toLocaleString("es-ES", {
       dateStyle: "short",
@@ -49,32 +62,34 @@ function PatientAppointments({ patientId, refreshAppointments }) {
     setError(null);
 
     try {
-      const data = await getCitas();
-      const citasPaciente = data.filter(
-        (cita) => String(cita.patient) === String(patientId)
-      );
+      const data = await fetchCitasPorPaciente(patientId);
 
-      // Asegúrate de que las fechas se formateen correctamente
-      const citasConFechaFormateada = citasPaciente.map((cita) => ({
+      // Agregar fechaOriginal para filtrar correctamente
+      const citasConFechaFormateada = data.map((cita) => ({
         ...cita,
+        fechaOriginal: cita.fecha, // guardamos la fecha original para el filtro
         fecha: formatDate(cita.fecha),
         comenzar: formatDate(cita.comenzar),
         finalizar: formatDate(cita.finalizar),
       }));
 
       setAppointments(citasConFechaFormateada);
+
+      // Opcional: calcular totalPages si paginas backend o tú quieres paginar
+      setTotalPages(1); // Ajusta según la lógica de paginación que uses
     } catch (error) {
       console.error("Error al cargar citas:", error);
-      setError("Error al cargar las citas.");
+      toast.error("Error al cargar las citas del paciente");
       setAppointments([]);
+      setError("Error al cargar citas");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAppointments(); // Llamar a la función para obtener las citas
-  }, [patientId, refreshAppointments]); // Dependencia: refrescar cuando `patientId` o `refreshAppointments` cambian
+    fetchAppointments();
+  }, [patientId, refreshAppointments]);
 
   const handlePrevPage = () => {
     if (page > 1) setPage(page - 1);
@@ -84,17 +99,79 @@ function PatientAppointments({ patientId, refreshAppointments }) {
     if (page < totalPages) setPage(page + 1);
   };
 
+  // Ahora sí usamos fechaOriginal para filtrar
+  const filteredAppointments = appointments.filter((appointment) => {
+    if (!appointment.fechaOriginal) return false;
+
+    const date = new Date(appointment.fechaOriginal);
+    if (isNaN(date.getTime())) return false;
+
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString();
+
+    const matchMonth = selectedMonth ? month === selectedMonth : true;
+    const matchYear = selectedYear ? year === selectedYear : true;
+
+    return matchMonth && matchYear;
+  });
+
   if (loading) return <div className="loading">Cargando citas...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="container-proteccion-datos">
       <h4 className="title-section">Citas del paciente</h4>
+      <div className="container-filtro">
+        <div className="section-filtro">
+          <label className="label-filtro" htmlFor="filtro-mes">
+            Mes:{" "}
+          </label>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            id="filtro-mes"
+            name="mes"
+            className="select-filtro"
+          >
+            <option value="">Todos</option>
+            {meses.map((mes) => (
+              <option key={mes.value} value={mes.value}>
+                {mes.label}
+              </option>
+            ))}
+          </select>
+          <div className="flecha-filtro">▼</div>
+        </div>
+
+        <div className="section-filtro">
+          <label className="label-filtro" htmlFor="filtro-ano">
+            Año:{" "}
+          </label>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            id="filtro-ano"
+            name="ano"
+            className="select-filtro"
+          >
+            <option value="">Todos</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          <div className="flecha-filtro">▼</div>
+        </div>
+      </div>
+
       <div className="table-container mt-5">
         <div className="table-subcontainer">
           <div className="table-subsubcontainer">
-            {appointments.length === 0 ? (
-              <p className="text-center mt-4">No hay citas programadas.</p>
+            {filteredAppointments.length === 0 ? (
+              <p className="text-center mt-4">
+                No hay citas para los filtros seleccionados.
+              </p>
             ) : (
               <table className="table-pacientes">
                 <thead className="thead-pacientes">
@@ -103,35 +180,22 @@ function PatientAppointments({ patientId, refreshAppointments }) {
                     <th>Comenzar</th>
                     <th>Finalizar</th>
                     <th>Descripción</th>
-                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="tbody-pacientes">
-                  {appointments.map((appointment, index) => (
+                  {filteredAppointments.map((appointment, index) => (
                     <tr key={index}>
                       <td>{appointment.fecha}</td>
                       <td>{appointment.comenzar}</td>
                       <td>{appointment.finalizar}</td>
                       <td>{appointment.descripcion}</td>
-                      <td className="px-6 py-4">
-                        <div className="btn-actions-container">
-                          <button
-                            className="btn-toogle"
-                            onClick={() =>
-                              navigate(`/pacientes/${appointment.patient}`)
-                            }
-                          >
-                            Perfil
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
 
-            {/* Paginación (si la usas) */}
+            {/* Paginación */}
             <div className="pagination-container">
               <span className="span-pagination">
                 Página {page} de {totalPages}

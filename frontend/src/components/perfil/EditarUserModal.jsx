@@ -143,6 +143,13 @@ const EditarUserModal = ({
                   false,
                   13
                 )}
+                {renderInput(
+                  "Auth Token Twilio",
+                  "twilio_auth_token",
+                  "text",
+                  false,
+                  14
+                )}
               </div>
 
               {/* Botones */}

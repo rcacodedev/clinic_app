@@ -10,7 +10,7 @@ const opcionesPago = [
   { value: "transferencia", label: "Transferencia" },
 ];
 
-const EditarCitaModal = ({
+const EditarCitaLista = ({
   isOpen,
   onClose,
   onSave,
@@ -81,8 +81,9 @@ const EditarCitaModal = ({
 
   const handleDelete = (e) => {
     e.preventDefault();
-    onDelete();
+    onDelete(formData);
     setShowConfirmModal(false);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -151,7 +152,7 @@ const EditarCitaModal = ({
               <label className="modal-label mb-2 mt-2">
                 Precio:
                 <input
-                  type="text"
+                  type="number"
                   name="precio"
                   value={formData.precio}
                   onChange={onChange}
@@ -209,4 +210,4 @@ const EditarCitaModal = ({
   );
 };
 
-export default EditarCitaModal;
+export default EditarCitaLista;

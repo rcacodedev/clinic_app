@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   fetchWorkerDetails,
   deleteWorker,
-  fetchWorkerAppointments,
+  updateWorker,
 } from "../../services/workerService";
 import { fetchGrupos } from "../../services/django";
 import EditarEmpleadoModal from "../../components/Workers/EditarEmpleadoModal";
-import EliminarEmpleadoModal from "../../components/Workers/EliminarEmpleadoModal";
 import WorkerPDFUpload from "../../components/Workers/RegistroJornada";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/ConfirmModal";
@@ -15,40 +14,38 @@ import ConfirmModal from "../../components/ConfirmModal";
 const WorkerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const firstInputRef = useRef();
 
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [appointments, setAppointments] = useState([]);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [modalEditarWorker, setModalEditarWorker] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [allGroups, setAllGroups] = useState([]); // ← todos los grupos
+  const [workerGroups, setWorkerGroups] = useState([]); // ← grupos del trabajador
   const [groups, setGroups] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    first_name: "",
+    last_name: "",
+    groups: [],
+    color: "#ffffff",
+  });
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [modalEliminarWorker, setModalEliminarWorker] = useState(false);
 
-  const handleOpenModal = (worker) => {
-    setSelectedWorker(worker);
-    setIsModalOpen(true);
+  const loadData = async () => {
+    try {
+      await Promise.all([loadWorker()]);
+    } catch (err) {
+      console.error("Error al cargar datos:", err);
+      setError("Error al cargar los datos del trabajador");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedWorker(null);
-  };
-
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([loadWorker(), loadAppointments()]);
-      } catch (err) {
-        console.error("Error al cargar datos:", err);
-        setError("Error al cargar los datos del trabajador");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [id]);
 
@@ -56,21 +53,15 @@ const WorkerProfile = () => {
     const data = await fetchWorkerDetails(id);
     setWorker(data);
 
-    // Obtener todos los grupos disponibles
-    const allGroups = await fetchGrupos(); // Esto debería devolver todos los grupos
+    const allFetchedGroups = await fetchGrupos();
+    setAllGroups(allFetchedGroups); // ← guardamos todos los grupos
 
-    // Filtrar los nombres de los grupos a los que pertenece el trabajador
+    // Solo los grupos del trabajador
     const groupNames = data.groups.map((groupId) => {
-      const group = allGroups.find((g) => g.id === groupId);
+      const group = allFetchedGroups.find((g) => g.id === groupId);
       return group ? group.name : "Grupo desconocido";
     });
-
-    setGroups(groupNames);
-  };
-
-  const loadAppointments = async () => {
-    const data = await fetchWorkerAppointments(id);
-    setAppointments(data);
+    setWorkerGroups(groupNames);
   };
 
   const handleDeleteWorker = async () => {
@@ -87,9 +78,48 @@ const WorkerProfile = () => {
     }
   };
 
+  const handleOpenEditarModal = () => {
+    setFormData({
+      groups: worker.groups || [], // si worker tiene grupos
+      color: worker.color || "#ffffff", // si worker tiene color
+    });
+    setModalEditarWorker(true);
+  };
+
+  const handleCloseEditarModal = () => {
+    setModalEditarWorker(false);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "groups") {
+      setFormData((prev) => ({
+        ...prev,
+        groups: [parseInt(value)],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+  const handleSubmitEditar = async (updatedWorkerData) => {
+    try {
+      await updateWorker(id, updatedWorkerData);
+      setModalEditarWorker(false);
+      toast.success("El empleado fue editado correctamente");
+      loadData();
+    } catch (error) {
+      console.error("Hubo un error al editar empleado", error);
+      toast.error("Ha ocurrido un error al editar el empleado");
+    }
+  };
+
   if (loading) return <p>Cargando...</p>;
   if (error) return <p>{error}</p>;
   if (!worker) return <p>No se encontraron datos del empleado.</p>;
+  console.log(worker);
 
   return (
     <div className="main-container">
@@ -199,7 +229,17 @@ const WorkerProfile = () => {
         <div className="flex flex-col">
           <span className="text-l text-gray-500 font-bold">Departamento</span>
           <span className="text-base font-medium text-gray-800">
-            <span>{groups.length > 0 ? groups.join(", ") : "No asignado"}</span>
+            <span>
+              {worker.groups && worker.groups.length > 0
+                ? worker.groups
+                    .map((groupId) => {
+                      const group = allGroups.find((g) => g.id === groupId);
+                      return group ? group.name : null;
+                    })
+                    .filter(Boolean) // elimina posibles nulls
+                    .join(", ")
+                : "No asignado"}
+            </span>
           </span>
         </div>
         <div className="flex flex-col">
@@ -219,10 +259,7 @@ const WorkerProfile = () => {
       </div>
 
       <div className="mt-3">
-        <button
-          onClick={() => setIsEditModalOpen(true)}
-          className="btn-primary"
-        >
+        <button onClick={handleOpenEditarModal} className="btn-primary">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="white"
@@ -249,12 +286,17 @@ const WorkerProfile = () => {
         </button>
       </div>
 
-      {isModalOpen && (
+      {modalEditarWorker && (
         <EditarEmpleadoModal
-          isOpen={handleOpenModal}
-          onRequestClose={handleCloseModal}
-          worker={worker}
-          onWorkerUpdated={setWorker}
+          isOpen={modalEditarWorker}
+          onClose={handleCloseEditarModal}
+          onSubmit={handleSubmitEditar}
+          onChange={handleFormChange}
+          formData={formData}
+          firstInputRef={firstInputRef}
+          groups={groups}
+          allGroups={allGroups}
+          setFormData={setFormData}
         />
       )}
 

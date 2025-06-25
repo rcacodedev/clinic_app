@@ -14,7 +14,7 @@ def generar_pdf_factura(factura, datos_facturacion):
     width, height = A4
 
     # Colores
-    pastel_brown = HexColor("#F2B1A1")
+    pastel_brown = HexColor("#b9b9b9")
 
     # Márgenes y espaciado
     margin_left = 50
@@ -206,7 +206,7 @@ def generar_pdf_factura_irpf(factura, datos_facturacion):
     p.drawString(precio_x - 90, table_top - 3 * line_height, "Base Imponible:")
 
     # Calcular IRPF (15%)
-    irpf = round(factura.total * 0.15, 2)
+    irpf = round(factura.total * 15/100, 2)
     p.setFont("Helvetica-Bold", 11)
     p.drawString(precio_x, table_top - 4 * line_height, f"-{irpf}€")  # Mostrar como descuento (con signo -)
     p.setFont("Helvetica", 10)

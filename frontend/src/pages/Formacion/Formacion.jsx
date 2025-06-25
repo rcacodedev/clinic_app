@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken, getUserIdFromToken } from "../../utils/auth";
-import { createFormacion, getFormacion } from "../../services/formacionService";
+import {
+  createFormacion,
+  getFormacion,
+  updateFormacion,
+  deleteFormacion,
+} from "../../services/formacionService";
 import { toast } from "react-toastify";
 import CrearFormacionModal from "../../components/formacion/CrearFormacionModal";
+import EditarFormacionModal from "../../components/formacion/EditarFormacionModal";
 
 const initialFormacionData = {
   titulo: "",
@@ -19,6 +25,7 @@ const Formacion = () => {
   const [formacion, setFormacion] = useState([]);
   const [formData, setFormdata] = useState(initialFormacionData);
   const [modalCrearFormacion, setModalCrearFormacion] = useState(false);
+  const [modalEditarFormacion, setModalEditarFormacion] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -45,14 +52,16 @@ const Formacion = () => {
   // Función para abrir el modal
   const handleCreateModal = () => {
     setFormdata(initialFormacionData);
-    setFormdata(true);
     setModalCrearFormacion(true);
   };
 
   // Función para manejar los cambios en el formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormdata({ ...formData, [name]: value });
+    setFormdata((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   // Funcion para guardar la formación
@@ -68,12 +77,41 @@ const Formacion = () => {
     }
   };
 
+  const handleEditFormacion = async (formacion) => {
+    try {
+      await updateFormacion(formacion.id, formacion);
+      setModalEditarFormacion(false);
+      toast.success("Formación actualizada con éxito");
+      fetchFormaciones();
+    } catch (error) {
+      console.error("Hubo un error al actualizar la formación", error);
+      toast.error("Hubo un error al actualizar la Formación");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteFormacion(id);
+      setFormacion(formacion.filter((forma) => forma.id !== id));
+
+      toast.success("Formacion eliminada correctamente");
+      fetchFormaciones();
+    } catch (error) {
+      console.error("Hubo un error al eliminar la formación", error);
+      toast.error("Hubo un error al eliminar la formación");
+    }
+  };
+
   const handlePrevPage = () => {
     if (page > 1) setPage(page - 1);
   };
 
   const handleNextPage = () => {
     if (page < totalPages) setPage(page + 1);
+  };
+  const handleOpenEditModal = (formacionItem) => {
+    setFormdata(formacionItem);
+    setModalEditarFormacion(true);
   };
 
   return (
@@ -144,7 +182,7 @@ const Formacion = () => {
                           Info
                         </button>
                         <button
-                          onClick={() => abrirModalEditar(paciente)}
+                          onClick={() => handleOpenEditModal(formacion)}
                           className="btn-toogle"
                         >
                           <svg
@@ -159,7 +197,7 @@ const Formacion = () => {
                         </button>
                         <button
                           className="btn-toogle"
-                          onClick={() => handleDeleteClick(paciente.id)}
+                          onClick={() => handleDelete(formacion.id)}
                         >
                           <svg
                             viewBox="0 0 1024 1024"
@@ -217,7 +255,18 @@ const Formacion = () => {
           setFormdata={setFormdata}
           onChange={handleChange}
           isOpen={() => setModalCrearFormacion(true)}
-          firtInputRef={firstInputRef}
+          firstInputRef={firstInputRef}
+        />
+      )}
+      {modalEditarFormacion && formData && (
+        <EditarFormacionModal
+          isOpen={modalEditarFormacion}
+          setIsOpen={setModalEditarFormacion}
+          formData={formData}
+          setFormData={setFormdata}
+          handleChange={handleChange}
+          onSave={handleEditFormacion}
+          onChange={handleChange}
         />
       )}
     </div>

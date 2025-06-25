@@ -1,198 +1,167 @@
-import React, { useState, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
-import { updateWorker } from "../../services/workerService";
-import { fetchGrupos } from "../../services/django";
+import React, { useEffect, useState, useRef } from "react";
 import { HexColorPicker } from "react-colorful";
 
 const EditarEmpleadoModal = ({
   isOpen,
-  onRequestClose,
-  worker,
-  onWorkerUpdated,
+  onClose,
+  onSubmit,
+  formData,
+  setFormData,
+  groups,
+  allGroups,
 }) => {
-  const [color, setColor] = useState(worker.color || "#ffffff"); // Usar el color actual del trabajador
-  const [formData, setFormData] = useState({
-    email: "",
-    dni: "",
-    address: "",
-    postal_code: "",
-    phone: "",
-    country: "",
-    groups: [],
-    color: color,
-  });
-  const [groupsList, setGroupsList] = useState([]); // Lista de grupos disponibles
-  const [loading, setLoading] = useState(false);
   const [colorPickerVisible, setColorPickerVisible] = useState(false);
+  const [color, setColor] = useState(formData.color || "#ffffff");
   const colorPickerRef = useRef(null);
-  const modalContentRef = useRef(null);
 
-  // Sincroniza el estado cuando cambia el trabajador
+  // Sincronizar color local cuando cambie formData.color
   useEffect(() => {
-    if (worker) {
-      setFormData({
-        email: worker.user?.email || "",
-        dni: worker.user.userInfo.dni || "",
-        address: worker.user.userInfo.address || "",
-        postal_code: worker.user.userInfo.postal_code || "",
-        phone: worker.user.userInfo.phone || "",
-        country: worker.user.userInfo.country || "",
-        groups: worker.groups || [],
-        color: worker.color || "#ffffff",
-      });
-    }
-  }, [worker]);
+    setColor(formData.color || "#ffffff");
+  }, [formData.color]);
 
-  // Cargar datos de grupos
-  useEffect(() => {
-    const loadGrupos = async () => {
-      try {
-        const response = await fetchGrupos();
-        setGroupsList(response);
-      } catch (error) {
-        console.error("Error al cargar los grupos:", error);
-      }
-    };
-
-    loadGrupos();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  if (!isOpen) return null;
 
   const handleColorChange = (newColor) => {
     setColor(newColor);
-    setFormData((prevState) => ({ ...prevState, color: newColor }));
+    setFormData((prevState) => ({
+      ...prevState,
+      color: newColor,
+    }));
   };
 
-  // Cerrar el selector si el usuario hace clic fuera de él
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        isOpen &&
-        modalContentRef.current &&
-        !modalContentRef.current.contains(event.target)
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
       ) {
-        onRequestClose();
+        setColorPickerVisible(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    if (colorPickerVisible) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onRequestClose]);
+  }, [colorPickerVisible]);
 
-  // Manejo selección de grupos
-  const handleGroupToogle = (groupId) => {
-    setFormData((prev) => {
-      const isSelected = prev.groups.includes(groupId);
-      return {
-        ...prev,
-        groups: isSelected
-          ? prev.groups.filter((id) => id !== groupId)
-          : [...prev.groups, groupId],
-      };
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      // Llamada al servicio para actualizar el trabajador
-      const updatedWorker = await updateWorker(worker.id, formData);
-      onWorkerUpdated(updatedWorker); // Notifica al componente padre
-      onRequestClose(); // Cierra el modal
-      toast.success("Empleado actualizado correctamente");
-    } catch (err) {
-      console.error("Error al actualizar el trabajador:", err);
-      toast.error("Error al actualizar el empleado");
-    } finally {
-      setLoading(false);
-    }
+    // Puedes agregar validaciones aquí
+
+    onSubmit(formData); // <-- PASAMOS LOS DATOS ACTUALIZADOS
   };
 
-  if (!worker) return null; // Evita renderizar si los datos no están listos
+  console.log(groups);
 
   return (
     <div className="modal-container">
-      <div className="modal-content" ref={modalContentRef}>
+      <div className="modal-content">
         <h2 className="modal-title">Editar Empleado</h2>
         <div className="modal-pacientes-container">
           <div className="w-full p-4">
-            <form onSubmit={handleSubmit} noValidate>
-              <div className="modal-content-pacientes">
-                <label className="modal-label">Departamento:</label>
-                <div className="mb-4">
-                  <select
-                    multiple
-                    value={formData.groups}
-                    onChange={(e) => {
-                      const selected = Array.from(
-                        e.target.selectedOptions,
-                        (opt) => parseInt(opt.value)
+            <form onSubmit={handleSubmit} className="grid gap-y-4" noValidate>
+              <div className="w-full mt-2">
+                <h6 className="modal-section-title">
+                  1. Departamento del Empleado
+                </h6>
+                <p className="text-gray-600 text-sm mb-2">
+                  Cambia el departamento asignado.
+                </p>
+                <hr className="mb-6 mt-2 border-gray-300" />
+                <div>
+                  <label className="modal-label">Departamento:</label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {allGroups.map((group) => {
+                      const isSelected = formData.groups.includes(group.id);
+                      return (
+                        <button
+                          type="button"
+                          key={group.id}
+                          onClick={() => {
+                            setFormData((prev) => {
+                              const alreadySelected = prev.groups.includes(
+                                group.id
+                              );
+                              return {
+                                ...prev,
+                                groups: alreadySelected
+                                  ? prev.groups.filter((id) => id !== group.id)
+                                  : [...prev.groups, group.id],
+                              };
+                            });
+                          }}
+                          className={`px-4 py-2 rounded-full text-sm font-medium border ${
+                            isSelected
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "bg-white text-gray-700 border-gray-300"
+                          } hover:shadow`}
+                        >
+                          {group.name}
+                        </button>
                       );
-                      setFormData({ ...formData, groups: selected });
-                    }}
-                    className="w-full border rounded p-2"
-                  >
-                    {groupsList.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <label htmlFor="color" className="modal-label">
-                  Selecciona Color:
-                </label>
-                {/* Mostrar un recuadro con el color actual */}
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: color,
-                    border: "1px solid #ccc",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setColorPickerVisible(!colorPickerVisible)} // Cambiar la visibilidad del selector
-                ></div>
-                {/* Mostrar el SketchPicker solo cuando el usuario haga clic */}
-                {colorPickerVisible && (
-                  <div
-                    ref={colorPickerRef}
-                    style={{
-                      position: "absolute",
-                      zIndex: 2,
-                      background: "white",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      boxShadow: "0px 2px 10px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    <HexColorPicker
-                      color={color}
-                      onChange={handleColorChange}
-                    />
+                    })}
                   </div>
-                )}
+                </div>
+              </div>
+
+              <div className="w-full mt-2">
+                <h6 className="modal-section-title">2. Color del Empleado</h6>
+                <p className="text-gray-600 text-sm mb-2">
+                  Cambia el color que identifica al empleado.
+                </p>
+                <hr className="mb-6 mt-2 border-gray-300" />
+                <div>
+                  <label htmlFor="color">Selecciona Color:</label>
+                  <div style={{ position: "relative" }}>
+                    <div
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        backgroundColor: color,
+                        border: "1px solid #ccc",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setColorPickerVisible(!colorPickerVisible)}
+                    ></div>
+
+                    {colorPickerVisible && (
+                      <div
+                        ref={colorPickerRef}
+                        style={{
+                          position: "absolute",
+                          zIndex: 2,
+                          top: "50px",
+                          background: "white",
+                          padding: "10px",
+                          borderRadius: "8px",
+                          boxShadow: "0px 2px 10px rgba(0,0,0,0.2)",
+                        }}
+                      >
+                        <HexColorPicker
+                          color={color}
+                          onChange={handleColorChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="btn-close-container">
                 <button
                   type="button"
-                  onClick={onRequestClose}
+                  onClick={onClose}
                   className="btn-close-modal"
                 >
-                  Cerrar
+                  Cancelar
                 </button>
                 <button type="submit" className="btn-save-modal">
-                  Guardar
+                  Actualizar
                 </button>
               </div>
             </form>
